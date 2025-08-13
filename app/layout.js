@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css";
 
 const inter = Inter({
@@ -14,8 +15,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable}`} >
+
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+
         {/* header */}
 
         <main className="min-h-screen"> 
@@ -23,11 +32,13 @@ export default function RootLayout({ children }) {
         </main>
 
         {/* footer */}
-        <footer className="bg-gray-800 text-white text-center py-4">
+        <footer className="text-center py-4">
           <div className="container mx-auto px-4">
             <p>&copy; {new Date().getFullYear()} BookMyDoc. All rights reserved.</p>
           </div>
         </footer>
+
+          </ThemeProvider>
       </body>
     </html>
   );
