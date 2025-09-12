@@ -120,3 +120,9 @@
     /* @apply bg-background text-foreground; */
   }
 }
+/* .gradient{
+  @apply bg-gradient-to-b from-emarald-500 to-teal-400;
+}
+.gradient-title{
+  @apply gradient font-bold text-transperant bg-clip-text pb-1 pr-2;
+} */
