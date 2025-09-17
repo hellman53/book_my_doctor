@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 
 const Header = () => {
   return (
-    <header className="fixed top-0 w-full border-b border-gray-800 bg-background/80 backdrop-blur-md  z-10 supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md z-10 supports-[backdrop-filter]:bg-white/60">
       <nav className="container mx-auto px-4 h-16 flex justify-between items-center">
         <Link href="/">
           <Image
