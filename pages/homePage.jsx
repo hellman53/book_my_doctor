@@ -23,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import Pricing from "@/components/pricing";
 import { creditBenefits, features, testimonials } from "@/lib/data";
 import "./homePage.css"
+import DoctorForm from "@/pages/DoctorForm";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Hero = () => {
   return (
