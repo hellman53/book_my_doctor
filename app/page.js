@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { db } from "./firebase/config";
 import { collection, addDoc } from "firebase/firestore";
 import HomePage from "@/pages/homePage";
+import Chatbot from "@/components/ChatBot";
 
 const Home = () => {
   const [name, setName] = useState("");
@@ -29,7 +30,9 @@ const Home = () => {
   //   }
   // };
  return (
-  <HomePage />
+ <> 
+ <HomePage />
+  <Chatbot/></>
  );
 }
 
