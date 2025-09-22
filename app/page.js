@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { db } from "./firebase/config";
 import { collection, addDoc } from "firebase/firestore";
-import HomePage from "@/pages/homePage";
+import HomePage from "@/pages/homePageEx";
 
 const Home = () => {
   const [name, setName] = useState("");
