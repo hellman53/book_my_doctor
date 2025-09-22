@@ -23,7 +23,12 @@ export const metadata = {
   description: "Book your doctor appointments easily",
   other: {
     "format-detection": "telephone=no, date=no, email=no, address=no"
-  }
+  },
+    icons: {
+    icon: "/logo-single.png",          // default
+    shortcut: "/logo-single.png",
+    apple: "/logo-single.png", // optional, if you add it
+  },
 };
 
 export default function RootLayout({ children }) {
