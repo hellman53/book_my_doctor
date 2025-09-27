@@ -1,6 +1,9 @@
+"use client"
 import Link from "next/link";
+
 import Image from "next/image";
 import React from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   ClerkProvider,
   SignInButton,
@@ -12,6 +15,8 @@ import {
 import { Button } from "./ui/button";
 
 const Header = () => {
+  const { user } = useUser();
+  console.log(user)
   return (
     <header className="fixed top-0 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md z-10 supports-[backdrop-filter]:bg-white/60">
       <nav className="container mx-auto px-4 h-16 flex justify-between items-center">
