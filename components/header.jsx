@@ -82,6 +82,15 @@ const Header = () => {
               </Link>
             )}
 
+            {userData?.role === "doctor-pending" && (
+              <Link href="/appointments">
+                <Button variant="outline" className="hidden md:inline-flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  My Appointments
+                </Button>
+              </Link>
+            )}
+
             {userData?.role === "admin" && (
               <Link href="/admin-dashboard">
                 <Button variant="outline" className="hidden md:inline-flex items-center gap-2">
