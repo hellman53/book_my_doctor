@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 
-export default function Chatbot() {
+export default function ChatBot() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,20 +28,23 @@ export default function Chatbot() {
     return () => clearInterval(interval);
   }, [loading]);
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loadingText]);
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [
-      ...messages,
-      { role: "user", text: input, time: new Date().toLocaleTimeString() },
-    ];
-    setMessages(newMessages);
+    const userMessage = {
+      role: "user",
+      text: input,
+      time: new Date().toLocaleTimeString(),
+    };
+    const botLoadingMessage = { role: "bot", text: loadingText, time: "" };
+
+    setMessages((prev) => [...prev, userMessage, botLoadingMessage]);
     setInput("");
     setLoading(true);
-
-    // Add initial loading message
-    const loadingMessage = { role: "bot", text: loadingText, time: "" };
-    setMessages([...newMessages, loadingMessage]);
 
     try {
       const res = await fetch("/api/chat", {
@@ -52,19 +55,18 @@ export default function Chatbot() {
 
       const data = await res.json();
 
-      // Replace loading message with bot response
-      setMessages([
-        ...newMessages,
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
         {
           role: "bot",
-          text: data.reply,
+          text: data.reply || "❌ Failed to get response.",
           time: new Date().toLocaleTimeString(),
         },
       ]);
     } catch (err) {
       console.error(err);
-      setMessages([
-        ...newMessages,
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
         {
           role: "bot",
           text: "❌ Failed to get response.",
@@ -76,26 +78,21 @@ export default function Chatbot() {
     }
   };
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loadingText]);
-
   return (
     <div className="w-screen h-screen flex flex-col bg-gradient-to-b from-blue-50 to-gray-100">
       <div className="flex-1 flex flex-col justify-center items-center p-4 md:p-6">
-        <div className="w-full h-full  flex flex-col bg-white shadow-2xl rounded-2xl">
-          {/* Header */}
+        <div className="w-full h-full flex flex-col bg-white shadow-2xl rounded-2xl">
           <div className="p-4 md:p-6 border-b border-gray-200 text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-green-700">
               🧑‍⚕️ MediMeet
             </h1>
           </div>
 
-          {/* Chat Messages */}
           <div className="flex-1 overflow-y-auto p-3 md:p-4 bg-gray-50">
             {messages.map((msg, i) => {
               const isUser = msg.role === "user";
-              const isDoctor = msg.text.includes("💡 Suggested Doctor");
+              const isDoctor = (msg.text || "").includes("💡 Suggested Doctor");
+
               return (
                 <div
                   key={i}
@@ -129,7 +126,6 @@ export default function Chatbot() {
             <div ref={chatEndRef}></div>
           </div>
 
-          {/* Input Area */}
           <div className="p-3 md:p-4 border-t border-gray-200 flex items-center gap-2 md:gap-3">
             <input
               type="text"

@@ -10,12 +10,30 @@ const dummyDoctors = [
 export async function POST(req) {
   try {
     const { message } = await req.json();
+    console.log("Received message:", message);
 
+    if (!message) {
+      return new Response(JSON.stringify({ error: "Message required" }), { status: 400 });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY missing!");
+      return new Response(JSON.stringify({ error: "API key missing" }), { status: 500 });
+    }
+
+    // Initialize Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(message);
 
-    const advice = result.response.text();
+    // ✅ Use a valid model, e.g., gemini-1.5
+    let advice;
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5" });
+      const result = await model.generateContent(message);
+      advice = result?.response?.text?.() || "Sorry, I could not generate advice.";
+    } catch (error) {
+      console.error("Gemini API failed, using fallback:", error);
+      advice = "🤖 Sorry, I could not fetch AI advice at the moment. Here's some general guidance.";
+    }
 
     // Suggest a random doctor
     const suggestedDoctor = dummyDoctors[Math.floor(Math.random() * dummyDoctors.length)];
