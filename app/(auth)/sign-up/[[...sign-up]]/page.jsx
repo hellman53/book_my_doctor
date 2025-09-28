@@ -3,7 +3,10 @@ import React from 'react'
 
 function SignUpPage() {
   return (
-    <SignUp />
+    <SignUp 
+      afterSignUpUrl="/"
+      afterSignInUrl="/"
+    />
   )
 }
 

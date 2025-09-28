@@ -26,11 +26,12 @@ export default function UserSyncProvider({ children }) {
         
         if (!existingUser) {
           console.log('User not found in Firestore, creating new record...');
+          console.log(user.primaryEmailAddress?.emailAddress,);
           
           // Transform Clerk user data to our format
           const userData = {
             id: user.id,
-            email_addresses: user.emailAddresses,
+            email_addresses: user.primaryEmailAddress?.emailAddress || "",
             first_name: user.firstName,
             last_name: user.lastName,
             image_url: user.imageUrl,
@@ -55,7 +56,7 @@ export default function UserSyncProvider({ children }) {
           // Optionally update user data if it's outdated
           const userData = {
             id: user.id,
-            email_addresses: user.emailAddresses,
+            email_addresses:user.primaryEmailAddress?.emailAddress || "",
             first_name: user.firstName,
             last_name: user.lastName,
             image_url: user.imageUrl,
