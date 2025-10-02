@@ -1,5 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from 'react';
+
+
+
+
+
 // import { db } from "../app/firebase/config";
 // import { collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
@@ -483,6 +488,538 @@ const Testimonials = () => {
   );
 };
 
+
+
+
+
+
+
+/* moving testimonial section api */
+const mockTestimonials = [
+  {
+    id: 1,
+    name: "Sarah R.",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1485893086445-ed75865251e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The video consultation feature saved me so much time. I was able to get medical advice without taking time off work or traveling to a clinic."
+  },
+  {
+    id: 2,
+    name: "Dr. Robert M.",
+    role: "Cardiologist",
+    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "This platform has revolutionized my practice. I can now reach more patients and provide timely care without the constraints of a physical office."
+  },
+  {
+    id: 3,
+    name: "James T.",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The credit system is so convenient. I purchased a package for my family, and we've been able to consult with specialists whenever needed."
+  },
+  {
+    id: 4,
+    name: "Dr. Emily W.",
+    role: "Pediatrician",
+    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "As a pediatrician, this platform helps me connect with young patients in a comfortable environment, reducing their anxiety about doctor visits."
+  },
+  {
+    id: 5,
+    name: "Michael P.",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The prescription delivery service is fantastic. I get my medications right at my doorstep without any hassle."
+  },
+  {
+    id: 6,
+    name: "Dr. Lisa K.",
+    role: "Dermatologist",
+    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The image sharing feature is perfect for dermatology consultations. Patients can easily share photos of their skin conditions for accurate diagnosis."
+  },
+  {
+    id: 7,
+    name: "Jennifer L.",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The 24/7 availability is amazing. I had a medical concern late at night and got immediate help from a qualified doctor."
+  },
+  {
+    id: 8,
+    name: "David Chen",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "As someone with mobility issues, this platform has been life-changing. I can access quality healthcare from my home."
+  },
+  {
+    id: 9,
+    name: "Maria Garcia",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The multilingual support is excellent. I can communicate with doctors in my native language without any barriers."
+  },
+  {
+    id: 10,
+    name: "Alex Johnson",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The medical records feature keeps all my health information organized. No more carrying paperwork between doctors."
+  },
+  {
+    id: 11,
+    name: "Priya Sharma",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1485893086445-ed75865251e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The specialist referral system is seamless. I was connected with the right expert for my condition within hours."
+  },
+  {
+    id: 12,
+    name: "Thomas Wilson",
+    role: "Patient",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
+    text: "The follow-up care is outstanding. My doctor checked on my recovery progress regularly through the platform."
+  }
+];
+
+
+
+
+/* moving testimonial section */
+const TestimonialCarousel = () => {
+  const [testimonials, setTestimonials] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const transitionRef = useRef(null);
+
+  // Load testimonials with cloned cards for infinite loop
+  useEffect(() => {
+    setTestimonials([...mockTestimonials, ...mockTestimonials.slice(0, 3)]);
+  }, []);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (testimonials.length === 0) return;
+
+    transitionRef.current = setInterval(() => {
+      setCurrentIndex((prev) => prev + 1);
+      setIsTransitioning(true);
+    }, 4000);
+
+    return () => clearInterval(transitionRef.current);
+  }, [testimonials]);
+
+  // Reset when reaching the end
+  useEffect(() => {
+    if (currentIndex === testimonials.length - 3) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentIndex(0);
+      }, 700);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, testimonials.length]);
+
+  return (
+    <div className="bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* === Heading Section (same as screenshot) === */}
+        <div className="text-center mb-12">
+          <span className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
+            Success Stories
+          </span>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4"
+              style={{ fontSize: '36px' }}>
+            What Our Users Say
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Hear from patients and doctors who use our platform
+          </p>
+        </div>
+
+        {/* === Carousel Section === */}
+        <div className="relative overflow-hidden">
+          <div
+            className={`flex ${isTransitioning ? "transition-transform duration-700 ease-in-out" : ""}`}
+            style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+          >
+            {testimonials.map((testimonial) => (
+              <div 
+                key={testimonial.id + Math.random()} 
+                className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4"
+              >
+                <div 
+                  className="bg-white rounded-lg shadow-md p-6 h-full"
+                  style={{ 
+                    border: '1px solid #29f68cff',
+                    borderRadius: '10px'
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{testimonial.name}</h3>
+                      <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 italic">"{testimonial.text}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+
+
+
+/* footer */ 
+const Footer = () => {
+  return (
+    <footer className="text-white py-8 px-4" style={{ backgroundColor: '#d6fbe8' }}>
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Healthcare+ Brand */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#009966' }}>BookMyDoc</h1>
+          <p className="text-gray-700">
+            Your trusted healthcare partner providing quality medical services with modern technology.
+          </p>
+        </div>
+
+        {/* Main Sections Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          
+          {/* Quick Links */}
+          <div className="text-center md:text-left">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Quick Links</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li><a href="#" className="hover:text-gray-900 transition-colors">Services</a></li>
+              <li><a href="#" className="hover:text-gray-900 transition-colors">Our Doctors</a></li>
+              <li><a href="#" className="hover:text-gray-900 transition-colors">Book Appointment</a></li>
+              <li><a href="#" className="hover:text-gray-900 transition-colors">About Us</a></li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="text-center md:text-left">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Services</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li>General Medicine</li>
+              <li>Cardiology</li>
+              <li>Pediatrics</li>
+              <li>Emergency Care</li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="text-center md:text-left">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Contact Info</h3>
+            <div className="space-y-2 text-gray-700">
+              <div className="flex items-center justify-center md:justify-start">
+                <span className="mr-2">📍</span>
+                <span>123 Gorakhpur, City</span>
+              </div>
+              <div className="flex items-center justify-center md:justify-start">
+                <span className="mr-2">📞</span>
+                <span>+91 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center justify-center md:justify-start">
+                <span className="mr-2">📎</span>
+                <span>info@BookMyDoc.com</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-gray-400 pt-4 text-center text-gray-600 text-sm">
+          <p>© 2025 BookMyDoc. All Rights Reserved.
+Designed & Developed By
+Angle270</p>
+        </div>
+        
+      </div>
+    </footer>
+  );
+};
+
+
+/* services in easy to understand */
+const ConsultationSection = () => {
+  return (
+    <section className="py-12 px-4 bg-white">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Consult top doctors online for any health concern
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Private online consultations with verified doctors in all specialists
+          </p>
+        </div>
+
+        {/* Consultation Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          
+          {/* Period doubts or Pregnancy */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">🤰</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">45+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Period doubts or Pregnancy</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+
+          {/* Acne, pimple or skin issues */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">🧴</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium" >38+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Acne, pimple or skin issues</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+
+          {/* Performance issues in bed */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">💊</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">52+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Performance issues in bed</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+
+          {/* Cold, cough or fever */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">🤒</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">67+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Cold, cough or fever</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+
+          {/* Child not feeling well */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-pink-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">👶</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">41+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Child not feeling well</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+
+          {/* Depression or anxiety */}
+          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">😔</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">29+ doctors</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Depression or anxiety</h3>
+            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
+              CONSULT NOW
+            </button>
+          </div>
+        </div>
+
+        {/* View All Specialties Button */}
+        <div className="text-center">
+          <button className="border-2 text-green-600 font-medium py-2 px-6 rounded-lg transition-colors hover:bg-green-600 hover:text-white" style={{ borderColor: '#00d492', color: '#009966' }}>
+            View All Specialties
+          </button>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
+/* mission vision section */
+const DoctorAppointmentCards = () => {
+  const [currentIndex, setCurrentIndex] = useState(1); // Start with middle card
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const cards = [
+    {
+      id: 1,
+      title: "Mission",
+      description:
+        "To provide exceptional healthcare services with compassion, innovation, and excellence, ensuring every patient receives personalized care in a comfortable environment.",
+      icon: "🎯",
+      bgColor: "#ffe2e2",
+    },
+    {
+      id: 2,
+      title: "Vision",
+      description:
+        "To be the leading healthcare provider known for outstanding patient care, medical excellence, and community wellness through cutting-edge technology and compassionate service.",
+      icon: "👁️",
+      bgColor: "#f3e8ff",
+    },
+    {
+      id: 3,
+      title: "Core Values",
+      description:
+        "Compassion, Integrity, Excellence, Innovation, and Patient-Centered Care. We prioritize your health and wellbeing above all else.",
+      icon: "❤️",
+      bgColor: "#fef9c2",
+    },
+  ];
+
+  // Auto-rotate every 4 seconds (no dependency on currentIndex)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleNext();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleNext = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev + 1) % cards.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  };
+
+  const handlePrev = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  };
+
+  const getCardPosition = (index) => {
+    const positions = ["left", "center", "right"];
+    const adjustedIndex = (index - currentIndex + cards.length) % cards.length;
+    return positions[adjustedIndex];
+  };
+
+  const getCardStyle = (position, bgColor) => {
+    switch (position) {
+      case "left":
+        return {
+          transform: "translateX(-120%) scale(0.9)",
+          opacity: 0.9,
+          zIndex: 10,
+          backgroundColor: bgColor,
+        };
+      case "center":
+        return {
+          transform: "translateX(0) scale(1)",
+          opacity: 1,
+          zIndex: 30,
+          backgroundColor: bgColor,
+        };
+      case "right":
+        return {
+          transform: "translateX(120%) scale(0.9)",
+          opacity: 0.9,
+          zIndex: 10,
+          backgroundColor: bgColor,
+        };
+      default:
+        return { backgroundColor: bgColor };
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-6xl mx-auto w-full">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="font-bold mb-4" style={{ fontSize: "36px" }}>
+            <span className="text-black">Our Commitment </span>
+            <span style={{ color: "#009966" }}>to You</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover what drives our passion for healthcare excellence and
+            patient-centered service
+          </p>
+        </div>
+
+        {/* Cards Container */}
+        <div className="relative h-96 md:h-80 flex items-center justify-center">
+          {cards.map((card, index) => {
+            const position = getCardPosition(index);
+            const style = getCardStyle(position, card.bgColor);
+
+            return (
+              <div
+                key={card.id}
+                className="absolute w-80 md:w-96 h-72 rounded-2xl shadow-xl transition-all duration-500 ease-in-out cursor-pointer hover:shadow-2xl"
+                style={style}
+                onClick={() => {
+                  if (position === "left") handlePrev();
+                  if (position === "right") handleNext();
+                }}
+              >
+                <div className="p-8 h-full flex flex-col justify-center">
+                  <div className="text-center">
+                    <div className="text-4xl mb-4">{card.icon}</div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                      {card.title}
+                    </h3>
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Additional Info */}
+        <div className="text-center mt-16 max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg">
+            Our commitment to these principles ensures that every patient
+            receives the highest quality care in a supportive and innovative
+            environment.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 const CTA = () => {
   return (
     <section className="py-20">
@@ -558,21 +1095,33 @@ const HomePage = () => {
 
       {/* Services Section */}
       <Services />
-
+     
       {/* Featured Doctors Section */}
       <FeaturedDoctors />
-
+      
       {/* Pricing Section with green medical styling */}
       <PricingSection />
 
       {/* Features Section */}
       <Feature />
-
+      
+      {/* moving testimonial section */}
+      <TestimonialCarousel/>
+      
+      {/* services in easy to understand */}
+      <ConsultationSection/>
+      
       {/* Testimonials with green medical accents */}
       <Testimonials />
 
       {/* CTA Section with green medical styling */}
       <CTA />
+      
+      {/* mission vision section */}
+       <DoctorAppointmentCards/>
+      
+      {/* Footer */}
+      <Footer/>
     </div>
   );
 };
