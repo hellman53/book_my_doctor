@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // import { collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
+import { Typewriter } from "react-simple-typewriter";
 import {
   ArrowRight,
   Stethoscope,
@@ -33,9 +34,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className=" hero relative overflow-hidden mt-32 ">
+    <section className="hero relative overflow-hidden mt-32">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* LEFT TEXT */}
           <div className="space-y-8">
             <Badge
               variant="outline"
@@ -43,14 +45,35 @@ const Hero = () => {
             >
               Healthcare made simple
             </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Connect with doctors <br />
-              <span className="gradient-title">anytime, anywhere</span>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              {/* Dynamic Line */}
+              <span className="text-black block">
+                <Typewriter
+                  words={[
+                    "Connect with doctors",
+                    "Book appointments",
+                    "Manage your health",
+                  ]}
+                  loop={true}
+                  cursor
+                  cursorStyle="|"
+                  typeSpeed={70}
+                  deleteSpeed={50}
+                  delaySpeed={2000}
+                />
+              </span>
+              {/* Static Line */}
+              <span className="block mt-2" style={{ color: "#0a9d6c" }}>
+                Consult with Doctors Anytime, Anywhere
+              </span>
             </h1>
+
             <p className="text-gray-600 text-lg md:text-xl max-w-md">
               Book appointments, consult via video, and manage your healthcare
               journey all in one secure platform.
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 asChild
@@ -61,6 +84,7 @@ const Hero = () => {
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+
               <Button
                 asChild
                 variant="outline"
@@ -72,6 +96,7 @@ const Hero = () => {
             </div>
           </div>
 
+          {/* RIGHT IMAGE */}
           <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
             <Image
               src="/banner2.png"

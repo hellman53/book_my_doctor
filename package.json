@@ -33,6 +33,7 @@
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.9.1",
     "react-select": "^5.10.2",
+    "react-simple-typewriter": "^5.0.1",
     "sonner": "^2.0.7",
     "svix": "^1.76.1",
     "tailwind-merge": "^3.3.1"
