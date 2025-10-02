@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Select from "react-select";
-import { Country, State, City } from "country-state-city";
 import { submitDoctorApplication } from "@/lib/firebase-users";
+import { Country, State, City } from "country-state-city";
+import Select from "react-select";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
