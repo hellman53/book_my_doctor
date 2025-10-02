@@ -11,6 +11,7 @@ import {
 import { neobrutalism } from '@clerk/themes'
 import "./globals.css";
 import Header from "@/components/header";
+import UserSyncProvider from "@/components/UserSyncProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,21 +44,21 @@ export default function RootLayout({ children }) {
               enableSystem
               disableTransitionOnChange
             >
+            <UserSyncProvider>
+              {/* header */}
+              <Header />
 
-          {/* header */}
-          <Header />
+              <main className="min-h-screen"> 
+                {children}
+              </main>
 
-          <main className="min-h-screen"> 
-            {children}
-          </main>
-
-          {/* footer */}
-          <footer className="text-center py-4">
-            <div className="container mx-auto px-4">
-              <p suppressHydrationWarning>&copy; {new Date().getFullYear()} BookMyDoc. All rights reserved.</p>
-            </div>
-          </footer>
-
+              {/* footer */}
+              <footer className="text-center py-4">
+                <div className="container mx-auto px-4">
+                  <p suppressHydrationWarning>&copy; {new Date().getFullYear()} BookMyDoc. All rights reserved.</p>
+                </div>
+              </footer>
+            </UserSyncProvider>
             </ThemeProvider>
         </body>
       </html>
