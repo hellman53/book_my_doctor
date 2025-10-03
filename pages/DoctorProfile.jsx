@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   Stethoscope,
   GraduationCap,
-  Building
+  Building,
+  X
 } from "lucide-react";
 
 export default function DoctorProfile() {
@@ -30,6 +31,7 @@ export default function DoctorProfile() {
   const router = useRouter();
   const { user: currentUser, isLoaded } = useUser();
   const [doctor, setDoctor] = useState(null);
+  const [doctorUser, setDoctorUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -46,8 +48,19 @@ export default function DoctorProfile() {
     const fetchDoctor = async () => {
       try {
         const doctorDoc = await getDoc(doc(db, "doctors", doctorId));
+        const doctorData = await getDoc(doc(db, "users", doctorId));
         if (doctorDoc.exists()) {
           setDoctor({ id: doctorDoc.id, ...doctorDoc.data() });
+        } else {
+          toast.error("Doctor not found");
+          router.push("/");
+        }
+        if (doctorData.exists()) {
+          setDoctorUser({ id: doctorData.id, ...doctorData.data() });
+          if(doctorUser.role != "doctor"){
+            toast.error("Doctor not found");
+            router.push("/")
+          }
         } else {
           toast.error("Doctor not found");
           router.push("/");
@@ -281,7 +294,7 @@ export default function DoctorProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+    <div className="mt-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
       {/* Navigation Bar */}
       <div className="pt-20 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -303,10 +316,10 @@ export default function DoctorProfile() {
             {/* Doctor Avatar */}
             <div className="relative flex-shrink-0">
               <div className="w-32 h-32 lg:w-40 lg:h-40 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white border-opacity-30">
-                {doctor.profileImage ? (
+                {doctorUser.profileImage ? (
                   <img 
-                    src={doctor.profileImage} 
-                    alt={doctor.fullName}
+                    src={doctorUser.profileImage} 
+                    alt={doctorUser.fullName}
                     className="w-full h-full rounded-3xl object-cover"
                   />
                 ) : (
@@ -329,7 +342,7 @@ export default function DoctorProfile() {
                 </div>
                 
                 {/* Rating */}
-                {doctor.rating && (
+                {doctor.rating? (
                   <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
@@ -348,7 +361,7 @@ export default function DoctorProfile() {
                       <span className="opacity-80">({doctor.reviewCount} reviews)</span>
                     )}
                   </div>
-                )}
+                ): null}
 
                 {/* Quick Info */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm mb-6">
@@ -565,7 +578,7 @@ export default function DoctorProfile() {
           {/* Right Column - Quick Info */}
           <div className="space-y-6">
             {/* Quick Action Card */}
-            <div className="sticky top-8">
+            <div className="sticky top-22">
               <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl shadow-xl p-6 text-white">
                 <div className="text-center mb-6">
                   <div className="text-4xl font-bold mb-2">₹{doctor.consultationFee}</div>
@@ -698,7 +711,7 @@ export default function DoctorProfile() {
 
       {/* Enhanced Booking Modal */}
       {showBookingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-2xl w-full mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-8">
               {/* Modal Header */}
