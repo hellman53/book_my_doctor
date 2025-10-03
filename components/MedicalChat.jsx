@@ -16,6 +16,8 @@ import {
   Maximize,
   MessageCircle
 } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Dummy doctor data
 const dummyDoctors = [
@@ -131,15 +133,12 @@ const dummyDoctors = [
   },
 ];
 
-// Function to pick a random doctor (fallback)
 const getRandomDoctor = () =>
   dummyDoctors[Math.floor(Math.random() * dummyDoctors.length)];
 
-// Function to select doctor based on user symptoms keywords
 const getDoctorBySpecialization = (messageContent) => {
   const text = messageContent.toLowerCase();
-
-  const specializationMap = [
+  const map = [
     {
       keywords: ["heart", "cardio", "blood pressure", "chest pain"],
       specialization: "Cardiologist",
@@ -181,23 +180,28 @@ const getDoctorBySpecialization = (messageContent) => {
       specialization: "Gynecologist",
     },
   ];
-
-  for (const { keywords, specialization } of specializationMap) {
-    for (const kw of keywords) {
-      if (text.includes(kw)) {
-        const doctor = dummyDoctors.find(
-          (d) => d.specialization === specialization
+  for (const { keywords, specialization } of map) {
+    for (const kw of keywords)
+      if (text.includes(kw))
+        return (
+          dummyDoctors.find((d) => d.specialization === specialization) ||
+          getRandomDoctor()
         );
-        if (doctor) return doctor;
-      }
-    }
   }
-
   return (
     dummyDoctors.find((d) => d.specialization === "General Physician") ||
     getRandomDoctor()
   );
 };
+
+const quickSymptoms = [
+  "Fever",
+  "Headache",
+  "Skin Rash",
+  "Joint Pain",
+  "Eye Pain",
+  "Pregnancy",
+];
 
 export default function MedicalChat() {
   const [messages, setMessages] = useState([]);
@@ -219,7 +223,7 @@ export default function MedicalChat() {
   }, []);
 
   async function sendMessage(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!input.trim()) return;
 
     const userMsg = { 
@@ -236,18 +240,15 @@ export default function MedicalChat() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newHistory }),
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
       const data = await res.json();
-
-      // Assign doctor based on user's input keywords
-      const doctorSuggestion = getDoctorBySpecialization(userMsg.content);
-
+      const doctor = getDoctorBySpecialization(userMsg.content);
       const assistantMsg = {
         role: "assistant",
         content: data?.text || "I understand your concerns. Based on your symptoms, here's a specialist who can help you:",
         time: new Date(),
-        doctor: doctorSuggestion,
+        doctor,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -497,8 +498,6 @@ export default function MedicalChat() {
               </div>
             </motion.div>
           )}
-
-          <div ref={endRef} />
         </div>
 
         {/* Quick Replies */}
