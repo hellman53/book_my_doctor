@@ -16,8 +16,8 @@ import {
   Maximize,
   MessageCircle
 } from "lucide-react";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+// import { useState } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
 
 // Dummy doctor data
 const dummyDoctors = [
