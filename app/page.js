@@ -29,7 +29,7 @@ const Home = () => {
   //   }
   // };
  return (
-  <div className="h-screen w-screen">
+  <div className="">
     <HomePage />
   </div>
  );

@@ -11,6 +11,7 @@ import {
 import { neobrutalism } from '@clerk/themes'
 import "./globals.css";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import UserSyncProvider from "@/components/UserSyncProvider";
 
 const inter = Inter({
@@ -53,11 +54,13 @@ export default function RootLayout({ children }) {
               </main>
 
               {/* footer */}
-              <footer className="text-center py-4">
+              {/* <footer className="text-center py-4">
                 <div className="container mx-auto px-4">
                   <p suppressHydrationWarning>&copy; {new Date().getFullYear()} BookMyDoc. All rights reserved.</p>
                 </div>
-              </footer>
+              </footer> */}
+              <Footer />
+
             </UserSyncProvider>
             </ThemeProvider>
         </body>

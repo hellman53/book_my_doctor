@@ -1,10 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 
-
-
-
-
 // import { db } from "../app/firebase/config";
 // import { collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
@@ -26,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Pricing from "@/components/pricing";
+import Pricing from "@/components/pricingEX";
 import { creditBenefits, features, testimonials } from "@/lib/data";
 import "./homePage.css"
 import DoctorForm from "@/pages/DoctorForm";
@@ -513,12 +509,6 @@ const Testimonials = () => {
   );
 };
 
-
-
-
-
-
-
 /* moving testimonial section api */
 const mockTestimonials = [
   {
@@ -606,9 +596,6 @@ const mockTestimonials = [
     text: "The follow-up care is outstanding. My doctor checked on my recovery progress regularly through the platform."
   }
 ];
-
-
-
 
 /* moving testimonial section */
 const TestimonialCarousel = () => {
@@ -704,78 +691,75 @@ const TestimonialCarousel = () => {
   );
 };
 
-
-
-
 /* footer */ 
 const Footer = () => {
-  return (
-    <footer className="text-white py-8 px-4" style={{ backgroundColor: '#d6fbe8' }}>
-      <div className="max-w-6xl mx-auto">
+return (
+  <footer className="text-white py-8 px-4" style={{ backgroundColor: '#d6fbe8' }}>
+    <div className="max-w-6xl mx-auto">
+      
+      {/* Healthcare+ Brand */}
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold mb-2" style={{ color: '#009966' }}>BookMyDoc</h1>
+        <p className="text-gray-700">
+          Your trusted healthcare partner providing quality medical services with modern technology.
+        </p>
+      </div>
+
+      {/* Main Sections Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         
-        {/* Healthcare+ Brand */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold mb-2" style={{ color: '#009966' }}>BookMyDoc</h1>
-          <p className="text-gray-700">
-            Your trusted healthcare partner providing quality medical services with modern technology.
-          </p>
+        {/* Quick Links */}
+        <div className="text-center md:text-left">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Quick Links</h3>
+          <ul className="space-y-2 text-gray-700">
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Services</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Our Doctors</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">Book Appointment</a></li>
+            <li><a href="#" className="hover:text-gray-900 transition-colors">About Us</a></li>
+          </ul>
         </div>
 
-        {/* Main Sections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          
-          {/* Quick Links */}
-          <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Quick Links</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Services</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Our Doctors</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">Book Appointment</a></li>
-              <li><a href="#" className="hover:text-gray-900 transition-colors">About Us</a></li>
-            </ul>
-          </div>
+        {/* Services */}
+        <div className="text-center md:text-left">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Services</h3>
+          <ul className="space-y-2 text-gray-700">
+            <li>General Medicine</li>
+            <li>Cardiology</li>
+            <li>Pediatrics</li>
+            <li>Emergency Care</li>
+          </ul>
+        </div>
 
-          {/* Services */}
-          <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Services</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>General Medicine</li>
-              <li>Cardiology</li>
-              <li>Pediatrics</li>
-              <li>Emergency Care</li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Contact Info</h3>
-            <div className="space-y-2 text-gray-700">
-              <div className="flex items-center justify-center md:justify-start">
-                <span className="mr-2">📍</span>
-                <span>123 Gorakhpur, City</span>
-              </div>
-              <div className="flex items-center justify-center md:justify-start">
-                <span className="mr-2">📞</span>
-                <span>+91 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center justify-center md:justify-start">
-                <span className="mr-2">📎</span>
-                <span>info@BookMyDoc.com</span>
-              </div>
+        {/* Contact Info */}
+        <div className="text-center md:text-left">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#009966' }}>Contact Info</h3>
+          <div className="space-y-2 text-gray-700">
+            <div className="flex items-center justify-center md:justify-start">
+              <span className="mr-2">📍</span>
+              <span>123 Gorakhpur, City</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-start">
+              <span className="mr-2">📞</span>
+              <span>+91 (555) 123-4567</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-start">
+              <span className="mr-2">📎</span>
+              <span>info@BookMyDoc.com</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-400 pt-4 text-center text-gray-600 text-sm">
-          <p>© 2025 BookMyDoc. All Rights Reserved.
+      {/* Copyright */}
+      <div className="border-t border-gray-400 pt-4 text-center text-gray-600 text-sm">
+        <p>© 2025 BookMyDoc. All Rights Reserved.
 Designed & Developed By
 Angle270</p>
-        </div>
-        
       </div>
-    </footer>
-  );
+      
+    </div>
+  </footer>
+);
 };
 
 
@@ -1114,7 +1098,7 @@ const HomePage = () => {
   //   }
   // };
   return (
-    <div className="bg-white">
+    <div className="bg-white w-[100%] ">
       {/* Hero Section */}
       <Hero />
 
@@ -1144,9 +1128,7 @@ const HomePage = () => {
       
       {/* mission vision section */}
        <DoctorAppointmentCards/>
-      
-      {/* Footer */}
-      <Footer/>
+
     </div>
   );
 };
