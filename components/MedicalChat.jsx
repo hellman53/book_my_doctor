@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Dummy doctor data
 const dummyDoctors = [
@@ -96,15 +96,12 @@ const dummyDoctors = [
   },
 ];
 
-// Function to pick a random doctor (fallback)
 const getRandomDoctor = () =>
   dummyDoctors[Math.floor(Math.random() * dummyDoctors.length)];
 
-// Function to select doctor based on user symptoms keywords
 const getDoctorBySpecialization = (messageContent) => {
   const text = messageContent.toLowerCase();
-
-  const specializationMap = [
+  const map = [
     {
       keywords: ["heart", "cardio", "blood pressure"],
       specialization: "Cardiologist",
@@ -146,39 +143,39 @@ const getDoctorBySpecialization = (messageContent) => {
       specialization: "Gynecologist",
     },
   ];
-
-  for (const { keywords, specialization } of specializationMap) {
-    for (const kw of keywords) {
-      if (text.includes(kw)) {
-        const doctor = dummyDoctors.find(
-          (d) => d.specialization === specialization
+  for (const { keywords, specialization } of map) {
+    for (const kw of keywords)
+      if (text.includes(kw))
+        return (
+          dummyDoctors.find((d) => d.specialization === specialization) ||
+          getRandomDoctor()
         );
-        if (doctor) return doctor;
-      }
-    }
   }
-
   return (
     dummyDoctors.find((d) => d.specialization === "General Physician") ||
     getRandomDoctor()
   );
 };
 
+const quickSymptoms = [
+  "Fever",
+  "Headache",
+  "Skin Rash",
+  "Joint Pain",
+  "Eye Pain",
+  "Pregnancy",
+];
+
 export default function MedicalChat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const endRef = useRef(null);
-  const containerRef = useRef(null);
 
   async function sendMessage(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!input.trim()) return;
-
     const userMsg = { role: "user", content: input.trim(), time: new Date() };
-    const newHistory = [...messages, userMsg];
-    setMessages(newHistory);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
@@ -186,18 +183,15 @@ export default function MedicalChat() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newHistory }),
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
       const data = await res.json();
-
-      // Assign doctor based on user's input keywords
-      const doctorSuggestion = getDoctorBySpecialization(userMsg.content);
-
+      const doctor = getDoctorBySpecialization(userMsg.content);
       const assistantMsg = {
         role: "assistant",
         content: data?.text || "⚠️ No response.",
         time: new Date(),
-        doctor: doctorSuggestion,
+        doctor,
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -216,162 +210,147 @@ export default function MedicalChat() {
     }
   }
 
-  useEffect(() => {
-    if (endRef.current) endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const atBottom =
-        container.scrollHeight - container.scrollTop === container.clientHeight;
-      setShowScrollBtn(!atBottom);
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div className="w-full bg-gradient-to-r from-green-50 to-green-100 py-16 px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-5xl mx-auto flex flex-col h-[90vh] bg-white rounded-2xl shadow-lg overflow-hidden relative"
-      >
-        {/* Header */}
-        <div className="bg-green-600 text-white px-6 py-4 font-semibold text-lg rounded-t-2xl">
+    <div className="w-full min-h-screen bg-gradient-to-r from-green-50 to-green-100 py-8 px-4 sm:px-6 lg:px-16 flex justify-center">
+      <motion.div className="w-full mt-15 flex flex-col h-[80vh] sm:h-[85vh] md:h-[80vh] bg-white rounded-2xl shadow-xl overflow-hidden relative">
+        <div className="bg-green-600 text-white px-6 py-4 font-semibold text-lg sm:text-xl rounded-t-2xl text-center">
           🩺 AI Medical Assistant
         </div>
 
-        {/* Messages */}
-        <div
-          ref={containerRef}
-          className="flex-1 p-6 overflow-y-auto space-y-5 relative"
-        >
+        <div className="flex-1 p-4 sm:p-6 space-y-4 relative overflow-y-auto">
           {messages.length === 0 && (
-            <div className="text-gray-500 text-center mt-20">
+            <div className="text-gray-500 text-center mt-20 text-sm sm:text-base">
               💬 Describe your symptoms to begin...
             </div>
           )}
 
-          {messages.map((m, i) => {
-            const time = m.time
-              ? new Date(m.time).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "";
-            if (m.role === "assistant") {
+          <AnimatePresence>
+            {messages.map((m, i) => {
+              const time = m.time
+                ? new Date(m.time).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "";
+              if (m.role === "assistant")
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="flex flex-col items-start space-y-2"
+                  >
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 text-gray-900 px-4 py-3 rounded-2xl shadow max-w-full sm:max-w-md break-words">
+                      {m.content}{" "}
+                      {time && (
+                        <span className="text-gray-400 text-xs ml-2">
+                          {time}
+                        </span>
+                      )}
+                    </div>
+                    {m.doctor && (
+                      <motion.div
+                        whileHover={{
+                          scale: 1.03,
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                        }}
+                        className="bg-white border border-green-300 rounded-xl px-4 py-3 shadow-md max-w-full sm:max-w-md transition transform break-words"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                            {m.doctor.name[0]}
+                          </div>
+                          <div>
+                            <div className="text-green-700 font-semibold text-md sm:text-lg">
+                              Dr. {m.doctor.name}
+                            </div>
+                            <div className="text-gray-600 text-sm">
+                              {m.doctor.specialization}
+                            </div>
+                            <div className="text-gray-500 text-xs">
+                              {m.doctor.experience} experience
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-gray-600 text-sm sm:text-base">
+                          {m.doctor.hospital}
+                        </div>
+                        <div className="mt-1 flex items-center text-yellow-500 space-x-1 text-sm sm:text-base">
+                          {Array.from({ length: m.doctor.rating }, (_, i) => (
+                            <span key={i}>⭐</span>
+                          ))}
+                          <span className="text-gray-500 ml-2">
+                            ({m.doctor.reviews} reviews)
+                          </span>
+                        </div>
+                        <div className="mt-2 text-green-600 text-sm sm:text-base font-medium">
+                          Contact: {m.doctor.contact}
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
               return (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-start space-y-2"
+                  exit={{ opacity: 0, y: 10 }}
+                  className="flex justify-end flex-col items-end space-y-1"
                 >
-                  <div className="bg-green-50 border border-green-200 text-gray-900 px-4 py-3 rounded-2xl shadow max-w-lg">
-                    {m.content}
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-2xl shadow max-w-full sm:max-w-md break-words">
+                    {m.content}{" "}
                     {time && (
-                      <span className="text-gray-400 text-xs ml-2">{time}</span>
+                      <span className="text-gray-200 text-xs ml-2">{time}</span>
                     )}
                   </div>
-
-                  {m.doctor && (
-                    <div className="bg-white border border-green-300 rounded-xl px-4 py-3 shadow-md max-w-lg hover:shadow-lg hover:scale-105 transition transform">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
-                          {m.doctor.name[0]}
-                        </div>
-                        <div>
-                          <div className="text-green-700 font-semibold text-md">
-                            Dr. {m.doctor.name}
-                          </div>
-                          <div className="text-gray-600 text-sm">
-                            {m.doctor.specialization}
-                          </div>
-                          <div className="text-gray-500 text-xs">
-                            {m.doctor.experience} experience
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-gray-600 text-sm">
-                        {m.doctor.hospital}
-                      </div>
-                      <div className="mt-1 flex items-center text-yellow-500 space-x-1 text-sm">
-                        {Array.from({ length: m.doctor.rating }, (_, i) => (
-                          <span key={i}>⭐</span>
-                        ))}
-                        <span className="text-gray-500 ml-2">
-                          ({m.doctor.reviews} reviews)
-                        </span>
-                      </div>
-                      <div className="mt-2 text-green-600 text-sm font-medium">
-                        Contact: {m.doctor.contact}
-                      </div>
-                    </div>
-                  )}
                 </motion.div>
               );
-            }
-
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-end flex-col items-end space-y-1"
-              >
-                <div className="bg-green-600 text-white px-4 py-3 rounded-2xl shadow max-w-lg">
-                  {m.content}
-                  {time && (
-                    <span className="text-gray-200 text-xs ml-2">{time}</span>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
+            })}
+          </AnimatePresence>
 
           {loading && (
-            <div className="flex items-center space-x-2 text-gray-400 italic">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-2 text-gray-400 italic text-sm sm:text-base"
+            >
               <span>Assistant is typing</span>
-              <span className="animate-pulse">...</span>
-            </div>
+              <span className="animate-pulse">⠋⠙⠹</span>
+            </motion.div>
           )}
-
-          <div ref={endRef} />
         </div>
 
-        {/* Scroll to bottom button */}
-        {showScrollBtn && (
-          <button
-            onClick={() =>
-              endRef.current?.scrollIntoView({ behavior: "smooth" })
-            }
-            className="absolute bottom-24 right-6 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition"
-            title="Scroll to latest"
-          >
-            ⬇️
-          </button>
-        )}
+        <div className="flex flex-wrap gap-2 p-2 sm:p-4 border-t border-gray-200 bg-green-50">
+          {quickSymptoms.map((s, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setInput(s);
+                sendMessage();
+              }}
+              className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm hover:bg-green-300 transition"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
 
-        {/* Input form */}
         <form
           onSubmit={sendMessage}
-          className="flex p-4 border-t border-gray-200 bg-green-50 rounded-b-2xl"
+          className="flex p-3 sm:p-4 border-t border-gray-200 bg-green-50"
         >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your symptoms..."
-            className="flex-1 px-4 py-2 rounded-xl border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none"
+            className="flex-1 px-4 py-2 sm:py-3 rounded-xl border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none text-sm sm:text-base"
           />
           <button
             type="submit"
             disabled={loading}
-            className="ml-3 px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition disabled:opacity-50"
+            className="ml-3 px-4 sm:px-5 py-2 sm:py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition disabled:opacity-50 text-sm sm:text-base"
           >
             Send
           </button>
