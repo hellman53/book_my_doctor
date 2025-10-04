@@ -5,7 +5,7 @@ import { submitDoctorApplication } from "@/lib/firebase-users";
 import { Country, State, City } from "country-state-city";
 import Select from "react-select";
 import { useUser } from "@clerk/nextjs";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 // Medical specializations
@@ -285,10 +285,11 @@ export default function DoctorForm() {
     setShowErrorPopup(false);
     setErrorMessage("");
   };
+ 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 pt-20 py-8 px-4 sm:px-6 lg:px-8">
-      {/* Success Popup */}
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 mt-8 pt-20 py-8 px-4 sm:px-6 lg:px-8">
+     
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-auto shadow-2xl">

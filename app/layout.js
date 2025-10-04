@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "react-hot-toast";
 import {
   ClerkProvider,
   SignInButton,
@@ -60,6 +61,10 @@ export default function RootLayout({ children }) {
                 </div>
               </footer> */}
               <Footer />
+
+              {/* 🔥 global toast container */}
+              <Toaster reverseOrder={false} /> 
+              {/* position="top-right"  */}
 
             </UserSyncProvider>
             </ThemeProvider>

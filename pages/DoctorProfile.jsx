@@ -23,7 +23,10 @@ import {
   Stethoscope,
   GraduationCap,
   Building,
-  X
+  X,
+  Users,
+  Monitor,
+  Building2
 } from "lucide-react";
 
 export default function DoctorProfile() {
@@ -40,6 +43,7 @@ export default function DoctorProfile() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [isTodayAvailable, setIsTodayAvailable] = useState(false);
 
   const doctorId = params.id;
 
@@ -49,17 +53,25 @@ export default function DoctorProfile() {
       try {
         const doctorDoc = await getDoc(doc(db, "doctors", doctorId));
         const doctorData = await getDoc(doc(db, "users", doctorId));
+        
         if (doctorDoc.exists()) {
-          setDoctor({ id: doctorDoc.id, ...doctorDoc.data() });
+          const doctorDataObj = { id: doctorDoc.id, ...doctorDoc.data() };
+          setDoctor(doctorDataObj);
+          
+          // Check today's availability after doctor data is loaded
+          checkTodaysAvailability(doctorDataObj);
         } else {
           toast.error("Doctor not found");
           router.push("/");
+          return;
         }
+        
         if (doctorData.exists()) {
-          setDoctorUser({ id: doctorData.id, ...doctorData.data() });
-          if(doctorUser.role != "doctor"){
+          const userData = { id: doctorData.id, ...doctorData.data() };
+          setDoctorUser(userData);
+          if(userData.role !== "doctor"){
             toast.error("Doctor not found");
-            router.push("/")
+            router.push("/");
           }
         } else {
           toast.error("Doctor not found");
@@ -78,25 +90,100 @@ export default function DoctorProfile() {
     }
   }, [doctorId, router]);
 
-  // Generate available time slots based on doctor's availability
-  const generateTimeSlots = () => {
-    if (!doctor || !selectedDate) return [];
-
-    const dayOfWeek = new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' });
-    const dayAvailability = doctor.availability.find(avail => avail.day === dayOfWeek);
+  // Check if today is available for appointments
+  const checkTodaysAvailability = (doctorData) => {
+    const today = new Date();
+    const todayDay = today.toLocaleDateString('en-US', { weekday: 'long' });
     
+    let todayAvailability = null;
+
+    // Check schedule settings first
+    if (doctorData.scheduleSettings) {
+      if (doctorData.scheduleSettings.virtual?.enabled) {
+        todayAvailability = doctorData.scheduleSettings.virtual.availability?.find(
+          avail => avail.day === todayDay
+        );
+      }
+      if (!todayAvailability && doctorData.scheduleSettings.inPerson?.enabled) {
+        todayAvailability = doctorData.scheduleSettings.inPerson.availability?.find(
+          avail => avail.day === todayDay
+        );
+      }
+    }
+
+    // Fallback to old availability structure
+    if (!todayAvailability && doctorData.availability) {
+      todayAvailability = doctorData.availability.find(avail => avail.day === todayDay);
+    }
+
+    setIsTodayAvailable(!!todayAvailability);
+  };
+
+  // Check if appointment type is enabled
+  const isAppointmentTypeEnabled = (type) => {
+    if (!doctor?.scheduleSettings) return true;
+    
+    if (type === "virtual") {
+      return doctor.scheduleSettings.virtual?.enabled !== false;
+    } else if (type === "personal") {
+      return doctor.scheduleSettings.inPerson?.enabled !== false;
+    }
+    return true;
+  };
+
+  // Get availability for a specific day and appointment type
+  const getDayAvailability = (dayOfWeek, type) => {
+    if (!doctor) return null;
+
+    // Check schedule settings first
+    if (doctor.scheduleSettings) {
+      if (type === "virtual" && doctor.scheduleSettings.virtual?.enabled) {
+        return doctor.scheduleSettings.virtual.availability?.find(
+          avail => avail.day === dayOfWeek
+        );
+      } else if (type === "personal" && doctor.scheduleSettings.inPerson?.enabled) {
+        return doctor.scheduleSettings.inPerson.availability?.find(
+          avail => avail.day === dayOfWeek
+        );
+      }
+    }
+
+    // Fallback to old availability structure
+    if (doctor.availability) {
+      return doctor.availability.find(avail => avail.day === dayOfWeek);
+    }
+
+    return null;
+  };
+
+  // Generate available time slots based on doctor's availability and schedule settings
+  const generateTimeSlots = (date, type) => {
+    if (!doctor || !date) return [];
+
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    
+    const dayAvailability = getDayAvailability(dayOfWeek, type);
     if (!dayAvailability) return [];
 
+    let slotDuration = 30; // default
+
+    // Get slot duration from schedule settings
+    if (type === "virtual" && doctor.scheduleSettings?.virtual) {
+      slotDuration = doctor.scheduleSettings.virtual.slotDuration || 30;
+    } else if (type === "personal" && doctor.scheduleSettings?.inPerson) {
+      slotDuration = doctor.scheduleSettings.inPerson.slotDuration || 30;
+    }
+
     const slots = [];
-    const startTime = new Date(`${selectedDate}T${dayAvailability.startTime}`);
-    const endTime = new Date(`${selectedDate}T${dayAvailability.endTime}`);
+    const startTime = new Date(`${date}T${dayAvailability.startTime}`);
+    const endTime = new Date(`${date}T${dayAvailability.endTime}`);
     
-    // Generate 30-minute slots
+    // Generate slots based on slot duration
     let currentTime = new Date(startTime);
     while (currentTime < endTime) {
       const timeString = currentTime.toTimeString().slice(0, 5);
       slots.push(timeString);
-      currentTime.setMinutes(currentTime.getMinutes() + 30);
+      currentTime.setMinutes(currentTime.getMinutes() + slotDuration);
     }
 
     return slots;
@@ -124,10 +211,36 @@ export default function DoctorProfile() {
 
   // Handle date selection
   const handleDateSelect = async (date) => {
+    if (!date) return;
+    
     setSelectedDate(date);
     setSelectedTime("");
-    const slots = generateTimeSlots();
     
+    // Check if selected appointment type is enabled
+    if (!isAppointmentTypeEnabled(appointmentType)) {
+      toast.error(`${
+        appointmentType === "virtual" ? "Virtual" : "In-person"
+      } appointments are currently not available for this doctor`);
+      return;
+    }
+
+    // Check if the selected date has availability
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    const dayAvailability = getDayAvailability(dayOfWeek, appointmentType);
+    
+    if (!dayAvailability) {
+      toast.error(`No ${appointmentType} appointments available for ${dayOfWeek}`);
+      setAvailableSlots([]);
+      return;
+    }
+
+    const slots = generateTimeSlots(date, appointmentType);
+    
+    if (slots.length === 0) {
+      setAvailableSlots([]);
+      return;
+    }
+
     // Check which slots are available
     const availableSlotsWithStatus = await Promise.all(
       slots.map(async (slot) => {
@@ -141,6 +254,20 @@ export default function DoctorProfile() {
     
     setAvailableSlots(availableSlotsWithStatus);
     setBookingStep(2);
+  };
+
+  // Handle appointment type selection
+  const handleAppointmentTypeSelect = (type) => {
+    if (!isAppointmentTypeEnabled(type)) {
+      toast.error(`${
+        type === "virtual" ? "Virtual" : "In-person"
+      } appointments are currently not available for this doctor`);
+      return;
+    }
+    setAppointmentType(type);
+    setSelectedDate("");
+    setSelectedTime("");
+    setAvailableSlots([]);
   };
 
   // Generate Vonage session for virtual appointment
@@ -179,6 +306,14 @@ export default function DoctorProfile() {
 
     if (!selectedDate || !selectedTime) {
       toast.error("Please select date and time");
+      return;
+    }
+
+    // Final check if appointment type is enabled
+    if (!isAppointmentTypeEnabled(appointmentType)) {
+      toast.error(`${
+        appointmentType === "virtual" ? "Virtual" : "In-person"
+      } appointments are currently not available for this doctor`);
       return;
     }
 
@@ -253,6 +388,11 @@ export default function DoctorProfile() {
       setSelectedTime("");
       setPatientNotes("");
 
+      // Refresh available slots
+      if (selectedDate) {
+        handleDateSelect(selectedDate);
+      }
+
     } catch (error) {
       console.error("Error booking appointment:", error);
       toast.error("Failed to book appointment. Please try again.");
@@ -266,6 +406,24 @@ export default function DoctorProfile() {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const formattedHour = hour % 12 || 12;
     return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  // Get appointment type availability status
+  const getAppointmentTypeStatus = () => {
+    const virtualEnabled = isAppointmentTypeEnabled("virtual");
+    const inPersonEnabled = isAppointmentTypeEnabled("personal");
+    
+    return {
+      virtual: virtualEnabled,
+      inPerson: inPersonEnabled,
+      bothEnabled: virtualEnabled && inPersonEnabled,
+      noneEnabled: !virtualEnabled && !inPersonEnabled
+    };
+  };
+
+  // Get minimum date for date input (today)
+  const getMinDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
   if (loading) {
@@ -293,6 +451,8 @@ export default function DoctorProfile() {
     );
   }
 
+  const appointmentStatus = getAppointmentTypeStatus();
+
   return (
     <div className="mt-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
       {/* Navigation Bar */}
@@ -316,7 +476,7 @@ export default function DoctorProfile() {
             {/* Doctor Avatar */}
             <div className="relative flex-shrink-0">
               <div className="w-32 h-32 lg:w-40 lg:h-40 bg-white bg-opacity-20 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white border-opacity-30">
-                {doctorUser.profileImage ? (
+                {doctorUser?.profileImage ? (
                   <img 
                     src={doctorUser.profileImage} 
                     alt={doctorUser.fullName}
@@ -363,6 +523,28 @@ export default function DoctorProfile() {
                   </div>
                 ): null}
 
+                {/* Appointment Type Availability */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-6">
+                  {appointmentStatus.virtual && (
+                    <div className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <Monitor className="h-4 w-4" />
+                      <span className="text-sm">Virtual Available</span>
+                    </div>
+                  )}
+                  {appointmentStatus.inPerson && (
+                    <div className="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <Building2 className="h-4 w-4" />
+                      <span className="text-sm">In-Person Available</span>
+                    </div>
+                  )}
+                  {appointmentStatus.noneEnabled && (
+                    <div className="flex items-center gap-2 bg-red-500 bg-opacity-20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <Clock className="h-4 w-4" />
+                      <span className="text-sm">No Appointments Available</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Quick Info */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm mb-6">
                   <div className="flex items-center gap-2">
@@ -383,9 +565,14 @@ export default function DoctorProfile() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <button
                     onClick={() => setShowBookingModal(true)}
-                    className="bg-white text-emerald-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    disabled={appointmentStatus.noneEnabled}
+                    className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                      appointmentStatus.noneEnabled
+                        ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                        : "bg-white text-emerald-600 hover:bg-gray-50"
+                    }`}
                   >
-                    Book Appointment
+                    {appointmentStatus.noneEnabled ? "No Appointments Available" : "Book Appointment"}
                   </button>
                   <div className="flex gap-3">
                     <button className="bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 p-4 rounded-2xl hover:bg-opacity-30 transition-all">
@@ -490,27 +677,45 @@ export default function DoctorProfile() {
               </div>
               
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl">
-                  <div className="p-2 bg-emerald-500 rounded-lg">
+                <div className={`flex items-center gap-3 p-4 rounded-xl transition-all ${
+                  appointmentStatus.virtual 
+                    ? "bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200" 
+                    : "bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 opacity-60"
+                }`}>
+                  <div className={`p-2 rounded-lg ${
+                    appointmentStatus.virtual ? "bg-emerald-500" : "bg-gray-400"
+                  }`}>
                     <Video className="h-5 w-5 text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Virtual Consultation</h3>
                     <p className="text-gray-600 text-sm">Video call appointments</p>
+                    {!appointmentStatus.virtual && (
+                      <p className="text-red-500 text-xs mt-1">Currently unavailable</p>
+                    )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
-                  <div className="p-2 bg-blue-500 rounded-lg">
+                <div className={`flex items-center gap-3 p-4 rounded-xl transition-all ${
+                  appointmentStatus.inPerson 
+                    ? "bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200" 
+                    : "bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 opacity-60"
+                }`}>
+                  <div className={`p-2 rounded-lg ${
+                    appointmentStatus.inPerson ? "bg-blue-500" : "bg-gray-400"
+                  }`}>
                     <MapPin className="h-5 w-5 text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">In-Person Visit</h3>
                     <p className="text-gray-600 text-sm">Clinic consultations</p>
+                    {!appointmentStatus.inPerson && (
+                      <p className="text-red-500 text-xs mt-1">Currently unavailable</p>
+                    )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
+                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
                   <div className="p-2 bg-purple-500 rounded-lg">
                     <Calendar className="h-5 w-5 text-white" />
                   </div>
@@ -520,7 +725,7 @@ export default function DoctorProfile() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl">
+                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl border border-amber-200">
                   <div className="p-2 bg-amber-500 rounded-lg">
                     <Clock className="h-5 w-5 text-white" />
                   </div>
@@ -566,10 +771,23 @@ export default function DoctorProfile() {
               </div>
               
               {/* Quick availability indicator */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+              <div className={`mt-6 p-4 rounded-xl border ${
+                isTodayAvailable 
+                  ? "bg-gradient-to-r from-green-50 to-green-100 border-green-200" 
+                  : "bg-gradient-to-r from-red-50 to-red-100 border-red-200"
+              }`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-700 font-medium">Available for appointments today</span>
+                  <div className={`w-3 h-3 rounded-full ${
+                    isTodayAvailable ? "bg-green-500 animate-pulse" : "bg-red-500"
+                  }`}></div>
+                  <span className={`font-medium ${
+                    isTodayAvailable ? "text-green-700" : "text-red-700"
+                  }`}>
+                    {isTodayAvailable 
+                      ? "Available for appointments today" 
+                      : "Not available for appointments today"
+                    }
+                  </span>
                 </div>
               </div>
             </div>
@@ -587,19 +805,40 @@ export default function DoctorProfile() {
                 
                 <button
                   onClick={() => setShowBookingModal(true)}
-                  className="w-full bg-white text-emerald-600 py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg mb-4"
+                  disabled={appointmentStatus.noneEnabled}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-4 ${
+                    appointmentStatus.noneEnabled
+                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      : "bg-white text-emerald-600 hover:bg-gray-50"
+                  }`}
                 >
-                  Book Appointment Now
+                  {appointmentStatus.noneEnabled ? "Not Available" : "Book Appointment Now"}
                 </button>
                 
                 <div className="flex gap-3">
-                  <button className="flex-1 bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 py-3 rounded-xl hover:bg-opacity-30 transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => handleAppointmentTypeSelect("virtual")}
+                    disabled={!appointmentStatus.virtual}
+                    className={`flex-1 py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                      appointmentStatus.virtual
+                        ? "bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 hover:bg-opacity-30"
+                        : "bg-gray-500 bg-opacity-20 backdrop-blur-sm border border-gray-400 border-opacity-30 cursor-not-allowed"
+                    }`}
+                  >
                     <Video className="h-5 w-5" />
                     <span className="text-sm font-medium">Video Call</span>
                   </button>
-                  <button className="flex-1 bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 py-3 rounded-xl hover:bg-opacity-30 transition-all flex items-center justify-center gap-2">
-                    <Heart className="h-5 w-5" />
-                    <span className="text-sm font-medium">Save</span>
+                  <button 
+                    onClick={() => handleAppointmentTypeSelect("personal")}
+                    disabled={!appointmentStatus.inPerson}
+                    className={`flex-1 py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                      appointmentStatus.inPerson
+                        ? "bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 hover:bg-opacity-30"
+                        : "bg-gray-500 bg-opacity-20 backdrop-blur-sm border border-gray-400 border-opacity-30 cursor-not-allowed"
+                    }`}
+                  >
+                    <Users className="h-5 w-5" />
+                    <span className="text-sm font-medium">In-Person</span>
                   </button>
                 </div>
               </div>
@@ -726,6 +965,7 @@ export default function DoctorProfile() {
                     setBookingStep(1);
                     setSelectedDate("");
                     setSelectedTime("");
+                    setAvailableSlots([]);
                   }}
                   className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
@@ -782,17 +1022,24 @@ export default function DoctorProfile() {
                     <label className="block text-xl font-semibold text-gray-900 mb-6">Choose Appointment Type</label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <button
-                        onClick={() => setAppointmentType("virtual")}
-                        className={`group p-8 border-2 rounded-2xl text-center transition-all duration-300 transform hover:scale-105 ${
+                        onClick={() => handleAppointmentTypeSelect("virtual")}
+                        disabled={!appointmentStatus.virtual}
+                        className={`group p-8 border-2 rounded-2xl text-center transition-all duration-300 transform ${
+                          appointmentStatus.virtual ? 'hover:scale-105' : 'cursor-not-allowed'
+                        } ${
                           appointmentType === "virtual"
                             ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg"
-                            : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50"
+                            : appointmentStatus.virtual
+                            ? "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50"
+                            : "border-gray-200 bg-gray-100 text-gray-400"
                         }`}
                       >
                         <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
                           appointmentType === "virtual" 
                             ? "bg-emerald-500 text-white" 
-                            : "bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                            : appointmentStatus.virtual
+                            ? "bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                            : "bg-gray-300 text-gray-400"
                         }`}>
                           <Video className="w-8 h-8" />
                         </div>
@@ -801,24 +1048,36 @@ export default function DoctorProfile() {
                         <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                           appointmentType === "virtual" 
                             ? "bg-emerald-100 text-emerald-700" 
-                            : "bg-gray-100 text-gray-600"
+                            : appointmentStatus.virtual
+                            ? "bg-gray-100 text-gray-600"
+                            : "bg-gray-200 text-gray-400"
                         }`}>
                           ₹{doctor.consultationFee}
                         </div>
+                        {!appointmentStatus.virtual && (
+                          <div className="mt-2 text-red-500 text-xs">Currently unavailable</div>
+                        )}
                       </button>
                       
                       <button
-                        onClick={() => setAppointmentType("personal")}
-                        className={`group p-8 border-2 rounded-2xl text-center transition-all duration-300 transform hover:scale-105 ${
+                        onClick={() => handleAppointmentTypeSelect("personal")}
+                        disabled={!appointmentStatus.inPerson}
+                        className={`group p-8 border-2 rounded-2xl text-center transition-all duration-300 transform ${
+                          appointmentStatus.inPerson ? 'hover:scale-105' : 'cursor-not-allowed'
+                        } ${
                           appointmentType === "personal"
                             ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg"
-                            : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50"
+                            : appointmentStatus.inPerson
+                            ? "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50"
+                            : "border-gray-200 bg-gray-100 text-gray-400"
                         }`}
                       >
                         <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
                           appointmentType === "personal" 
                             ? "bg-emerald-500 text-white" 
-                            : "bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                            : appointmentStatus.inPerson
+                            ? "bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                            : "bg-gray-300 text-gray-400"
                         }`}>
                           <MapPin className="w-8 h-8" />
                         </div>
@@ -827,10 +1086,15 @@ export default function DoctorProfile() {
                         <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                           appointmentType === "personal" 
                             ? "bg-emerald-100 text-emerald-700" 
-                            : "bg-gray-100 text-gray-600"
+                            : appointmentStatus.inPerson
+                            ? "bg-gray-100 text-gray-600"
+                            : "bg-gray-200 text-gray-400"
                         }`}>
                           ₹{doctor.consultationFee}
                         </div>
+                        {!appointmentStatus.inPerson && (
+                          <div className="mt-2 text-red-500 text-xs">Currently unavailable</div>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -841,7 +1105,7 @@ export default function DoctorProfile() {
                       <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                       <input
                         type="date"
-                        min={new Date().toISOString().split('T')[0]}
+                        min={getMinDate()}
                         value={selectedDate}
                         onChange={(e) => handleDateSelect(e.target.value)}
                         className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
@@ -849,7 +1113,7 @@ export default function DoctorProfile() {
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      Same-day appointments available
+                      {isTodayAvailable ? "Same-day appointments available" : "Check availability for today"}
                     </div>
                   </div>
                 </div>
@@ -869,9 +1133,16 @@ export default function DoctorProfile() {
                           month: 'long', 
                           day: 'numeric' 
                         })}</p>
+                        <p className="text-emerald-600 font-medium mt-1">
+                          {appointmentType === 'virtual' ? 'Virtual Consultation' : 'In-Person Visit'}
+                        </p>
                       </div>
                       <button
-                        onClick={() => setBookingStep(1)}
+                        onClick={() => {
+                          setBookingStep(1);
+                          setSelectedTime("");
+                          setAvailableSlots([]);
+                        }}
                         className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-2"
                       >
                         <Calendar className="h-4 w-4" />
@@ -893,7 +1164,7 @@ export default function DoctorProfile() {
                               selectedTime === slot.time
                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg transform scale-105"
                                 : slot.available
-                                ? "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 hover:transform hover:scale-105"
+                                ? "border-green-200 bg-green-50 text-green-700 hover:border-green-300 hover:bg-green-100 hover:transform hover:scale-105"
                                 : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                             }`}
                           >
@@ -901,12 +1172,15 @@ export default function DoctorProfile() {
                               selectedTime === slot.time
                                 ? "bg-emerald-500 text-white"
                                 : slot.available
-                                ? "bg-gray-100 text-gray-600 group-hover:bg-emerald-100 group-hover:text-emerald-600"
-                                : "bg-gray-200 text-gray-400"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-400 text-gray-200"
                             }`}>
                               <Clock className="w-4 h-4" />
                             </div>
                             <div className="font-semibold">{formatTime(slot.time)}</div>
+                            {!slot.available && (
+                              <div className="text-xs text-gray-500 mt-1">Booked</div>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -914,15 +1188,31 @@ export default function DoctorProfile() {
                       <div className="text-center py-12">
                         <Clock className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500 text-lg">No available slots for this date</p>
+                        <p className="text-gray-400 text-sm mb-4">Please select a different date or appointment type</p>
                         <button
-                          onClick={() => setBookingStep(1)}
-                          className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
+                          onClick={() => {
+                            setBookingStep(1);
+                            setSelectedTime("");
+                            setAvailableSlots([]);
+                          }}
+                          className="text-emerald-600 hover:text-emerald-700 font-medium"
                         >
                           Choose a different date
                         </button>
                       </div>
                     )}
                   </div>
+
+                  {selectedTime && (
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-4 border border-green-200">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="text-green-700 font-medium">
+                          Selected: {formatTime(selectedTime)} on {new Date(selectedDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Patient Notes */}
                   <div>
@@ -976,7 +1266,11 @@ export default function DoctorProfile() {
                   {/* Action Buttons */}
                   <div className="flex gap-4">
                     <button
-                      onClick={() => setBookingStep(1)}
+                      onClick={() => {
+                        setBookingStep(1);
+                        setSelectedTime("");
+                        setAvailableSlots([]);
+                      }}
                       className="flex-1 py-4 px-6 rounded-2xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
                     >
                       Back
