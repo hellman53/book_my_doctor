@@ -516,29 +516,7 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-emerald-100 ">
-        {/* bg-gradient-to-br from-purple-600 to-violet-700 */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-gray-700 mb-4 sm:mb-6">
-            Ready to Transform Your Healthcare Experience?
-          </h2>
-          <p className="text-base sm:text-lg md:text-xl text-emerald-600/90 mb-6 sm:mb-8 max-w-2xl sm:max-w-3xl mx-auto px-2">
-            Join over 100,000 patients who've discovered a better way to access quality healthcare
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-            <button className="w-full sm:w-auto bg-white text-emerald-600 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3">
-              <Rocket className="h-4 w-4 sm:h-5 sm:w-5" />
-              Get Started Now
-              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 sm:group-hover:translate-x-2 transition-transform" />
-            </button>
-            <button className="w-full sm:w-auto bg-transparent border-2 border-emerald-600 text-emerald-600 hover:bg-white/10 px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3">
-              <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
-              View All Doctors
-            </button>
-          </div>
-        </div>
-      </section>
+      
 
       {/* FAQ Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
@@ -584,7 +562,29 @@ export default function AboutUs() {
         </div>
       </section>
 
-      
+      {/* Final CTA */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-emerald-100 ">
+        {/* bg-gradient-to-br from-purple-600 to-violet-700 */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-gray-700 mb-4 sm:mb-6">
+            Ready to Transform Your Healthcare Experience?
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl text-emerald-600/90 mb-6 sm:mb-8 max-w-2xl sm:max-w-3xl mx-auto px-2">
+            Join over 100,000 patients who've discovered a better way to access quality healthcare
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+            <button className="w-full sm:w-auto bg-white text-emerald-600 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3">
+              <Rocket className="h-4 w-4 sm:h-5 sm:w-5" />
+              Get Started Now
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 sm:group-hover:translate-x-2 transition-transform" />
+            </button>
+            <button className="w-full sm:w-auto bg-transparent border-2 border-emerald-600 text-emerald-600 hover:bg-white/10 px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3">
+              <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+              View All Doctors
+            </button>
+          </div>
+        </div>
+      </section>
 
       <style jsx>{`
         @keyframes float {

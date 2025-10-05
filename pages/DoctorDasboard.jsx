@@ -2,8 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, writeBatch, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  writeBatch,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "@/app/firebase/config";
+import VideoCallWrapper from "@/components/VideoCallWrapper";
 import { toast } from "react-hot-toast";
 import {
   Calendar,
@@ -33,8 +47,10 @@ import {
   Play,
   Eye,
   Search,
-  Filter
+  Filter,
+  LogOut,
 } from "lucide-react";
+import VideoCall from "@/components/VideoCall";
 
 export default function DoctorDashboard() {
   const { user: currentUser, isLoaded } = useUser();
@@ -46,22 +62,23 @@ export default function DoctorDashboard() {
   const [cancelledRevenue, setCancelledRevenue] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [activeVideoCall, setActiveVideoCall] = useState(null);
 
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState({
     virtual: {
       enabled: true,
       slotDuration: 30,
-      availability: []
+      availability: [],
     },
     inPerson: {
       enabled: true,
       slotDuration: 30,
-      availability: []
+      availability: [],
     },
     general: {
-      appointments: []
-    }
+      appointments: [],
+    },
   });
 
   // Form states
@@ -73,14 +90,28 @@ export default function DoctorDashboard() {
     patientName: "",
     patientEmail: "",
     notes: "",
-    fee: 0
+    fee: 0,
   });
 
   const [cancellationRange, setCancellationRange] = useState({
     date: "",
     startTime: "",
-    endTime: ""
+    endTime: "",
   });
+  // Add this useEffect to check ZegoCloud configuration
+  useEffect(() => {
+    // Check if ZegoCloud is configured
+    const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
+    const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET;
+
+    if (!appID || !serverSecret) {
+      console.warn(
+        "ZegoCloud credentials not configured. Video calls will not work."
+      );
+    } else if (isNaN(parseInt(appID))) {
+      console.warn("Invalid ZegoCloud App ID format.");
+    }
+  }, []);
 
   useEffect(() => {
     if (currentUser && isLoaded) {
@@ -94,7 +125,7 @@ export default function DoctorDashboard() {
       if (doctorDoc.exists()) {
         const doctorData = { id: doctorDoc.id, ...doctorDoc.data() };
         setDoctor(doctorData);
-        
+
         // Load schedule settings
         if (doctorData.scheduleSettings) {
           setScheduleSettings(doctorData.scheduleSettings);
@@ -102,7 +133,7 @@ export default function DoctorDashboard() {
 
         // Fetch appointments
         await fetchAppointments(currentUser.id);
-        
+
         // Calculate revenue
         await calculateRevenue(currentUser.id);
       }
@@ -117,17 +148,14 @@ export default function DoctorDashboard() {
   const fetchAppointments = async (doctorId) => {
     try {
       const appointmentsRef = collection(db, "appointments");
-      const q = query(
-        appointmentsRef,
-        where("doctorId", "==", doctorId)
-      );
-      
+      const q = query(appointmentsRef, where("doctorId", "==", doctorId));
+
       const querySnapshot = await getDocs(q);
-      const appointmentsData = querySnapshot.docs.map(doc => ({
+      const appointmentsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
-      
+
       setAppointments(appointmentsData);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -142,12 +170,12 @@ export default function DoctorDashboard() {
         where("doctorId", "==", doctorId),
         where("status", "==", "confirmed")
       );
-      
+
       const querySnapshot = await getDocs(q);
       let totalRevenue = 0;
       let totalCancelled = 0;
 
-      querySnapshot.forEach(doc => {
+      querySnapshot.forEach((doc) => {
         const appointment = doc.data();
         if (appointment.consultationFee) {
           totalRevenue += appointment.consultationFee;
@@ -160,9 +188,9 @@ export default function DoctorDashboard() {
         where("doctorId", "==", doctorId),
         where("status", "==", "cancelled")
       );
-      
+
       const cancelledSnapshot = await getDocs(cancelledQ);
-      cancelledSnapshot.forEach(doc => {
+      cancelledSnapshot.forEach((doc) => {
         const appointment = doc.data();
         if (appointment.consultationFee) {
           totalCancelled += appointment.consultationFee;
@@ -180,7 +208,7 @@ export default function DoctorDashboard() {
     try {
       await updateDoc(doc(db, "doctors", currentUser.id), {
         scheduleSettings: scheduleSettings,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
       toast.success("Schedule settings saved successfully!");
     } catch (error) {
@@ -190,50 +218,51 @@ export default function DoctorDashboard() {
   };
 
   const toggleAppointmentType = (type) => {
-    setScheduleSettings(prev => ({
+    setScheduleSettings((prev) => ({
       ...prev,
       [type]: {
         ...prev[type],
-        enabled: !prev[type].enabled
-      }
+        enabled: !prev[type].enabled,
+      },
     }));
   };
 
   const updateSlotDuration = (type, duration) => {
-    setScheduleSettings(prev => ({
+    setScheduleSettings((prev) => ({
       ...prev,
       [type]: {
         ...prev[type],
-        slotDuration: duration
-      }
+        slotDuration: duration,
+      },
     }));
   };
 
   const addAvailability = (type, day, startTime, endTime) => {
-    setScheduleSettings(prev => ({
+    setScheduleSettings((prev) => ({
       ...prev,
       [type]: {
         ...prev[type],
-        availability: [
-          ...prev[type].availability,
-          { day, startTime, endTime }
-        ]
-      }
+        availability: [...prev[type].availability, { day, startTime, endTime }],
+      },
     }));
   };
 
   const removeAvailability = (type, index) => {
-    setScheduleSettings(prev => ({
+    setScheduleSettings((prev) => ({
       ...prev,
       [type]: {
         ...prev[type],
-        availability: prev[type].availability.filter((_, i) => i !== index)
-      }
+        availability: prev[type].availability.filter((_, i) => i !== index),
+      },
     }));
   };
 
   const addGeneralAppointment = async () => {
-    if (!newAppointment.date || !newAppointment.startTime || !newAppointment.endTime) {
+    if (
+      !newAppointment.date ||
+      !newAppointment.startTime ||
+      !newAppointment.endTime
+    ) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -253,14 +282,14 @@ export default function DoctorDashboard() {
         consultationFee: newAppointment.fee || doctor.consultationFee,
         isGeneral: true,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "appointments"), appointmentData);
-      
+
       toast.success("General appointment added successfully!");
       fetchAppointments(currentUser.id);
-      
+
       setNewAppointment({
         type: "general",
         date: "",
@@ -269,7 +298,7 @@ export default function DoctorDashboard() {
         patientName: "",
         patientEmail: "",
         notes: "",
-        fee: 0
+        fee: 0,
       });
     } catch (error) {
       console.error("Error adding general appointment:", error);
@@ -283,7 +312,7 @@ export default function DoctorDashboard() {
       await updateDoc(doc(db, "appointments", appointmentId), {
         status: "cancelled",
         cancelledAt: serverTimestamp(),
-        refundAmount: refundAmount
+        refundAmount: refundAmount,
       });
 
       toast.success("Appointment cancelled successfully!");
@@ -296,7 +325,11 @@ export default function DoctorDashboard() {
   };
 
   const cancelAppointmentsInRange = async () => {
-    if (!cancellationRange.date || !cancellationRange.startTime || !cancellationRange.endTime) {
+    if (
+      !cancellationRange.date ||
+      !cancellationRange.startTime ||
+      !cancellationRange.endTime
+    ) {
       toast.error("Please select date and time range");
       return;
     }
@@ -314,26 +347,29 @@ export default function DoctorDashboard() {
       const batch = writeBatch(db);
       let cancelledCount = 0;
 
-      querySnapshot.forEach(doc => {
+      querySnapshot.forEach((doc) => {
         const appointment = doc.data();
         const appointmentTime = appointment.appointmentTime;
-        
-        if (appointmentTime >= cancellationRange.startTime && appointmentTime <= cancellationRange.endTime) {
+
+        if (
+          appointmentTime >= cancellationRange.startTime &&
+          appointmentTime <= cancellationRange.endTime
+        ) {
           batch.update(doc.ref, {
             status: "cancelled",
             cancelledAt: serverTimestamp(),
-            refundAmount: appointment.consultationFee
+            refundAmount: appointment.consultationFee,
           });
           cancelledCount++;
         }
       });
 
       await batch.commit();
-      
+
       setCancellationRange({
         date: "",
         startTime: "",
-        endTime: ""
+        endTime: "",
       });
 
       toast.success(`Cancelled ${cancelledCount} appointments successfully!`);
@@ -345,25 +381,113 @@ export default function DoctorDashboard() {
     }
   };
 
-  const joinVideoCall = (appointment) => {
-    if (appointment.vonageSessionId) {
-      // Redirect to video call page with session ID
-      window.open(`/video-call/${appointment.vonageSessionId}`, '_blank');
-    } else {
-      toast.error("Video call not available for this appointment");
+  const joinVideoCall = async (appointment) => {
+    try {
+      // Check if it's a virtual appointment
+      if (appointment.appointmentType !== "virtual") {
+        toast.error("Video calls are only available for virtual appointments");
+        return;
+      }
+
+      // Check if appointment is confirmed
+      if (appointment.status !== "confirmed") {
+        toast.error("Can only join confirmed appointments");
+        return;
+      }
+
+      let zegoCloudData = appointment.zegoCloudData;
+
+      // Generate ZegoCloud data if not exists
+      if (!zegoCloudData) {
+        zegoCloudData = await generateZegoCloudRoom(appointment.id);
+
+        // Update appointment with ZegoCloud data
+        await updateDoc(doc(db, "appointments", appointment.id), {
+          zegoCloudData: zegoCloudData,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      // Validate ZegoCloud data
+      if (!zegoCloudData.roomID) {
+        throw new Error("Invalid room configuration");
+      }
+
+      // Start video call with generated data
+      setActiveVideoCall({
+        roomID: zegoCloudData.roomID,
+        appointmentId: appointment.id,
+        patientName: appointment.patientName,
+      });
+
+      toast.success("Joining video call...");
+    } catch (error) {
+      console.error("Error joining video call:", error);
+
+      if (error.message.includes("credentials")) {
+        toast.error(
+          "Video call service not configured. Please contact support."
+        );
+      } else if (error.message.includes("room configuration")) {
+        toast.error("Invalid room configuration. Please try again.");
+      } else {
+        toast.error("Error starting video call. Please try again.");
+      }
     }
+  };
+
+  const generateZegoCloudRoom = async (appointmentId) => {
+    try {
+      // Generate a unique room ID based on appointment ID
+      const roomID = `appointment_${appointmentId}_${Date.now()}`;
+
+      // Your ZegoCloud credentials
+      const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
+      const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET;
+
+      if (!appID || !serverSecret) {
+        throw new Error("ZegoCloud credentials not configured");
+      }
+
+      // Validate credentials
+      if (isNaN(parseInt(appID))) {
+        throw new Error("Invalid App ID format");
+      }
+
+      return {
+        roomID,
+        appID: parseInt(appID),
+        serverSecret,
+      };
+    } catch (error) {
+      console.error("Error generating ZegoCloud room:", error);
+      throw error;
+    }
+  };
+
+  const leaveVideoCall = () => {
+    setActiveVideoCall(null);
+    toast.success("Left the video call");
   };
 
   const viewAppointmentDetails = (appointment) => {
     // You can implement a modal or separate page for detailed view
-    toast.success(`Viewing details for ${appointment.patientName}'s appointment`);
+    toast.success(
+      `Viewing details for ${appointment.patientName}'s appointment`
+    );
   };
 
   // Filter appointments based on search and status
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.patientEmail?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || appointment.status === statusFilter;
+  const filteredAppointments = appointments.filter((appointment) => {
+    const matchesSearch =
+      appointment.patientName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      appointment.patientEmail
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || appointment.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -379,10 +503,26 @@ export default function DoctorDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Doctor Not Found</h2>
-          <p className="text-gray-600">Please complete your doctor profile first.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Doctor Not Found
+          </h2>
+          <p className="text-gray-600">
+            Please complete your doctor profile first.
+          </p>
         </div>
       </div>
+    );
+  }
+
+  // Render video call if active
+  if (activeVideoCall) {
+    return (
+      <VideoCallWrapper
+        roomID={activeVideoCall.roomID}
+        userID={currentUser.id}
+        userName={`Dr. ${doctor.fullName}`}
+        onLeave={leaveVideoCall}
+      />
     );
   }
 
@@ -396,12 +536,16 @@ export default function DoctorDashboard() {
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                 Welcome, Dr. {doctor.fullName}
               </h1>
-              <p className="text-gray-600 mt-1">Manage your appointments and schedule</p>
+              <p className="text-gray-600 mt-1">
+                Manage your appointments and schedule
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-xl lg:text-2xl font-bold text-emerald-600">₹{revenue}</p>
+                <p className="text-xl lg:text-2xl font-bold text-emerald-600">
+                  ₹{revenue}
+                </p>
               </div>
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 rounded-full flex items-center justify-center">
                 <User className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-600" />
@@ -421,7 +565,7 @@ export default function DoctorDashboard() {
                 { id: "appointments", name: "Appointments", icon: Calendar },
                 { id: "schedule", name: "Schedule", icon: Clock },
                 { id: "revenue", name: "Revenue", icon: DollarSign },
-                { id: "settings", name: "Settings", icon: Settings }
+                { id: "settings", name: "Settings", icon: Settings },
               ].map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -453,9 +597,14 @@ export default function DoctorDashboard() {
               <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Appointments</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Total Appointments
+                    </p>
                     <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                      {appointments.filter(a => a.status === "confirmed").length}
+                      {
+                        appointments.filter((a) => a.status === "confirmed")
+                          .length
+                      }
                     </p>
                   </div>
                   <div className="p-2 lg:p-3 bg-blue-100 rounded-lg">
@@ -467,9 +616,17 @@ export default function DoctorDashboard() {
               <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Virtual Appointments</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Virtual Appointments
+                    </p>
                     <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                      {appointments.filter(a => a.appointmentType === "virtual" && a.status === "confirmed").length}
+                      {
+                        appointments.filter(
+                          (a) =>
+                            a.appointmentType === "virtual" &&
+                            a.status === "confirmed"
+                        ).length
+                      }
                     </p>
                   </div>
                   <div className="p-2 lg:p-3 bg-green-100 rounded-lg">
@@ -481,9 +638,17 @@ export default function DoctorDashboard() {
               <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">In-Person Appointments</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      In-Person Appointments
+                    </p>
                     <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                      {appointments.filter(a => a.appointmentType === "personal" && a.status === "confirmed").length}
+                      {
+                        appointments.filter(
+                          (a) =>
+                            a.appointmentType === "personal" &&
+                            a.status === "confirmed"
+                        ).length
+                      }
                     </p>
                   </div>
                   <div className="p-2 lg:p-3 bg-purple-100 rounded-lg">
@@ -495,8 +660,12 @@ export default function DoctorDashboard() {
               <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Cancelled Revenue</p>
-                    <p className="text-xl lg:text-2xl font-bold text-red-600">-₹{cancelledRevenue}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Cancelled Revenue
+                    </p>
+                    <p className="text-xl lg:text-2xl font-bold text-red-600">
+                      -₹{cancelledRevenue}
+                    </p>
                   </div>
                   <div className="p-2 lg:p-3 bg-red-100 rounded-lg">
                     <AlertCircle className="h-5 w-5 lg:h-6 lg:w-6 text-red-600" />
@@ -508,28 +677,50 @@ export default function DoctorDashboard() {
             {/* Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold mb-4">Today's Appointments</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Today's Appointments
+                </h3>
                 <div className="space-y-3">
                   {appointments
-                    .filter(a => a.appointmentDate === new Date().toISOString().split('T')[0] && a.status === "confirmed")
+                    .filter(
+                      (a) =>
+                        a.appointmentDate ===
+                          new Date().toISOString().split("T")[0] &&
+                        a.status === "confirmed"
+                    )
                     .slice(0, 5)
-                    .map(appointment => (
-                      <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    .map((appointment) => (
+                      <div
+                        key={appointment.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
                         <div>
-                          <p className="font-medium text-sm">{appointment.patientName}</p>
-                          <p className="text-xs text-gray-600">{appointment.appointmentTime}</p>
+                          <p className="font-medium text-sm">
+                            {appointment.patientName}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {appointment.appointmentTime}
+                          </p>
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          appointment.appointmentType === 'virtual' 
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            appointment.appointmentType === "virtual"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
                           {appointment.appointmentType}
                         </span>
                       </div>
                     ))}
-                  {appointments.filter(a => a.appointmentDate === new Date().toISOString().split('T')[0]).length === 0 && (
-                    <p className="text-gray-500 text-center py-4">No appointments today</p>
+                  {appointments.filter(
+                    (a) =>
+                      a.appointmentDate ===
+                      new Date().toISOString().split("T")[0]
+                  ).length === 0 && (
+                    <p className="text-gray-500 text-center py-4">
+                      No appointments today
+                    </p>
                   )}
                 </div>
               </div>
@@ -539,15 +730,23 @@ export default function DoctorDashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Total Revenue</span>
-                    <span className="font-bold text-emerald-600">₹{revenue}</span>
+                    <span className="font-bold text-emerald-600">
+                      ₹{revenue}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Cancelled Revenue</span>
-                    <span className="font-bold text-red-600">-₹{cancelledRevenue}</span>
+                    <span className="font-bold text-red-600">
+                      -₹{cancelledRevenue}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center border-t pt-3">
-                    <span className="text-gray-600 font-semibold">Net Revenue</span>
-                    <span className="font-bold text-blue-600 text-lg">₹{revenue - cancelledRevenue}</span>
+                    <span className="text-gray-600 font-semibold">
+                      Net Revenue
+                    </span>
+                    <span className="font-bold text-blue-600 text-lg">
+                      ₹{revenue - cancelledRevenue}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -557,7 +756,7 @@ export default function DoctorDashboard() {
 
         {/* Appointments Tab */}
         {activeTab === "appointments" && (
-          <AppointmentsManager 
+          <AppointmentsManager
             appointments={filteredAppointments}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -590,7 +789,7 @@ export default function DoctorDashboard() {
 
         {/* Revenue Tab */}
         {activeTab === "revenue" && (
-          <RevenueManager 
+          <RevenueManager
             revenue={revenue}
             cancelledRevenue={cancelledRevenue}
             appointments={appointments}
@@ -598,32 +797,32 @@ export default function DoctorDashboard() {
         )}
 
         {/* Settings Tab */}
-        {activeTab === "settings" && (
-          <SettingsManager doctor={doctor} />
-        )}
+        {activeTab === "settings" && <SettingsManager doctor={doctor} />}
       </div>
     </div>
   );
 }
 
 // Appointments Manager Component
-function AppointmentsManager({ 
-  appointments, 
-  searchTerm, 
-  setSearchTerm, 
-  statusFilter, 
-  setStatusFilter, 
-  onCancel, 
-  onJoinVideoCall, 
+function AppointmentsManager({
+  appointments,
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+  onCancel,
+  onJoinVideoCall,
   onViewDetails,
   cancellationRange,
   setCancellationRange,
-  onBulkCancel 
+  onBulkCancel,
 }) {
   const [activeAppointmentType, setActiveAppointmentType] = useState("all");
 
-  const filteredByType = appointments.filter(appointment => 
-    activeAppointmentType === "all" || appointment.appointmentType === activeAppointmentType
+  const filteredByType = appointments.filter(
+    (appointment) =>
+      activeAppointmentType === "all" ||
+      appointment.appointmentType === activeAppointmentType
   );
 
   return (
@@ -642,7 +841,7 @@ function AppointmentsManager({
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
-            
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -670,7 +869,7 @@ function AppointmentsManager({
               { id: "all", name: "All Appointments", icon: Calendar },
               { id: "virtual", name: "Virtual", icon: Video },
               { id: "personal", name: "In-Person", icon: MapPin },
-              { id: "general", name: "General", icon: Users }
+              { id: "general", name: "General", icon: Users },
             ].map((type) => {
               const Icon = type.icon;
               return (
@@ -703,7 +902,12 @@ function AppointmentsManager({
             <input
               type="date"
               value={cancellationRange.date}
-              onChange={(e) => setCancellationRange(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setCancellationRange((prev) => ({
+                  ...prev,
+                  date: e.target.value,
+                }))
+              }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -714,7 +918,12 @@ function AppointmentsManager({
             <input
               type="time"
               value={cancellationRange.startTime}
-              onChange={(e) => setCancellationRange(prev => ({ ...prev, startTime: e.target.value }))}
+              onChange={(e) =>
+                setCancellationRange((prev) => ({
+                  ...prev,
+                  startTime: e.target.value,
+                }))
+              }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -725,7 +934,12 @@ function AppointmentsManager({
             <input
               type="time"
               value={cancellationRange.endTime}
-              onChange={(e) => setCancellationRange(prev => ({ ...prev, endTime: e.target.value }))}
+              onChange={(e) =>
+                setCancellationRange((prev) => ({
+                  ...prev,
+                  endTime: e.target.value,
+                }))
+              }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -744,8 +958,14 @@ function AppointmentsManager({
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="p-4 lg:p-6 border-b">
           <h3 className="text-lg font-semibold">
-            {activeAppointmentType === "all" ? "All" : activeAppointmentType.charAt(0).toUpperCase() + activeAppointmentType.slice(1)} Appointments
-            <span className="text-gray-500 text-sm font-normal ml-2">({filteredByType.length})</span>
+            {activeAppointmentType === "all"
+              ? "All"
+              : activeAppointmentType.charAt(0).toUpperCase() +
+                activeAppointmentType.slice(1)}{" "}
+            Appointments
+            <span className="text-gray-500 text-sm font-normal ml-2">
+              ({filteredByType.length})
+            </span>
           </h3>
         </div>
         <div className="divide-y">
@@ -781,7 +1001,7 @@ function ScheduleManager({
   setNewAppointment,
   onAddGeneralAppointment,
   onSaveSettings,
-  doctor
+  doctor,
 }) {
   return (
     <div className="space-y-6">
@@ -815,7 +1035,9 @@ function ScheduleManager({
               </label>
               <select
                 value={scheduleSettings.virtual.slotDuration}
-                onChange={(e) => updateSlotDuration("virtual", parseInt(e.target.value))}
+                onChange={(e) =>
+                  updateSlotDuration("virtual", parseInt(e.target.value))
+                }
                 className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value={15}>15 minutes</option>
@@ -865,7 +1087,9 @@ function ScheduleManager({
               </label>
               <select
                 value={scheduleSettings.inPerson.slotDuration}
-                onChange={(e) => updateSlotDuration("inPerson", parseInt(e.target.value))}
+                onChange={(e) =>
+                  updateSlotDuration("inPerson", parseInt(e.target.value))
+                }
                 className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value={15}>15 minutes</option>
@@ -901,7 +1125,12 @@ function ScheduleManager({
               <input
                 type="date"
                 value={newAppointment.date}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, date: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    date: e.target.value,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -912,7 +1141,12 @@ function ScheduleManager({
               <input
                 type="number"
                 value={newAppointment.fee}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, fee: parseInt(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    fee: parseInt(e.target.value) || 0,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder={doctor.consultationFee}
               />
@@ -927,7 +1161,12 @@ function ScheduleManager({
               <input
                 type="time"
                 value={newAppointment.startTime}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, startTime: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    startTime: e.target.value,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -938,7 +1177,12 @@ function ScheduleManager({
               <input
                 type="time"
                 value={newAppointment.endTime}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, endTime: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    endTime: e.target.value,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -952,7 +1196,12 @@ function ScheduleManager({
               <input
                 type="text"
                 value={newAppointment.patientName}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, patientName: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    patientName: e.target.value,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="General Appointment"
               />
@@ -964,7 +1213,12 @@ function ScheduleManager({
               <input
                 type="email"
                 value={newAppointment.patientEmail}
-                onChange={(e) => setNewAppointment(prev => ({ ...prev, patientEmail: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    patientEmail: e.target.value,
+                  }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -976,7 +1230,12 @@ function ScheduleManager({
             </label>
             <textarea
               value={newAppointment.notes}
-              onChange={(e) => setNewAppointment(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={(e) =>
+                setNewAppointment((prev) => ({
+                  ...prev,
+                  notes: e.target.value,
+                }))
+              }
               rows={3}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
@@ -1013,7 +1272,9 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-xl lg:text-3xl font-bold text-emerald-600">₹{revenue}</p>
+              <p className="text-xl lg:text-3xl font-bold text-emerald-600">
+                ₹{revenue}
+              </p>
             </div>
             <div className="p-2 lg:p-3 bg-emerald-100 rounded-lg">
               <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-600" />
@@ -1024,8 +1285,12 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
         <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Cancelled Revenue</p>
-              <p className="text-xl lg:text-3xl font-bold text-red-600">-₹{cancelledRevenue}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Cancelled Revenue
+              </p>
+              <p className="text-xl lg:text-3xl font-bold text-red-600">
+                -₹{cancelledRevenue}
+              </p>
             </div>
             <div className="p-2 lg:p-3 bg-red-100 rounded-lg">
               <AlertCircle className="h-5 w-5 lg:h-6 lg:w-6 text-red-600" />
@@ -1037,7 +1302,9 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Net Revenue</p>
-              <p className="text-xl lg:text-3xl font-bold text-blue-600">₹{revenue - cancelledRevenue}</p>
+              <p className="text-xl lg:text-3xl font-bold text-blue-600">
+                ₹{revenue - cancelledRevenue}
+              </p>
             </div>
             <div className="p-2 lg:p-3 bg-blue-100 rounded-lg">
               <Wallet className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
@@ -1050,26 +1317,34 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
         <h3 className="text-lg font-semibold mb-4">Revenue Breakdown</h3>
         <div className="space-y-4">
           {appointments
-            .filter(a => a.status === "confirmed")
+            .filter((a) => a.status === "confirmed")
             .map((appointment) => (
-              <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={appointment.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
                 <div>
                   <p className="font-medium">{appointment.patientName}</p>
                   <p className="text-sm text-gray-600">
-                    {appointment.appointmentDate} at {appointment.appointmentTime}
+                    {appointment.appointmentDate} at{" "}
+                    {appointment.appointmentTime}
                   </p>
-                  <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                    appointment.appointmentType === 'virtual' 
-                      ? 'bg-green-100 text-green-800'
-                      : appointment.appointmentType === 'personal'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
+                  <span
+                    className={`inline-block px-2 py-1 text-xs rounded-full ${
+                      appointment.appointmentType === "virtual"
+                        ? "bg-green-100 text-green-800"
+                        : appointment.appointmentType === "personal"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
                     {appointment.appointmentType}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-lg">₹{appointment.consultationFee}</p>
+                  <p className="font-bold text-lg">
+                    ₹{appointment.consultationFee}
+                  </p>
                   <p className="text-sm text-green-600">Completed</p>
                 </div>
               </div>
@@ -1121,7 +1396,7 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
   const [newSlot, setNewSlot] = useState({
     day: "Monday",
     startTime: "09:00",
-    endTime: "17:00"
+    endTime: "17:00",
   });
 
   const handleAdd = () => {
@@ -1132,41 +1407,63 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
   return (
     <div>
       <h4 className="text-md font-medium mb-4">Weekly Availability</h4>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Day
+          </label>
           <select
             value={newSlot.day}
-            onChange={(e) => setNewSlot(prev => ({ ...prev, day: e.target.value }))}
+            onChange={(e) =>
+              setNewSlot((prev) => ({ ...prev, day: e.target.value }))
+            }
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => (
-              <option key={day} value={day}>{day}</option>
+            {[
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ].map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
             ))}
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Start Time
+          </label>
           <input
             type="time"
             value={newSlot.startTime}
-            onChange={(e) => setNewSlot(prev => ({ ...prev, startTime: e.target.value }))}
+            onChange={(e) =>
+              setNewSlot((prev) => ({ ...prev, startTime: e.target.value }))
+            }
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            End Time
+          </label>
           <input
             type="time"
             value={newSlot.endTime}
-            onChange={(e) => setNewSlot(prev => ({ ...prev, endTime: e.target.value }))}
+            onChange={(e) =>
+              setNewSlot((prev) => ({ ...prev, endTime: e.target.value }))
+            }
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
-        
+
         <div className="flex items-end">
           <button
             onClick={handleAdd}
@@ -1179,11 +1476,16 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
 
       <div className="space-y-2">
         {availability.map((slot, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          >
             <div className="flex items-center gap-4">
               <span className="font-medium min-w-20">{slot.day}</span>
               <Clock className="h-4 w-4 text-gray-400" />
-              <span>{slot.startTime} - {slot.endTime}</span>
+              <span>
+                {slot.startTime} - {slot.endTime}
+              </span>
             </div>
             <button
               onClick={() => onRemove(type, index)}
@@ -1193,9 +1495,11 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
             </button>
           </div>
         ))}
-        
+
         {availability.length === 0 && (
-          <p className="text-gray-500 text-center py-4">No availability slots added</p>
+          <p className="text-gray-500 text-center py-4">
+            No availability slots added
+          </p>
         )}
       </div>
     </div>
@@ -1203,24 +1507,42 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
 }
 
 // Appointment Card Component
-function AppointmentCard({ appointment, onCancel, onJoinVideoCall, onViewDetails }) {
+function AppointmentCard({
+  appointment,
+  onCancel,
+  onJoinVideoCall,
+  onViewDetails,
+}) {
   const getAppointmentTypeColor = (type) => {
     switch (type) {
-      case 'virtual': return 'bg-green-100 text-green-800';
-      case 'personal': return 'bg-blue-100 text-blue-800';
-      case 'general': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "virtual":
+        return "bg-green-100 text-green-800";
+      case "personal":
+        return "bg-blue-100 text-blue-800";
+      case "general":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
+
+  const canJoinVideoCall =
+    appointment.status === "confirmed" &&
+    appointment.appointmentType === "virtual" &&
+    (appointment.zegoCloudData || appointment.vonageSessionId);
 
   return (
     <div className="p-4 lg:p-6">
@@ -1229,39 +1551,52 @@ function AppointmentCard({ appointment, onCancel, onJoinVideoCall, onViewDetails
           <div className="flex items-center gap-3 mb-2">
             <p className="font-semibold text-lg">{appointment.patientName}</p>
             <div className="flex gap-2">
-              <span className={`inline-block px-2 py-1 text-xs rounded-full ${getAppointmentTypeColor(appointment.appointmentType)}`}>
+              <span
+                className={`inline-block px-2 py-1 text-xs rounded-full ${getAppointmentTypeColor(
+                  appointment.appointmentType
+                )}`}
+              >
                 {appointment.appointmentType}
               </span>
-              <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
+              <span
+                className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(
+                  appointment.status
+                )}`}
+              >
                 {appointment.status}
               </span>
             </div>
           </div>
-          
-          <p className="text-sm text-gray-600 mb-1">{appointment.patientEmail}</p>
+
+          <p className="text-sm text-gray-600 mb-1">
+            {appointment.patientEmail}
+          </p>
           <p className="text-sm text-gray-600">
             {appointment.appointmentDate} at {appointment.appointmentTime}
           </p>
-          
+
           {appointment.patientNotes && (
-            <p className="text-sm text-gray-600 mt-2">Notes: {appointment.patientNotes}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              Notes: {appointment.patientNotes}
+            </p>
           )}
         </div>
-        
+
         <div className="flex flex-col items-end gap-2">
           <p className="font-bold text-lg">₹{appointment.consultationFee}</p>
-          
+
           <div className="flex gap-2">
-            {appointment.status === 'confirmed' && appointment.appointmentType === 'virtual' && (
+            {canJoinVideoCall && (
               <button
                 onClick={() => onJoinVideoCall(appointment)}
-                className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                className="flex items-center gap-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                title="Join video consultation"
               >
-                <Play className="h-3 w-3" />
+                <Video className="h-4 w-4" />
                 Join Call
               </button>
             )}
-            
+
             <button
               onClick={() => onViewDetails(appointment)}
               className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
@@ -1269,10 +1604,12 @@ function AppointmentCard({ appointment, onCancel, onJoinVideoCall, onViewDetails
               <Eye className="h-3 w-3" />
               View
             </button>
-            
-            {appointment.status === 'confirmed' && (
+
+            {appointment.status === "confirmed" && (
               <button
-                onClick={() => onCancel(appointment.id, appointment.consultationFee)}
+                onClick={() =>
+                  onCancel(appointment.id, appointment.consultationFee)
+                }
                 className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
               >
                 Cancel

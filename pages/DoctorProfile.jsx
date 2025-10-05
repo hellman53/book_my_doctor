@@ -270,33 +270,32 @@ export default function DoctorProfile() {
     setAvailableSlots([]);
   };
 
-  // Generate Vonage session for virtual appointment
-  const generateVonageSession = async () => {
+  // Generate ZegoCloud room data
+  const generateZegoCloudRoom = async (appointmentId) => {
     try {
-      // This would call your backend API to generate a Vonage session
-      const response = await fetch('/api/vonage/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          doctorId: doctorId,
-          patientId: currentUser.id,
-          appointmentType: 'virtual'
-        })
-      });
+      // Generate a unique room ID based on appointment ID
+      const roomID = `appointment_${appointmentId}`;
+      
+      // Your ZegoCloud credentials (store these in environment variables)
+      const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
+      const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET;
+      
+      if (!appID || !serverSecret) {
+        throw new Error('ZegoCloud credentials not configured');
+      }
 
-      if (!response.ok) throw new Error('Failed to generate session');
-
-      const data = await response.json();
-      return data.sessionId;
+      return {
+        roomID,
+        appID,
+        serverSecret
+      };
     } catch (error) {
-      console.error('Error generating Vonage session:', error);
+      console.error('Error generating ZegoCloud room:', error);
       throw error;
     }
   };
 
-  // Book appointment
+  // Update the bookAppointment function
   const bookAppointment = async () => {
     if (!currentUser) {
       toast.error("Please sign in to book an appointment");
@@ -311,21 +310,13 @@ export default function DoctorProfile() {
 
     // Final check if appointment type is enabled
     if (!isAppointmentTypeEnabled(appointmentType)) {
-      toast.error(`${
-        appointmentType === "virtual" ? "Virtual" : "In-person"
-      } appointments are currently not available for this doctor`);
+      toast.error(`${appointmentType === "virtual" ? "Virtual" : "In-person"} appointments are currently not available for this doctor`);
       return;
     }
 
     try {
-      let vonageSessionId = null;
-      
-      if (appointmentType === "virtual") {
-        vonageSessionId = await generateVonageSession();
-      }
-
-      // Create appointment data
-      const appointmentData = {
+      let appointmentRef;
+      let appointmentData = {
         doctorId: doctorId,
         doctorName: doctor.fullName,
         doctorSpecialization: doctor.specialization,
@@ -337,15 +328,32 @@ export default function DoctorProfile() {
         appointmentType: appointmentType,
         status: "confirmed",
         patientNotes: patientNotes,
-        vonageSessionId: vonageSessionId,
         consultationFee: doctor.consultationFee,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
-      // Store in appointments collection
-      const appointmentRef = await addDoc(collection(db, "appointments"), appointmentData);
-      
+      if (appointmentType === "virtual") {
+        // Generate ZegoCloud room data first
+        const zegoCloudData = await generateZegoCloudRoom(`temp_${Date.now()}`);
+        appointmentData.zegoCloudData = zegoCloudData;
+        
+        // Create appointment in appointments collection
+        appointmentRef = await addDoc(collection(db, "appointments"), appointmentData);
+        
+        // Update the appointment with the correct room ID using the actual appointment ID
+        const finalZegoCloudData = await generateZegoCloudRoom(appointmentRef.id);
+        await updateDoc(appointmentRef, {
+          zegoCloudData: finalZegoCloudData
+        });
+
+        // Update the local appointment data with the final ZegoCloud data
+        appointmentData.zegoCloudData = finalZegoCloudData;
+      } else {
+        // For in-person appointments, create without video data
+        appointmentRef = await addDoc(collection(db, "appointments"), appointmentData);
+      }
+
       // Update doctor's appointments subcollection
       const doctorAppointmentsRef = collection(db, "doctors", doctorId, "appointments");
       await addDoc(doctorAppointmentsRef, {
@@ -366,13 +374,11 @@ export default function DoctorProfile() {
       const dailyAppointmentDoc = await getDoc(dailyAppointmentRef);
 
       if (dailyAppointmentDoc.exists()) {
-        // Update existing daily appointment
         await updateDoc(dailyAppointmentRef, {
           appointments: [...dailyAppointmentDoc.data().appointments, appointmentRef.id],
           updatedAt: serverTimestamp()
         });
       } else {
-        // Create new daily appointment document
         await setDoc(dailyAppointmentRef, {
           date: selectedDate,
           appointments: [appointmentRef.id],

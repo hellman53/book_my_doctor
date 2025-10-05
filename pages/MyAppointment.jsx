@@ -31,6 +31,7 @@ import {
   XCircle,
   AlertCircle
 } from "lucide-react";
+import VideoCall from "@/components/VideoCall";
 
 export default function MyAppointments() {
   const { user: currentUser, isLoaded } = useUser();
@@ -41,6 +42,7 @@ export default function MyAppointments() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [activeVideoCall, setActiveVideoCall] = useState(null);
 
   useEffect(() => {
     if (currentUser && isLoaded) {
@@ -79,12 +81,21 @@ export default function MyAppointments() {
   };
 
   const joinVideoCall = (appointment) => {
-    if (appointment.vonageSessionId) {
-      // Redirect to video call page with session ID
-      window.open(`/video-call/${appointment.vonageSessionId}`, '_blank');
+    if (appointment.zegoCloudData?.roomID || appointment.vonageSessionId) {
+      const roomID = appointment.zegoCloudData?.roomID || appointment.vonageSessionId;
+      setActiveVideoCall({
+        roomID,
+        appointmentId: appointment.id,
+        doctorName: appointment.doctorName
+      });
     } else {
       toast.error("Video call not available for this appointment");
     }
+  };
+
+  const leaveVideoCall = () => {
+    setActiveVideoCall(null);
+    toast.success("Left the video call");
   };
 
   const cancelAppointment = async (appointmentId) => {
@@ -105,6 +116,23 @@ export default function MyAppointments() {
   const viewAppointmentDetails = (appointment) => {
     setSelectedAppointment(appointment);
     setShowDetailsModal(true);
+  };
+
+  // Check if join button should be shown for an appointment
+  const shouldShowJoinButton = (appointment) => {
+    if (appointment.status !== 'confirmed' || appointment.appointmentType !== 'virtual') {
+      return false;
+    }
+
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = new Date();
+    
+    // Calculate time differences in minutes
+    const timeUntilAppointment = (appointmentDateTime - now) / (1000 * 60);
+    const timeSinceAppointment = (now - appointmentDateTime) / (1000 * 60);
+
+    // Show button 15 minutes before appointment until 1 hour after appointment start
+    return timeUntilAppointment <= 15 && timeSinceAppointment <= 60;
   };
 
   // Filter appointments based on active tab, search, and status
@@ -148,6 +176,18 @@ export default function MyAppointments() {
       default: return <Stethoscope className="h-5 w-5 text-purple-600" />;
     }
   };
+
+  // Render Video Call if active
+  if (activeVideoCall) {
+    return (
+      <VideoCall
+        roomID={activeVideoCall.roomID}
+        userID={currentUser.id}
+        userName={`${currentUser.firstName} ${currentUser.lastName}`}
+        onLeave={leaveVideoCall}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -274,6 +314,7 @@ export default function MyAppointments() {
                 getStatusColor={getStatusColor}
                 getStatusIcon={getStatusIcon}
                 getAppointmentTypeIcon={getAppointmentTypeIcon}
+                shouldShowJoinButton={shouldShowJoinButton}
               />
             ))}
           </div>
@@ -310,6 +351,7 @@ export default function MyAppointments() {
           getStatusColor={getStatusColor}
           getStatusIcon={getStatusIcon}
           getAppointmentTypeIcon={getAppointmentTypeIcon}
+          shouldShowJoinButton={shouldShowJoinButton}
         />
       )}
     </div>
@@ -324,7 +366,8 @@ function AppointmentCard({
   onViewDetails,
   getStatusColor,
   getStatusIcon,
-  getAppointmentTypeIcon 
+  getAppointmentTypeIcon,
+  shouldShowJoinButton 
 }) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -345,6 +388,23 @@ function AppointmentCard({
 
   const isUpcoming = appointment.status === 'confirmed' && 
     new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`) > new Date();
+
+  const showJoinButton = shouldShowJoinButton(appointment);
+
+  // Calculate time until appointment
+  const getTimeUntilAppointment = () => {
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = new Date();
+    const timeDiff = appointmentDateTime - now;
+    
+    if (timeDiff <= 0) return "Meeting in progress";
+    
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) return `Starts in ${hours}h ${minutes}m`;
+    return `Starts in ${minutes}m`;
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -375,6 +435,16 @@ function AppointmentCard({
             <span>{formatTime(appointment.appointmentTime)}</span>
           </div>
         </div>
+
+        {/* Countdown for upcoming appointments */}
+        {isUpcoming && (
+          <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2 text-blue-700 text-sm">
+              <Clock className="h-3 w-3" />
+              <span className="font-medium">{getTimeUntilAppointment()}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Body */}
@@ -423,17 +493,17 @@ function AppointmentCard({
             View Details
           </button>
           
-          {isUpcoming && appointment.appointmentType === 'virtual' && (
+          {showJoinButton && (
             <button
               onClick={() => onJoinVideoCall(appointment)}
-              className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-colors animate-pulse"
             >
-              <Play className="h-4 w-4" />
+              <Video className="h-4 w-4" />
               Join Call
             </button>
           )}
           
-          {isUpcoming && (
+          {isUpcoming && !showJoinButton && (
             <button
               onClick={() => onCancel(appointment.id)}
               className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition-colors"
@@ -456,7 +526,8 @@ function AppointmentDetailsModal({
   onCancel,
   getStatusColor,
   getStatusIcon,
-  getAppointmentTypeIcon 
+  getAppointmentTypeIcon,
+  shouldShowJoinButton 
 }) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -477,6 +548,30 @@ function AppointmentDetailsModal({
 
   const isUpcoming = appointment.status === 'confirmed' && 
     new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`) > new Date();
+
+  const showJoinButton = shouldShowJoinButton(appointment);
+
+  // Calculate time until appointment
+  const getTimeUntilAppointment = () => {
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = new Date();
+    const timeDiff = appointmentDateTime - now;
+    
+    if (timeDiff <= 0) {
+      const timeSinceStart = Math.abs(timeDiff) / (1000 * 60);
+      if (timeSinceStart <= 60) {
+        return "Meeting in progress - You can join now";
+      } else {
+        return "Meeting time has passed";
+      }
+    }
+    
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) return `Starts in ${hours}h ${minutes}m`;
+    return `Starts in ${minutes}m`;
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -510,6 +605,19 @@ function AppointmentDetailsModal({
               </div>
             </div>
           </div>
+
+          {/* Time Status */}
+          {isUpcoming && (
+            <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <div>
+                  <h4 className="font-semibold text-blue-900">Appointment Timing</h4>
+                  <p className="text-blue-700 text-sm">{getTimeUntilAppointment()}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Appointment Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -570,6 +678,9 @@ function AppointmentDetailsModal({
                 <li>• Join the call 5 minutes before the scheduled time</li>
                 <li>• Use headphones for better audio quality</li>
                 <li>• Find a quiet, well-lit space for the consultation</li>
+                {showJoinButton && (
+                  <li className="font-semibold text-green-900">• Join button is now available! Click to start your consultation</li>
+                )}
               </ul>
             </div>
           )}
@@ -597,17 +708,20 @@ function AppointmentDetailsModal({
               Close
             </button>
             
-            {isUpcoming && appointment.appointmentType === 'virtual' && (
+            {showJoinButton && (
               <button
-                onClick={() => onJoinVideoCall(appointment)}
-                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-2xl font-semibold hover:bg-green-700 transition-colors"
+                onClick={() => {
+                  onJoinVideoCall(appointment);
+                  onClose();
+                }}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-2xl font-semibold hover:bg-green-700 transition-colors animate-pulse"
               >
-                <Play className="h-5 w-5" />
+                <Video className="h-5 w-5" />
                 Join Video Call
               </button>
             )}
             
-            {isUpcoming && (
+            {isUpcoming && !showJoinButton && (
               <button
                 onClick={() => {
                   onCancel(appointment.id);
