@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // import { db } from "../app/firebase/config";
 // import { collection, addDoc } from "firebase/firestore";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
@@ -164,18 +165,6 @@ const Hero = () => {
     </section>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Fixed icon components with unique names
@@ -423,30 +412,6 @@ const Services = () => {
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
 const featuredDoctors = [
   {
     name: "Dr. Priya Sharma",
@@ -688,13 +653,6 @@ const FeaturedDoctors = () => {
   );
 };
 
-
-
-
-
-
-
-
 const PricingSection = () => {
   const creditBenefits = [
     "1 Credit = 1 Consultation with any specialist doctor",
@@ -905,12 +863,6 @@ const PricingSection = () => {
 };
 
 
-
-
-
-
-
-
 const Feature = () => {
   return (
     <section className="py-16 bg-white">
@@ -1088,7 +1040,6 @@ const Feature = () => {
     </section>
   );
 };
-
 
 
 /* moving testimonial section api */
@@ -1457,9 +1408,6 @@ Angle270</p>
 
 /* services in easy to understand*/ 
 
-
-
-
 const ConsultationSection = () => {
   const consultations = [
     {
@@ -1811,8 +1759,6 @@ const ConsultationSection = () => {
 
 /* mission vision section */
 
-
-
 const DoctorAppointmentCards = () => {
   const [currentIndex, setCurrentIndex] = useState(1); // start from middle card
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -2044,12 +1990,6 @@ const DoctorAppointmentCards = () => {
   );
 };
 
-
-
-
-
-
-
 const HomePage = () => {
   // const [name, setName] = useState("");
   // const [email, setEmail] = useState("");
@@ -2078,6 +2018,8 @@ const HomePage = () => {
     <div className="bg-white w-[100%] ">
       {/* Hero Section */}
       <Hero />
+      
+       
 
       {/* Services Section */}
       
