@@ -905,148 +905,164 @@ const PricingSection = () => {
 
 const MedicineStoreSection = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-16 md:py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 md:mb-16">
           <div className="inline-flex items-center mb-4">
             <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
-            <span className="text-base font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+            <span className="text-sm md:text-base font-semibold px-3 py-1 md:px-4 md:py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
               🚀 Coming Soon
             </span>
           </div>
-          <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-600 bg-clip-text text-transparent">
             Medicine Store
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Your complete healthcare ecosystem - From doctor consultations to medicine delivery at your doorstep
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 gap-12 items-center">
           {/* Content Section */}
           <div className="space-y-8">
-            {/* Coming Soon Badge */}
-            <div className="inline-block">
-              <div className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl shadow-lg">
-                <span className="text-4xl md:text-6xl font-bold">Coming Soon</span>
+            {/* Centered Coming Soon Badge with Shine Effect */}
+            <div className="flex justify-center">
+              <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-lg text-center overflow-hidden">
+                {/* Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 -translate-x-full animate-shine" />
+                <span className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold relative z-10">Coming Soon</span>
               </div>
             </div>
 
             {/* Features List */}
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-gray-900">
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
                 Your <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">One-Stop</span> Healthcare Solution
               </h3>
               
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                    <span className="text-white text-lg">💊</span>
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-base sm:text-lg">💊</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Wide Medicine Range</h4>
-                    <p className="text-gray-600">Prescription & over-the-counter medicines from trusted brands</p>
+                    <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Wide Medicine Range</h4>
+                    <p className="text-gray-600 text-xs sm:text-sm">Prescription & over-the-counter medicines from trusted brands</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                    <span className="text-white text-lg">🚚</span>
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-base sm:text-lg">🚚</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Fast Delivery</h4>
-                    <p className="text-gray-600">Same-day delivery with real-time tracking</p>
+                    <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Fast Delivery</h4>
+                    <p className="text-gray-600 text-xs sm:text-sm">Same-day delivery with real-time tracking</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                    <span className="text-white text-lg">🎯</span>
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-base sm:text-lg">🎯</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Auto-Prescription Sync</h4>
-                    <p className="text-gray-600">Automatic prescription import from your doctor consultations</p>
+                    <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Auto-Prescription Sync</h4>
+                    <p className="text-gray-600 text-xs sm:text-sm">Automatic prescription import from your doctor consultations</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                    <span className="text-white text-lg">💰</span>
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-base sm:text-lg">💰</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Discounts & Offers</h4>
-                    <p className="text-gray-600">Exclusive discounts for BookMyDoc users</p>
+                    <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Discounts & Offers</h4>
+                    <p className="text-gray-600 text-xs sm:text-sm">Exclusive discounts for BookMyDoc users</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* CTA Section */}
-            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-6 border border-emerald-200">
-              <h4 className="font-semibold text-gray-900 mb-3 text-lg">Be the first to know!</h4>
+            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-4 sm:p-6 border border-emerald-200 max-w-2xl mx-auto">
+              <h4 className="font-semibold text-gray-900 mb-3 text-lg text-center">Be the first to know!</h4>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm sm:text-base"
                 />
-                <button className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                <button className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
                   Notify Me
                 </button>
               </div>
             </div>
           </div>
-
-          {/* Image Section */}
-          <div className="relative">
-            <div className="relative z-10">
-              <img
-                src="https://images.unsplash.com/photo-1585435557343-3b092031d5ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                alt="Modern Pharmacy Medicine Store"
-                className="rounded-2xl shadow-2xl w-full h-auto"
-              />
-            </div>
-            
-            {/* Floating Elements */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-emerald-100 rounded-full opacity-80 animate-pulse"></div>
-            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-100 rounded-full opacity-80 animate-pulse"></div>
-            
-            {/* Floating Badge */}
-            <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-emerald-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-xl">⚡</span>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800">Fast</div>
-                  <div className="text-sm text-gray-600">Medicine Delivery</div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
-          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
-            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">10K+</div>
-            <div className="text-gray-600">Medicines</div>
+        {/* Stats Section with Gradient Border */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-12 md:mt-16">
+          <div className="text-center p-4 sm:p-6 rounded-2xl bg-white/80 backdrop-blur-sm relative">
+            {/* Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full bg-gradient-to-br from-white via-emerald-50 to-blue-50 rounded-2xl"></div>
+            </div>
+            <div className="relative z-10">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">10K+</div>
+              <div className="text-gray-600 text-sm sm:text-base">Medicines</div>
+            </div>
           </div>
-          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
-            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">24/7</div>
-            <div className="text-gray-600">Available</div>
+
+          <div className="text-center p-4 sm:p-6 rounded-2xl bg-white/80 backdrop-blur-sm relative">
+            {/* Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full bg-gradient-to-br from-white via-emerald-50 to-blue-50 rounded-2xl"></div>
+            </div>
+            <div className="relative z-10">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">24/7</div>
+              <div className="text-gray-600 text-sm sm:text-base">Available</div>
+            </div>
           </div>
-          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
-            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">100+</div>
-            <div className="text-gray-600">Cities</div>
+
+          <div className="text-center p-4 sm:p-6 rounded-2xl bg-white/80 backdrop-blur-sm relative">
+            {/* Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full bg-gradient-to-br from-white via-emerald-50 to-blue-50 rounded-2xl"></div>
+            </div>
+            <div className="relative z-10">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">100+</div>
+              <div className="text-gray-600 text-sm sm:text-base">Cities</div>
+            </div>
           </div>
-          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
-            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">30min</div>
-            <div className="text-gray-600">Delivery Promise</div>
+
+          <div className="text-center p-4 sm:p-6 rounded-2xl bg-white/80 backdrop-blur-sm relative">
+            {/* Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full bg-gradient-to-br from-white via-emerald-50 to-blue-50 rounded-2xl"></div>
+            </div>
+            <div className="relative z-10">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">30min</div>
+              <div className="text-gray-600 text-sm sm:text-base">Delivery Promise</div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Add custom animation for shine effect */}
+      <style jsx>{`
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%) skewX(-12deg);
+          }
+          100% {
+            transform: translateX(200%) skewX(-12deg);
+          }
+        }
+        .animate-shine {
+          animation: shine 2s infinite;
+        }
+      `}</style>
     </section>
   );
 };
