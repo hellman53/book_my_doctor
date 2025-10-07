@@ -653,6 +653,12 @@ const FeaturedDoctors = () => {
   );
 };
 
+
+
+
+
+
+
 const PricingSection = () => {
   const creditBenefits = [
     "1 Credit = 1 Consultation with any specialist doctor",
@@ -660,7 +666,7 @@ const PricingSection = () => {
     "Transfer credits to family members anytime",
     "Get 24/7 support for all your healthcare needs",
     "Free follow-up consultations for 7 days",
-    "Access to premium health records storage"
+    "Access to premium health records storage",
   ];
 
   const pricingPlans = [
@@ -676,8 +682,8 @@ const PricingSection = () => {
         "24/7 Chat Support",
         "Basic Health Records",
         "7 Days Follow-up",
-        "Email Support"
-      ]
+        "Email Support",
+      ],
     },
     {
       name: "Family Pack",
@@ -692,8 +698,8 @@ const PricingSection = () => {
         "Family Sharing Enabled",
         "30 Days Follow-up",
         "Health Records for 4",
-        "Dedicated Care Manager"
-      ]
+        "Dedicated Care Manager",
+      ],
     },
     {
       name: "Premium Care",
@@ -709,15 +715,15 @@ const PricingSection = () => {
         "60 Days Follow-up",
         "Advanced Health Analytics",
         "Personal Health Coach",
-        "Annual Health Checkup"
-      ]
-    }
+        "Annual Health Checkup",
+      ],
+    },
   ];
 
   return (
     <section className="py-16 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header Section - Larger sizes */}
+        {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center mb-4">
             <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
@@ -725,103 +731,118 @@ const PricingSection = () => {
               💰 Affordable Healthcare
             </span>
           </div>
-          <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
             Consultation Packages
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Choose the perfect consultation package that fits your healthcare needs
           </p>
         </div>
 
-        {/* Pricing Cards - Made more compact */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {pricingPlans.map((plan, index) => (
-            <div
-              key={index}
-              className={`group relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 transition-all duration-500 hover:-translate-y-1 ${
-                plan.popular 
-                  ? 'border-emerald-300 shadow-xl scale-[1.02]' 
-                  : 'border-gray-200 hover:border-emerald-200 shadow-lg hover:shadow-xl'
-              }`}
-            >
-              {/* Popular Badge - Made smaller */}
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="p-6">
-                {/* Plan Header - Compact */}
-                <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">
-                    {plan.name}
-                  </h3>
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
-                      <span className="text-white font-bold text-xs">👑</span>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-600">
-                      {plan.credits} Credit{plan.credits > 1 ? 's' : ''}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Pricing - Compact */}
-                <div className="text-center mb-4">
-                  <div className="flex items-center justify-center space-x-2 mb-1">
-                    <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                      {plan.price}
-                    </span>
-                    <span className="text-sm text-gray-500 line-through">
-                      {plan.originalPrice}
-                    </span>
-                  </div>
-                  <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
-                    {plan.savings}
-                  </span>
-                </div>
-
-                {/* Features List - More compact */}
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <div className="flex-shrink-0 w-4 h-4 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center mr-2 mt-0.5">
-                        <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-sm text-gray-700 leading-tight">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA Button - Smaller */}
-                <button className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 text-sm ${
+        {/* ✅ Fixed Responsive Scrollable Pricing Cards */}
+        <div className="pb-6">
+          <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible px-4 md:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
+            {pricingPlans.map((plan, index) => (
+              <div
+                key={index}
+                className={`min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center group relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 transition-all duration-500 hover:-translate-y-1 ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 shadow-md hover:shadow-lg'
-                    : 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 shadow-sm hover:shadow-md'
-                } active:scale-95`}>
-                  Get Started
-                </button>
-              </div>
+                    ? "border-emerald-300 shadow-xl scale-[1.02]"
+                    : "border-gray-200 hover:border-emerald-200 shadow-lg hover:shadow-xl"
+                }`}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
 
-              {/* Hover Gradient Overlay */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/5 via-blue-500/5 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            </div>
-          ))}
+                <div className="p-6">
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {plan.name}
+                    </h3>
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                        <span className="text-white font-bold text-xs">👑</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-600">
+                        {plan.credits} Credit{plan.credits > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="text-center mb-4">
+                    <div className="flex items-center justify-center space-x-2 mb-1">
+                      <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-gray-500 line-through">
+                        {plan.originalPrice}
+                      </span>
+                    </div>
+                    <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                      {plan.savings}
+                    </span>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-2 mb-6">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start">
+                        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center mr-2 mt-0.5">
+                          <svg
+                            className="w-2 h-2 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="3"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-sm text-gray-700 leading-tight">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 text-sm ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 shadow-md hover:shadow-lg"
+                        : "bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 shadow-sm hover:shadow-md"
+                    } active:scale-95`}
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Credit System Explanation - More compact */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-emerald-100 shadow-lg p-6">
+        {/* Credit System */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-emerald-100 shadow-lg p-6 mt-10">
           <div className="text-center mb-6">
             <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center">
               <span className="text-xl">💎</span>
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
-              How Our <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Credit System</span> Works
+              How Our{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                Credit System
+              </span>{" "}
+              Works
             </h3>
             <p className="text-gray-600 max-w-xl mx-auto text-sm">
               Simple, flexible, and designed for your healthcare convenience
@@ -839,20 +860,28 @@ const PricingSection = () => {
                     {index + 1}
                   </span>
                 </div>
-                <p 
-                  className="text-sm text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: benefit }}
-                />
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {benefit}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Bottom CTA - Smaller */}
           <div className="text-center mt-6 pt-6 border-t border-emerald-100">
             <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 text-sm">
               <span>Start Your Health Journey</span>
-              <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <svg
+                className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
               </svg>
             </button>
           </div>
@@ -862,6 +891,165 @@ const PricingSection = () => {
   );
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+const MedicineStoreSection = () => {
+  return (
+    <section className="py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-base font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              🚀 Coming Soon
+            </span>
+          </div>
+          <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-600 bg-clip-text text-transparent">
+            Medicine Store
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Your complete healthcare ecosystem - From doctor consultations to medicine delivery at your doorstep
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Content Section */}
+          <div className="space-y-8">
+            {/* Coming Soon Badge */}
+            <div className="inline-block">
+              <div className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl shadow-lg">
+                <span className="text-4xl md:text-6xl font-bold">Coming Soon</span>
+              </div>
+            </div>
+
+            {/* Features List */}
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold text-gray-900">
+                Your <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">One-Stop</span> Healthcare Solution
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">💊</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Wide Medicine Range</h4>
+                    <p className="text-gray-600">Prescription & over-the-counter medicines from trusted brands</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">🚚</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Fast Delivery</h4>
+                    <p className="text-gray-600">Same-day delivery with real-time tracking</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">🎯</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Auto-Prescription Sync</h4>
+                    <p className="text-gray-600">Automatic prescription import from your doctor consultations</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">💰</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Discounts & Offers</h4>
+                    <p className="text-gray-600">Exclusive discounts for BookMyDoc users</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-6 border border-emerald-200">
+              <h4 className="font-semibold text-gray-900 mb-3 text-lg">Be the first to know!</h4>
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                <button className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                  Notify Me
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Image Section */}
+          <div className="relative">
+            <div className="relative z-10">
+              <img
+                src="https://images.unsplash.com/photo-1585435557343-3b092031d5ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                alt="Modern Pharmacy Medicine Store"
+                className="rounded-2xl shadow-2xl w-full h-auto"
+              />
+            </div>
+            
+            {/* Floating Elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-emerald-100 rounded-full opacity-80 animate-pulse"></div>
+            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-100 rounded-full opacity-80 animate-pulse"></div>
+            
+            {/* Floating Badge */}
+            <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-emerald-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-xl">⚡</span>
+                </div>
+                <div>
+                  <div className="font-bold text-gray-800">Fast</div>
+                  <div className="text-sm text-gray-600">Medicine Delivery</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">10K+</div>
+            <div className="text-gray-600">Medicines</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">24/7</div>
+            <div className="text-gray-600">Available</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">100+</div>
+            <div className="text-gray-600">Cities</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">30min</div>
+            <div className="text-gray-600">Delivery Promise</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const Feature = () => {
   return (
@@ -1757,6 +1945,9 @@ const ConsultationSection = () => {
   );
 };
 
+
+
+
 /* mission vision section */
 
 const DoctorAppointmentCards = () => {
@@ -2040,7 +2231,7 @@ const HomePage = () => {
       {/* services in easy to understand */}
       <ConsultationSection/>
       
-    
+    <MedicineStoreSection/>
 
       
       
