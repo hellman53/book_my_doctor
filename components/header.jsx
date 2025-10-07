@@ -29,13 +29,31 @@ import {
   Star
 } from "lucide-react";
 
+import { usePathname } from 'next/navigation';
+
 const Header = () => {
   const { user, isSignedIn, isLoaded } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const [syncStatus, setSyncStatus] = useState("idle"); // idle, syncing, synced, error
   const [userData, setUserData] = useState();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Helper function to check if a link is active
+  const isActiveLink = (path) => {
+    if (path === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(path);
+  };
+
+  // Active link styles
+  const activeLinkClass = "text-emerald-600";
+  const inactiveLinkClass = "text-gray-700 hover:text-emerald-600";
+  const activeIconClass = "text-emerald-600";
+  const inactiveIconClass = "text-gray-700 group-hover:text-emerald-600";
+
   useEffect(() => {
     const syncUserData = async () => {
       if (!isLoaded || !isSignedIn || !user) {
@@ -47,8 +65,6 @@ const Header = () => {
       const existingUser = await getUserFromFirestore(user.id);
 
       if (existingUser) {
-        
-
         // Transform Clerk user data to our format
         const newUser = {
           id: existingUser.id,
@@ -64,9 +80,6 @@ const Header = () => {
     };
 
     syncUserData();
-
-    // const userData = await getUserFromFirestore(user.id)
-    // console.log(userData)
   }, [user, isSignedIn, isLoaded]);
 
   const handleSearch = (e) => {
@@ -95,20 +108,51 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-8">
-          <Link href="/" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors">
-            <Home className="h-4 w-4" />
+          <Link 
+            href="/" 
+            className={`flex items-center space-x-2 transition-colors group ${
+              isActiveLink('/') ? activeLinkClass : inactiveLinkClass
+            }`}
+          >
+            <Home className={`h-4 w-4 transition-colors ${
+              isActiveLink('/') ? activeIconClass : inactiveIconClass
+            }`} />
             <span>Home</span>
           </Link>
-          <Link href="/doctors" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors">
-            <Users className="h-4 w-4" />
+          
+          <Link 
+            href="/doctors" 
+            className={`flex items-center space-x-2 transition-colors group ${
+              isActiveLink('/doctors') ? activeLinkClass : inactiveLinkClass
+            }`}
+          >
+            <Users className={`h-4 w-4 transition-colors ${
+              isActiveLink('/doctors') ? activeIconClass : inactiveIconClass
+            }`} />
             <span>Find Doctors</span>
           </Link>
-          <Link href="/ai-assistant" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors">
-            <MessageCircle className="h-4 w-4" />
+          
+          <Link 
+            href="/ai-assistant" 
+            className={`flex items-center space-x-2 transition-colors group ${
+              isActiveLink('/ai-assistant') ? activeLinkClass : inactiveLinkClass
+            }`}
+          >
+            <MessageCircle className={`h-4 w-4 transition-colors ${
+              isActiveLink('/ai-assistant') ? activeIconClass : inactiveIconClass
+            }`} />
             <span>AI Assistant</span>
           </Link>
-          <Link href="/about" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors">
-            <Heart className="h-4 w-4" />
+          
+          <Link 
+            href="/about" 
+            className={`flex items-center space-x-2 transition-colors group ${
+              isActiveLink('/about') ? activeLinkClass : inactiveLinkClass
+            }`}
+          >
+            <Heart className={`h-4 w-4 transition-colors ${
+              isActiveLink('/about') ? activeIconClass : inactiveIconClass
+            }`} />
             <span>About</span>
           </Link>
         </div>
@@ -146,8 +190,17 @@ const Header = () => {
             {/* Role-based navigation */}
             {userData?.role === "patient" && (
               <Link href="/appointments">
-                <Button variant="outline" className="hidden lg:inline-flex items-center gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
-                  <Calendar className="h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${
+                    isActiveLink('/appointments') 
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-400' 
+                      : 'text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                >
+                  <Calendar className={`h-4 w-4 ${
+                    isActiveLink('/appointments') ? 'text-emerald-600' : ''
+                  }`} />
                   My Appointments
                 </Button>
               </Link>
@@ -155,8 +208,17 @@ const Header = () => {
 
             {userData?.role === "doctor-pending" && (
               <Link href="/appointments">
-                <Button variant="outline" className="hidden lg:inline-flex items-center gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
-                  <Calendar className="h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${
+                    isActiveLink('/appointments') 
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-400' 
+                      : 'text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                >
+                  <Calendar className={`h-4 w-4 ${
+                    isActiveLink('/appointments') ? 'text-emerald-600' : ''
+                  }`} />
                   My Appointments
                 </Button>
               </Link>
@@ -164,8 +226,17 @@ const Header = () => {
 
             {userData?.role === "admin" && (
               <Link href="/admin-dashboard">
-                <Button variant="outline" className="hidden lg:inline-flex items-center gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
-                  <ShieldCheck className="h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${
+                    isActiveLink('/admin-dashboard') 
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-400' 
+                      : 'text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                >
+                  <ShieldCheck className={`h-4 w-4 ${
+                    isActiveLink('/admin-dashboard') ? 'text-emerald-600' : ''
+                  }`} />
                   Admin Dashboard
                 </Button>
               </Link>
@@ -173,8 +244,17 @@ const Header = () => {
 
             {userData?.role === "doctor" && (
               <Link href="/doctor-dashboard">
-                <Button variant="outline" className="hidden lg:inline-flex items-center gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
-                  <Stethoscope className="h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${
+                    isActiveLink('/doctor-dashboard') 
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-400' 
+                      : 'text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                >
+                  <Stethoscope className={`h-4 w-4 ${
+                    isActiveLink('/doctor-dashboard') ? 'text-emerald-600' : ''
+                  }`} />
                   Doctor Dashboard
                 </Button>
               </Link>
@@ -221,33 +301,57 @@ const Header = () => {
             <div className="space-y-3">
               <button
                 onClick={() => handleNavigation('/')}
-                className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                  isActiveLink('/') 
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                }`}
               >
-                <Home className="h-5 w-5" />
+                <Home className={`h-5 w-5 ${
+                  isActiveLink('/') ? 'text-emerald-600' : ''
+                }`} />
                 <span>Home</span>
               </button>
               
               <button
-                onClick={() => handleNavigation('/search-doctors')}
-                className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                onClick={() => handleNavigation('/doctors')}
+                className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                  isActiveLink('/doctors') 
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                }`}
               >
-                <Users className="h-5 w-5" />
+                <Users className={`h-5 w-5 ${
+                  isActiveLink('/doctors') ? 'text-emerald-600' : ''
+                }`} />
                 <span>Find Doctors</span>
               </button>
               
               <button
-                onClick={() => handleNavigation('/medical-chat')}
-                className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                onClick={() => handleNavigation('/ai-assistant')}
+                className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                  isActiveLink('/ai-assistant') 
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                }`}
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className={`h-5 w-5 ${
+                  isActiveLink('/ai-assistant') ? 'text-emerald-600' : ''
+                }`} />
                 <span>AI Assistant</span>
               </button>
               
               <button
                 onClick={() => handleNavigation('/about')}
-                className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                  isActiveLink('/about') 
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                }`}
               >
-                <Heart className="h-5 w-5" />
+                <Heart className={`h-5 w-5 ${
+                  isActiveLink('/about') ? 'text-emerald-600' : ''
+                }`} />
                 <span>About</span>
               </button>
 
@@ -256,9 +360,15 @@ const Header = () => {
                 {userData?.role === "patient" && (
                   <button
                     onClick={() => handleNavigation('/appointments')}
-                    className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                    className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                      isActiveLink('/appointments') 
+                        ? 'bg-emerald-50 text-emerald-600' 
+                        : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                    }`}
                   >
-                    <Calendar className="h-5 w-5" />
+                    <Calendar className={`h-5 w-5 ${
+                      isActiveLink('/appointments') ? 'text-emerald-600' : ''
+                    }`} />
                     <span>My Appointments</span>
                   </button>
                 )}
@@ -266,9 +376,15 @@ const Header = () => {
                 {userData?.role === "admin" && (
                   <button
                     onClick={() => handleNavigation('/admin-dashboard')}
-                    className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                    className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                      isActiveLink('/admin-dashboard') 
+                        ? 'bg-emerald-50 text-emerald-600' 
+                        : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                    }`}
                   >
-                    <ShieldCheck className="h-5 w-5" />
+                    <ShieldCheck className={`h-5 w-5 ${
+                      isActiveLink('/admin-dashboard') ? 'text-emerald-600' : ''
+                    }`} />
                     <span>Admin Dashboard</span>
                   </button>
                 )}
@@ -276,9 +392,15 @@ const Header = () => {
                 {userData?.role === "doctor" && (
                   <button
                     onClick={() => handleNavigation('/doctor-dashboard')}
-                    className="flex items-center space-x-3 w-full p-3 text-left text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+                    className={`flex items-center space-x-3 w-full p-3 text-left rounded-xl transition-colors ${
+                      isActiveLink('/doctor-dashboard') 
+                        ? 'bg-emerald-50 text-emerald-600' 
+                        : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
+                    }`}
                   >
-                    <Stethoscope className="h-5 w-5" />
+                    <Stethoscope className={`h-5 w-5 ${
+                      isActiveLink('/doctor-dashboard') ? 'text-emerald-600' : ''
+                    }`} />
                     <span>Doctor Dashboard</span>
                   </button>
                 )}

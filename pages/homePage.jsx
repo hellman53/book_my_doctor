@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // import { db } from "../app/firebase/config";
 // import { collection, addDoc } from "firebase/firestore";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
@@ -30,118 +31,185 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="hero relative overflow-hidden mt-32">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* LEFT TEXT */}
-          <div className="space-y-8">
-            <Badge
-              variant="outline"
-              className="bg-emerald-100 border-emerald-300 px-4 py-2 text-emerald-700 text-sm font-medium"
-            >
-              Healthcare made simple
-            </Badge>
+    <section className="hero relative overflow-hidden bg-white py-9">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* LEFT TEXT CONTENT */}
+          <div className="text-center lg:text-left space-y-8">
+            {/* Badge */}
+            <div className="inline-flex items-center justify-center lg:justify-start">
+              <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-2 animate-pulse" />
+              <Badge
+                variant="outline"
+                className="bg-white/80 backdrop-blur-sm border border-emerald-200 px-4 py-2 text-emerald-700 text-sm font-medium rounded-full shadow-sm"
+              >
+                🏥 Healthcare made simple
+              </Badge>
+            </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              {/* Dynamic Line */}
-              <span className="text-black block">
-                <Typewriter
-                  words={[
-                    "Connect with doctors",
-                    "Book appointments",
-                    "Manage your health",
-                  ]}
-                  loop={true}
-                  cursor
-                  cursorStyle="|"
-                  typeSpeed={70}
-                  deleteSpeed={50}
-                  delaySpeed={2000}
-                />
-              </span>
-              {/* Static Line */}
-              <span className="block mt-2" style={{ color: "#0a9d6c" }}>
-                Consult with Doctors Anytime, Anywhere
-              </span>
-            </h1>
+            {/* Main Heading */}
+            <div className="space-y-4">
+              {/* Dynamic Heading - 60px */}
+              <div className="h-24 lg:h-28 flex items-center justify-center lg:justify-start">
+                <h1 className="text-4xl lg:text-[60px] font-bold leading-tight">
+                  <span className="text-gray-900 block">
+                    <Typewriter
+                      words={[
+                        "Connect with doctors",
+                        "Book appointments",
+                        "Manage your health",
+                      ]}
+                      loop={true}
+                      cursor
+                      cursorStyle="|"
+                      typeSpeed={70}
+                      deleteSpeed={50}
+                      delaySpeed={2000}
+                    />
+                  </span>
+                </h1>
+              </div>
 
-            <p className="text-gray-600 text-lg md:text-xl max-w-md">
+              {/* Static Heading with Gradient - 60px */}
+              <h2 className="text-4xl lg:text-[60px] font-bold leading-tight">
+                <span 
+                  className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent"
+                >
+                  Consult with Doctors<br />Anytime, Anywhere
+                </span>
+              </h2>
+            </div>
+
+            {/* Description */}
+            <p className="text-gray-600 text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 leading-relaxed">
               Book appointments, consult via video, and manage your healthcare
               journey all in one secure platform.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button
                 asChild
                 size="lg"
-                className="bg-emerald-600 text-white hover:bg-emerald-700"
+                className="relative bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 py-6 px-8 group/btn"
               >
-                <Link href="/onboarding">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/onboarding" className="flex items-center gap-2">
+                  Get Started 
+                  <ArrowRight className="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               </Button>
 
               <Button
                 asChild
-                variant="outline"
                 size="lg"
-                className="border-emerald-300 hover:bg-gray-100"
+                className="relative bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 py-6 px-8 group/btn"
               >
-                <Link href="/doctors">Find Doctors</Link>
+                <Link href="/doctors" className="flex items-center gap-2">
+                  Find Doctors
+                  <ArrowRight className="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" />
+                </Link>
               </Button>
             </div>
           </div>
 
           {/* RIGHT IMAGE */}
-          <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
-            <Image
-              src="/banner2.png"
-              alt="Doctor consultation"
-              fill
-              priority
-              className="heroImg object-cover md:pt-14 rounded-xl p-0"
-            />
+          <div className="relative">
+            {/* Mobile View */}
+            <div className="block lg:hidden relative h-[300px] sm:h-[350px] rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src="/banner2.png"
+                alt="Doctor consultation"
+                fill
+                priority
+                className="object-cover object-center"
+              />
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent"></div>
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden lg:block relative h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
+              <Image
+                src="/banner2.png"
+                alt="Doctor consultation"
+                fill
+                priority
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              />
+              
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
+              
+              {/* Animated Border */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+            </div>
+
+            {/* Stats Badge - Desktop Only */}
+            <div className="hidden lg:block absolute -bottom-4 -right-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/50">
+              <div className="text-center">
+                <div className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                  5000+
+                </div>
+                <div className="text-xs text-gray-600 font-medium">
+                  Happy Patients
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Background Decorative Elements */}
+        <div className="absolute top-10 -left-20 w-32 h-32 bg-emerald-50 rounded-full opacity-40 blur-3xl -z-10"></div>
+        <div className="absolute bottom-10 -right-20 w-32 h-32 bg-blue-50 rounded-full opacity-40 blur-3xl -z-10"></div>
       </div>
     </section>
   );
 };
 
+
+// Fixed icon components with unique names
+
+
+const StethoscopeIcon = ({ className }) => <div className={className}>🩺</div>;
+const HeartIcon = ({ className }) => <div className={className}>❤️</div>;
+const BrainIcon = ({ className }) => <div className={className}>🧠</div>;
+const EyeIcon = ({ className }) => <div className={className}>👁️</div>;
+const BabyIcon = ({ className }) => <div className={className}>👶</div>;
+const BoneIcon = ({ className }) => <div className={className}>🦴</div>;
+
 const specialties = [
   {
-    icon: Stethoscope,
+    icon: StethoscopeIcon,
     title: "General Medicine",
-    description:
-      "Comprehensive healthcare for common conditions and preventive care",
+    description: "Comprehensive healthcare for common conditions and preventive care",
     doctors: "2,500+ doctors",
   },
   {
-    icon: Heart,
+    icon: HeartIcon,
     title: "Cardiology",
     description: "Heart and cardiovascular system specialists across India",
     doctors: "450+ doctors",
   },
   {
-    icon: Brain,
+    icon: BrainIcon,
     title: "Neurology",
     description: "Brain, spine, and nervous system expert consultations",
     doctors: "320+ doctors",
   },
   {
-    icon: Eye,
+    icon: EyeIcon,
     title: "Ophthalmology",
     description: "Eye care specialists for vision and eye health",
     doctors: "280+ doctors",
   },
   {
-    icon: Baby,
+    icon: BabyIcon,
     title: "Pediatrics",
     description: "Specialized care for infants, children, and adolescents",
     doctors: "380+ doctors",
   },
   {
-    icon: Bone,
+    icon: BoneIcon,
     title: "Orthopedics",
     description: "Bone, joint, and musculoskeletal system specialists",
     doctors: "420+ doctors",
@@ -150,58 +218,199 @@ const specialties = [
 
 const Services = () => {
   return (
-    <section className="py-20 px-4 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Find Specialists by{" "}
-            <span className="text-emerald-600">Category</span>
+    <section className="py-20 px-4 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              🏥 Medical Specialties
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+            Find Your Perfect
+            <span className="block mt-2">Healthcare Specialist</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Connect with expert doctors across various specialties, available
-            for both in-person and virtual consultations
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Connect with certified doctors across multiple specialties, available for 
+            <span className="font-semibold text-gray-800"> in-person consultations </span>
+            and 
+            <span className="font-semibold text-gray-800"> virtual visits</span>
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Mobile Horizontal Scroll View */}
+        <div className="block lg:hidden">
+          <div className="relative">
+            <div className="flex overflow-x-auto pb-8 space-x-4 hide-scrollbar snap-x snap-mandatory">
+              {specialties.map((specialty, index) => {
+                const IconComponent = specialty.icon;
+                return (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-80 snap-center bg-white/90 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  >
+                    <div className="p-6">
+                      {/* Icon with Green & Blue Gradient */}
+                      <div className="flex justify-center mb-4">
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5">
+                          <div className="w-full h-full rounded-xl bg-white flex items-center justify-center">
+                            <IconComponent className="h-7 w-7 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <h3 className="text-xl font-bold text-gray-900 text-center mb-3">
+                        {specialty.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-center text-sm leading-relaxed mb-4 line-clamp-2">
+                        {specialty.description}
+                      </p>
+
+                      {/* Doctors Count */}
+                      <div className="text-center mb-4">
+                        <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                          {specialty.doctors}
+                        </span>
+                      </div>
+
+                      {/* Action Button */}
+                      <button className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 active:scale-95 text-sm shadow-lg">
+                        View Doctors
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Scroll Indicator for Mobile */}
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                </div>
+                <span className="text-xs text-gray-600 ml-2">Swipe for more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Grid View */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {specialties.map((specialty, index) => {
             const IconComponent = specialty.icon;
             return (
-              <Card
+              <div
                 key={index}
-                className="hover:shadow-lg transition-shadow group bg-white border-emerald-200 hover:border-emerald-300"
+                className="group relative bg-white/80 backdrop-blur-sm rounded-3xl border border-white/50 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
               >
-                <CardHeader>
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
-                    <IconComponent className="h-6 w-6 text-emerald-600" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative p-8 z-10">
+                  <div className="mb-6">
+                    <div className="relative inline-flex">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5">
+                        <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-2xl">
+                          <IconComponent className="h-8 w-8 bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent" />
+                        </div>
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200" />
+                      <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-emerald-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-300" />
+                    </div>
                   </div>
-                  <CardTitle className="text-xl text-gray-900">
+
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
                     {specialty.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">{specialty.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-emerald-600">
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-6 leading-relaxed group-hover:text-gray-700 transition-colors">
+                    {specialty.description}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 group-hover:border-gray-200 transition-colors">
+                    <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
                       {specialty.doctors}
                     </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                    >
-                      View Doctors
-                    </Button>
+                    <button className="group/btn flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95">
+                      <span>View Doctors</span>
+                      <svg 
+                        className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              </div>
             );
           })}
         </div>
+
+        {/* CTA Section - Different for mobile and desktop */}
+        <div className="text-center mt-16">
+          {/* Mobile CTA */}
+          <div className="block lg:hidden">
+            <button className="w-full max-w-sm mx-auto py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95">
+              Browse All Specialties
+            </button>
+          </div>
+          
+          {/* Desktop CTA */}
+          <div className="hidden lg:block">
+            <div className="inline-flex flex-col sm:flex-row gap-4 items-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-lg">
+              <div className="text-left">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Can't find what you're looking for?
+                </h3>
+                <p className="text-gray-600">
+                  Browse our complete directory of healthcare professionals
+                </p>
+              </div>
+              <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
+                View All Specialties
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* CSS for mobile features */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+          scroll-snap-align: center;
+        }
+      `}</style>
     </section>
   );
 };
+
 
 const featuredDoctors = [
   {
@@ -240,182 +449,602 @@ const featuredDoctors = [
     virtualAvailable: true,
     nextAvailable: "Today, 5:30 PM",
   },
+  {
+    name: "Dr. Sanjay Verma",
+    specialty: "Orthopedic",
+    experience: "14 years",
+    rating: 4.7,
+    reviews: 189,
+    location: "Chennai, Tamil Nadu",
+    image: "/indian-male-doctor-2.jpg",
+    consultationFee: "₹900",
+    virtualAvailable: true,
+    nextAvailable: "Today, 6:00 PM",
+  },
+  {
+    name: "Dr. Meera Reddy",
+    specialty: "Dermatologist",
+    experience: "11 years",
+    rating: 4.8,
+    reviews: 278,
+    location: "Hyderabad, Telangana",
+    image: "/professional-indian-female-doctor-2.jpg",
+    consultationFee: "₹750",
+    virtualAvailable: true,
+    nextAvailable: "Tomorrow, 11:00 AM",
+  },
 ];
 
 const FeaturedDoctors = () => {
+  // Show only first 3 doctors initially
+  const displayedDoctors = featuredDoctors.slice(0, 3);
+
   return (
-    <section className="py-20 px-4">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Top Rated <span className="text-emerald-600">Doctors</span>
+    <section className="py-20 px-4 bg-white">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="inline-block mb-4">
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 text-emerald-700">
+              👨‍⚕️ Top Healthcare Professionals
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+            Meet Our
+            <span className="block mt-2">Expert Doctors</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Meet our highly rated healthcare professionals trusted by thousands
-            of patients
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Highly rated healthcare professionals trusted by thousands of patients 
+            across India
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredDoctors.map((doctor, index) => (
-            <Card
+        {/* Doctors Cards - Show only 3 on laptop, horizontal scroll on mobile */}
+        <div className="flex overflow-x-auto pb-8 lg:overflow-visible lg:grid lg:grid-cols-3 lg:gap-8 hide-scrollbar snap-x snap-mandatory">
+          {displayedDoctors.map((doctor, index) => (
+            <div
               key={index}
-              className="hover:shadow-lg transition-shadow bg-white border-emerald-200 hover:border-emerald-300"
+              className="flex-shrink-0 w-80 lg:w-full lg:max-w-none snap-center bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-500 group mx-4 lg:mx-0"
             >
-              <CardHeader className="text-center pb-4">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
-                  <img
-                    src={doctor.image || "/placeholder.svg"}
-                    alt={doctor.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900">
-                  {doctor.name}
-                </h3>
-                <p className="text-emerald-600 font-medium">
-                  {doctor.specialty}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {doctor.experience} experience
-                </p>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{doctor.rating}</span>
-                    <span className="text-sm text-gray-600">
-                      ({doctor.reviews} reviews)
-                    </span>
+              {/* Doctor Image with Gradient Border */}
+              <div className="relative p-6 pb-0">
+                <div className="relative mx-auto w-36 h-36">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-emerald-300 to-blue-400 rounded-full p-1 transform group-hover:scale-105 transition-transform duration-500">
+                    <div className="w-full h-full bg-white rounded-full p-1">
+                      <img
+                        src={doctor.image || "/placeholder.svg"}
+                        alt={doctor.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    </div>
                   </div>
+                  
+                  {/* Online Status Indicator */}
                   {doctor.virtualAvailable && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs bg-emerald-100 text-emerald-700"
-                    >
-                      <Video className="h-3 w-3 mr-1" />
-                      Virtual
-                    </Badge>
+                    <div className="absolute bottom-2 right-2 w-7 h-7 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    </div>
                   )}
                 </div>
+              </div>
 
-                <div className="flex items-center text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {doctor.location}
+              {/* Doctor Info */}
+              <div className="p-6 pt-4">
+                {/* Name and Specialty */}
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
+                    {doctor.name}
+                  </h3>
+                  <p className="text-lg font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                    {doctor.specialty}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {doctor.experience} experience
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Consultation Fee:</span>
-                  <span className="font-semibold text-emerald-600">
-                    {doctor.consultationFee}
-                  </span>
+                {/* Rating and Location */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="font-semibold text-gray-900">{doctor.rating}</span>
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        ({doctor.reviews} reviews)
+                      </span>
+                    </div>
+                    {doctor.virtualAvailable && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-100 to-blue-100 text-emerald-700 border border-emerald-200">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full mr-1 animate-pulse"></span>
+                        Virtual Available
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="mr-2">📍</span>
+                    <span className="truncate">{doctor.location}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center text-sm">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-600" />
-                  <span className="text-gray-600">Next available: </span>
-                  <span className="font-medium ml-1 text-gray-900">
-                    {doctor.nextAvailable}
-                  </span>
+                {/* Consultation Fee and Availability */}
+                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-4 mb-4 border border-emerald-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Consultation:</span>
+                    <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                      {doctor.consultationFee}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="mr-2">🕒</span>
+                    <span className="text-gray-600">Next: </span>
+                    <span className="font-semibold text-gray-900 ml-1">
+                      {doctor.nextAvailable}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex space-x-2 pt-2">
-                  <Button
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    size="sm"
-                  >
+                {/* Action Buttons */}
+                <div className="flex space-x-3">
+                  <button className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 text-sm">
                     Book Appointment
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                  >
-                    View Profile
-                  </Button>
+                  </button>
+                  <button className="px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 active:scale-95 text-sm">
+                    Profile
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Hover Gradient Overlay */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/5 via-emerald-400/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            </div>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <Button
-            variant="outline"
-            size="lg"
-            className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-          >
-            View All Doctors
-          </Button>
+        {/* Scroll Indicator for Mobile */}
+        <div className="lg:hidden text-center mt-8">
+          <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200 shadow-sm">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            </div>
+            <span className="text-xs text-gray-600 ml-2">Swipe to see more doctors</span>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="inline-flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-8 border border-emerald-100 shadow-lg">
+            <div className="text-left">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Want to see more doctors?
+              </h3>
+              <p className="text-gray-600">
+                Browse our complete directory of {featuredDoctors.length}+ healthcare professionals
+              </p>
+            </div>
+            <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
+              View All Doctors
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* CSS for mobile features */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+          scroll-snap-align: center;
+        }
+      `}</style>
+    </section>
+  );
+};
+
+
+
+
+
+
+
+const PricingSection = () => {
+  const creditBenefits = [
+    "1 Credit = 1 Consultation with any specialist doctor",
+    "Credits never expire - use them whenever you need",
+    "Transfer credits to family members anytime",
+    "Get 24/7 support for all your healthcare needs",
+    "Free follow-up consultations for 7 days",
+    "Access to premium health records storage",
+  ];
+
+  const pricingPlans = [
+    {
+      name: "Basic Care",
+      credits: 1,
+      price: "₹499",
+      originalPrice: "₹799",
+      savings: "38% savings",
+      popular: false,
+      features: [
+        "1 Specialist Consultation",
+        "24/7 Chat Support",
+        "Basic Health Records",
+        "7 Days Follow-up",
+        "Email Support",
+      ],
+    },
+    {
+      name: "Family Pack",
+      credits: 4,
+      price: "₹1,799",
+      originalPrice: "₹3,196",
+      savings: "44% savings",
+      popular: true,
+      features: [
+        "4 Specialist Consultations",
+        "Priority 24/7 Support",
+        "Family Sharing Enabled",
+        "30 Days Follow-up",
+        "Health Records for 4",
+        "Dedicated Care Manager",
+      ],
+    },
+    {
+      name: "Premium Care",
+      credits: 8,
+      price: "₹3,199",
+      originalPrice: "₹6,392",
+      savings: "50% savings",
+      popular: false,
+      features: [
+        "8 Specialist Consultations",
+        "24/7 Priority Support",
+        "Unlimited Family Sharing",
+        "60 Days Follow-up",
+        "Advanced Health Analytics",
+        "Personal Health Coach",
+        "Annual Health Checkup",
+      ],
+    },
+  ];
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-base font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              💰 Affordable Healthcare
+            </span>
+          </div>
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+            Consultation Packages
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Choose the perfect consultation package that fits your healthcare needs
+          </p>
+        </div>
+
+        {/* ✅ Fixed Responsive Scrollable Pricing Cards */}
+        <div className="pb-6">
+          <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible px-4 md:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
+            {pricingPlans.map((plan, index) => (
+              <div
+                key={index}
+                className={`min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center group relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 transition-all duration-500 hover:-translate-y-1 ${
+                  plan.popular
+                    ? "border-emerald-300 shadow-xl scale-[1.02]"
+                    : "border-gray-200 hover:border-emerald-200 shadow-lg hover:shadow-xl"
+                }`}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                <div className="p-6">
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {plan.name}
+                    </h3>
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                        <span className="text-white font-bold text-xs">👑</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-600">
+                        {plan.credits} Credit{plan.credits > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="text-center mb-4">
+                    <div className="flex items-center justify-center space-x-2 mb-1">
+                      <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-gray-500 line-through">
+                        {plan.originalPrice}
+                      </span>
+                    </div>
+                    <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                      {plan.savings}
+                    </span>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-2 mb-6">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start">
+                        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center mr-2 mt-0.5">
+                          <svg
+                            className="w-2 h-2 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="3"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-sm text-gray-700 leading-tight">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 text-sm ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 shadow-md hover:shadow-lg"
+                        : "bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600 shadow-sm hover:shadow-md"
+                    } active:scale-95`}
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Credit System */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-emerald-100 shadow-lg p-6 mt-10">
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center">
+              <span className="text-xl">💎</span>
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+              How Our{" "}
+              <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                Credit System
+              </span>{" "}
+              Works
+            </h3>
+            <p className="text-gray-600 max-w-xl mx-auto text-sm">
+              Simple, flexible, and designed for your healthcare convenience
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {creditBenefits.map((benefit, index) => (
+              <div
+                key={index}
+                className="group flex items-start p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-100 hover:border-emerald-200 transition-all duration-300"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center mr-3 group-hover:scale-105 transition-transform duration-300">
+                  <span className="text-white font-bold text-sm">
+                    {index + 1}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {benefit}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-6 pt-6 border-t border-emerald-100">
+            <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 text-sm">
+              <span>Start Your Health Journey</span>
+              <svg
+                className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>
   );
 };
 
-const PricingSection = () => {
+
+
+
+
+
+
+
+
+
+
+
+
+const MedicineStoreSection = () => {
   return (
-    <section id="pricing" className="py-20 bg-gray-50">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header Section */}
         <div className="text-center mb-16">
-          <Badge
-            variant="outline"
-            className="bg-emerald-100 border-emerald-300 px-4 py-1 text-emerald-700 text-sm font-medium mb-4"
-          >
-            Affordable Healthcare
-          </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Consultation Packages
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-base font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              🚀 Coming Soon
+            </span>
+          </div>
+          <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-600 bg-clip-text text-transparent">
+            Medicine Store
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Choose the perfect consultation package that fits your healthcare
-            needs
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Your complete healthcare ecosystem - From doctor consultations to medicine delivery at your doorstep
           </p>
         </div>
 
-        <div className="mx-auto">
-          {/* Clerk Pricing Table */}
-          <Pricing />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Content Section */}
+          <div className="space-y-8">
+            {/* Coming Soon Badge */}
+            <div className="inline-block">
+              <div className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-8 py-4 rounded-2xl shadow-lg">
+                <span className="text-4xl md:text-6xl font-bold">Coming Soon</span>
+              </div>
+            </div>
 
-          {/* Description */}
-          <Card className="mt-12 bg-gray-50 border-emerald-200">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
-                <Stethoscope className="h-5 w-5 mr-2 text-emerald-600" />
-                How Our Credit System Works
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {creditBenefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="mr-3 mt-1 bg-emerald-100 p-1 rounded-full">
-                      <svg
-                        className="h-4 w-4 text-emerald-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                    </div>
-                    <p
-                      className="text-gray-600"
-                      dangerouslySetInnerHTML={{ __html: benefit }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+            {/* Features List */}
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold text-gray-900">
+                Your <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">One-Stop</span> Healthcare Solution
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">💊</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Wide Medicine Range</h4>
+                    <p className="text-gray-600">Prescription & over-the-counter medicines from trusted brands</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">🚚</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Fast Delivery</h4>
+                    <p className="text-gray-600">Same-day delivery with real-time tracking</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">🎯</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Auto-Prescription Sync</h4>
+                    <p className="text-gray-600">Automatic prescription import from your doctor consultations</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-emerald-100 hover:border-emerald-200 transition-all duration-300">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-lg">💰</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Discounts & Offers</h4>
+                    <p className="text-gray-600">Exclusive discounts for BookMyDoc users</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-6 border border-emerald-200">
+              <h4 className="font-semibold text-gray-900 mb-3 text-lg">Be the first to know!</h4>
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                <button className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                  Notify Me
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Image Section */}
+          <div className="relative">
+            <div className="relative z-10">
+              <img
+                src="https://images.unsplash.com/photo-1585435557343-3b092031d5ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                alt="Modern Pharmacy Medicine Store"
+                className="rounded-2xl shadow-2xl w-full h-auto"
+              />
+            </div>
+            
+            {/* Floating Elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-emerald-100 rounded-full opacity-80 animate-pulse"></div>
+            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-100 rounded-full opacity-80 animate-pulse"></div>
+            
+            {/* Floating Badge */}
+            <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-emerald-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-xl">⚡</span>
+                </div>
+                <div>
+                  <div className="font-bold text-gray-800">Fast</div>
+                  <div className="text-sm text-gray-600">Medicine Delivery</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">10K+</div>
+            <div className="text-gray-600">Medicines</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">24/7</div>
+            <div className="text-gray-600">Available</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">100+</div>
+            <div className="text-gray-600">Cities</div>
+          </div>
+          <div className="text-center p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-emerald-100">
+            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">30min</div>
+            <div className="text-gray-600">Delivery Promise</div>
+          </div>
         </div>
       </div>
     </section>
@@ -424,90 +1053,182 @@ const PricingSection = () => {
 
 const Feature = () => {
   return (
-    <section className="py-20 ">
-      <div className="container mx-auto px-4">
+    <section className="py-16 bg-white">
+      <div className="container mx-auto px-4 sm:px-6">
+        {/* Header Section */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-2 animate-pulse" />
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              ⚡ Quick & Easy
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
             How It Works
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
             Our platform makes healthcare accessible with just a few clicks
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Mobile Horizontal Scroll View */}
+        <div className="block lg:hidden">
+          <div className="relative">
+            <div className="flex overflow-x-auto pb-8 space-x-4 hide-scrollbar snap-x snap-mandatory">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-80 snap-center bg-white rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 group hover:border-emerald-200"
+                >
+                  <div className="p-6">
+                    {/* Gradient Icon */}
+                    <div className="flex justify-center mb-4">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5 group-hover:from-emerald-600 group-hover:to-blue-600 transition-all duration-300">
+                        <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-2xl">
+                          {feature.icon}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <h3 className="text-xl font-bold text-gray-900 text-center mb-3 group-hover:text-gray-800 transition-colors">
+                      {feature.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-center text-sm leading-relaxed mb-4 line-clamp-3">
+                      {feature.description}
+                    </p>
+
+                    {/* Step Number */}
+                    <div className="text-center">
+                      <span className="text-xs font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                        Step {index + 1}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Scroll Indicator for Mobile */}
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                </div>
+                <span className="text-xs text-gray-600 ml-2">Swipe for more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Grid View */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card
+            <div
               key={index}
-              className="bg-white border-emerald-200 hover:border-emerald-300 transition-all duration-300 shadow-sm"
+              className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
             >
-              <CardHeader className="pb-2">
-                <div className="bg-emerald-100 p-3 rounded-lg w-fit mb-4">
-                  {feature.icon}
+              {/* Background Gradient on Hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative p-8 z-10">
+                {/* Step Number */}
+                <div className="absolute top-6 right-6">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">{index + 1}</span>
+                  </div>
                 </div>
-                <CardTitle className="text-xl font-semibold text-gray-900">
+
+                {/* Gradient Icon */}
+                <div className="mb-6">
+                  <div className="relative inline-flex">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5 group-hover:from-emerald-600 group-hover:to-blue-600 transition-all duration-300">
+                      <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-3xl">
+                        {feature.icon}
+                      </div>
+                    </div>
+                    {/* Animated Dots */}
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200" />
+                    <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-emerald-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-300" />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
                   {feature.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">{feature.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
+                </h3>
+                
+                <p className="text-gray-600 mb-6 leading-relaxed group-hover:text-gray-700 transition-colors">
+                  {feature.description}
+                </p>
 
-const Testimonials = () => {
-  return (
-    <section className="py-20 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <Badge
-            variant="outline"
-            className="bg-emerald-100 border-emerald-300 px-4 py-1 text-emerald-700 text-sm font-medium mb-4"
-          >
-            Success Stories
-          </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            What Our Users Say
-          </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Hear from patients and doctors who use our platform
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <Card
-              key={index}
-              className="border-emerald-200 hover:border-emerald-300 transition-all bg-white shadow-sm"
-            >
-              <CardContent className="pt-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mr-4">
-                    <span className="text-emerald-700 font-bold">
-                      {testimonial.initials}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                  </div>
+                {/* Learn More Link */}
+                <div className="flex items-center space-x-2 text-emerald-600 group-hover:text-emerald-700 transition-colors cursor-pointer">
+                  <span className="text-sm font-semibold">Learn more</span>
+                  <svg 
+                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
-                <p className="text-gray-600">&quot;{testimonial.quote}&quot;</p>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Bottom Gradient Border */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+            </div>
           ))}
         </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="inline-flex flex-col sm:flex-row gap-4 items-center bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-8 border border-emerald-100 shadow-lg">
+            <div className="text-left">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Ready to get started?
+              </h3>
+              <p className="text-gray-600">
+                Join thousands of patients who trust our platform
+              </p>
+            </div>
+            <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
+              Get Started Today
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* CSS for mobile features */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+          scroll-snap-align: center;
+        }
+      `}</style>
     </section>
   );
 };
+
 
 /* moving testimonial section api */
 const mockTestimonials = [
@@ -633,19 +1354,21 @@ const TestimonialCarousel = () => {
   }, [currentIndex, testimonials.length]);
 
   return (
-    <div className="bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="container mx-auto px-4 sm:px-6">
         
-        {/* === Heading Section (same as screenshot) === */}
-        <div className="text-center mb-12">
-          <span className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
-            Success Stories
-          </span>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4"
-              style={{ fontSize: '36px' }}>
+        {/* === Heading Section with Gradient === */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-2 animate-pulse" />
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              💫 Success Stories
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
             What Our Users Say
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
             Hear from patients and doctors who use our platform
           </p>
         </div>
@@ -656,38 +1379,146 @@ const TestimonialCarousel = () => {
             className={`flex ${isTransitioning ? "transition-transform duration-700 ease-in-out" : ""}`}
             style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
           >
-            {testimonials.map((testimonial) => (
+            {testimonials.map((testimonial, index) => (
               <div 
                 key={testimonial.id + Math.random()} 
-                className="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4"
+                className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 px-3 sm:px-4"
               >
-                <div 
-                  className="bg-white rounded-lg shadow-md p-6 h-full"
-                  style={{ 
-                    border: '1px solid #29f68cff',
-                    borderRadius: '10px'
-                  }}
-                >
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src={testimonial.image} 
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full object-cover mr-4"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{testimonial.name}</h3>
-                      <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                {/* Card with Permanent 2px Gradient Border */}
+                <div className="relative bg-white rounded-2xl p-6 sm:p-8 h-full shadow-lg">
+                  {/* Permanent 2px Gradient Border */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
+                    <div className="w-full h-full rounded-2xl bg-white"></div>
+                  </div>
+                  
+                  {/* Content Container */}
+                  <div className="relative z-10">
+                    {/* User Info with Gradient */}
+                    <div className="flex items-center mb-6">
+                      <div className="relative mr-4">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
+                          <img 
+                            src={testimonial.image} 
+                            alt={testimonial.name}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        </div>
+                        {/* Online Indicator */}
+                        <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg">{testimonial.name}</h3>
+                        <p className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Testimonial Text */}
+                    <div className="relative mb-6">
+                      <span className="absolute -left-2 -top-3 text-xl sm:text-2xl text-emerald-400 opacity-50">"</span>
+                      <p className="text-gray-700 text-sm sm:text-base leading-relaxed pl-2 sm:pl-4">
+                        {testimonial.text}
+                      </p>
+                      <span className="absolute -right-2 -bottom-3 text-xl sm:text-2xl text-blue-400 opacity-50">"</span>
+                    </div>
+
+                    {/* Rating Stars & Quote Icon */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex space-x-0.5 sm:space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      
+                      {/* Quote Icon */}
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 flex items-center justify-center">
+                        <svg 
+                          className="w-4 h-4 sm:w-5 sm:h-5 text-white" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-gray-700 italic">"{testimonial.text}"</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Mobile Scroll Indicator */}
+        <div className="block lg:hidden flex justify-center mt-8">
+          <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            </div>
+            <span className="text-xs text-gray-600 ml-2">Swipe for more</span>
+          </div>
+        </div>
+
+        {/* Navigation Dots */}
+        <div className="hidden lg:flex justify-center mt-12">
+          <div className="flex items-center space-x-3">
+            {mockTestimonials.slice(0, 4).map((_, index) => (
+              <button
+                key={index}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  Math.floor(currentIndex % 4) === index 
+                    ? 'bg-gradient-to-r from-emerald-500 to-blue-500 w-8'
+                    : 'bg-gray-300'
+                }`}
+                onClick={() => {
+                  setCurrentIndex(index * 3);
+                  setIsTransitioning(true);
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="inline-flex flex-col sm:flex-row gap-4 sm:gap-6 items-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/50 shadow-lg w-full max-w-4xl mx-auto">
+            <div className="text-center sm:text-left">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Join Our Happy Community
+              </h3>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Experience the future of healthcare today
+              </p>
+            </div>
+            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap text-sm sm:text-base">
+              Get Started Now
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* CSS for mobile features */}
+      <style jsx>{`
+        @media (max-width: 640px) {
+          .flex-shrink-0 {
+            scroll-snap-align: start;
+          }
+          .flex {
+            scroll-snap-type: x mandatory;
+          }
+        }
+      `}</style>
+    </section>
   );
 };
 
@@ -763,125 +1594,364 @@ Angle270</p>
 };
 
 
-/* services in easy to understand */
+/* services in easy to understand*/ 
+
 const ConsultationSection = () => {
+  const consultations = [
+    {
+      id: 1,
+      title: "Period doubts or Pregnancy",
+      icon: "🤰",
+      doctors: "45+ doctors",
+      description: "Expert guidance for women's health concerns"
+    },
+    {
+      id: 2,
+      title: "Acne, pimple or skin issues",
+      icon: "🧴",
+      doctors: "38+ doctors",
+      description: "Dermatology specialists for skin care"
+    },
+    {
+      id: 3,
+      title: "Performance issues in bed",
+      icon: "💊",
+      doctors: "52+ doctors",
+      description: "Confidential consultations available"
+    },
+    {
+      id: 4,
+      title: "Cold, cough or fever",
+      icon: "🤒",
+      doctors: "67+ doctors",
+      description: "General physicians for common illnesses"
+    },
+    {
+      id: 5,
+      title: "Child not feeling well",
+      icon: "👶",
+      doctors: "41+ doctors",
+      description: "Pediatric specialists for children's health"
+    },
+    {
+      id: 6,
+      title: "Depression or anxiety",
+      icon: "😔",
+      doctors: "29+ doctors",
+      description: "Mental health professionals available"
+    }
+  ];
+
+  // State for animated counters
+  const [counters, setCounters] = useState({
+    patients: 0,
+    doctors: 0,
+    availability: 0,
+    specialties: 0
+  });
+
+  const targetCounters = {
+    patients: 5000,
+    doctors: 200,
+    availability: 24,
+    specialties: 50
+  };
+
+  // Animate counters
+  useEffect(() => {
+    const duration = 2000; // 2 seconds
+    const steps = 60;
+    const stepDuration = duration / steps;
+
+    const animateCounter = (key, target) => {
+      let current = 0;
+      const increment = target / steps;
+
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        setCounters(prev => ({
+          ...prev,
+          [key]: Math.floor(current)
+        }));
+      }, stepDuration);
+    };
+
+    // Start animations with slight delays for visual effect
+    setTimeout(() => animateCounter('patients', targetCounters.patients), 100);
+    setTimeout(() => animateCounter('doctors', targetCounters.doctors), 300);
+    setTimeout(() => animateCounter('availability', targetCounters.availability), 500);
+    setTimeout(() => animateCounter('specialties', targetCounters.specialties), 700);
+  }, []);
+
   return (
-    <section className="py-12 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4 sm:px-6">
         
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Consult top doctors online for any health concern
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 text-emerald-700">
+              🩺 Online Consultations
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+            Consult Top Doctors Online
           </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Private online consultations with verified doctors in all specialists
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+            Private online consultations with verified doctors across all specialties. 
+            <span className="font-semibold text-gray-800"> Available 24/7</span>
           </p>
         </div>
 
-        {/* Consultation Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          
-          {/* Period doubts or Pregnancy */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🤰</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium">45+ doctors</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Period doubts or Pregnancy</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
-            </button>
-          </div>
+        {/* Desktop Grid View */}
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {consultations.map((consultation) => (
+            <div
+              key={consultation.id}
+              className="group relative bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+            >
+              {/* Background Pattern */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-500/5 to-blue-500/5 rounded-full -translate-y-16 translate-x-16" />
+              
+              <div className="relative p-8 z-10">
+                {/* Icon with Gradient Background */}
+                <div className="mb-6">
+                  <div className="relative inline-flex">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5">
+                      <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-3xl">
+                        {consultation.icon}
+                      </div>
+                    </div>
+                    {/* Floating Dots */}
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200" />
+                    <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-emerald-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-300" />
+                  </div>
+                </div>
 
-          {/* Acne, pimple or skin issues */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🧴</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium" >38+ doctors</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Acne, pimple or skin issues</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
-            </button>
-          </div>
+                {/* Content */}
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors">
+                  {consultation.title}
+                </h3>
+                
+                <p className="text-gray-600 mb-4 leading-relaxed text-sm">
+                  {consultation.description}
+                </p>
 
-          {/* Performance issues in bed */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">💊</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium">52+ doctors</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Performance issues in bed</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
-            </button>
-          </div>
+                {/* Doctors Count */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                    {consultation.doctors}
+                  </span>
+                  <div className="flex -space-x-2">
+                    <div className="w-6 h-6 bg-emerald-400 rounded-full border-2 border-white"></div>
+                    <div className="w-6 h-6 bg-blue-400 rounded-full border-2 border-white"></div>
+                    <div className="w-6 h-6 bg-emerald-300 rounded-full border-2 border-white"></div>
+                  </div>
+                </div>
 
-          {/* Cold, cough or fever */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🤒</span>
+                {/* Gradient Button */}
+                <button className="group/btn w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center space-x-2">
+                  <span>CONSULT NOW</span>
+                  <svg 
+                    className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
-              <span className="text-sm text-gray-500 font-medium">67+ doctors</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Cold, cough or fever</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
-            </button>
-          </div>
 
-          {/* Child not feeling well */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-pink-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">👶</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium">41+ doctors</span>
+              {/* Bottom Gradient Border */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Child not feeling well</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
-            </button>
-          </div>
+          ))}
+        </div>
 
-          {/* Depression or anxiety */}
-          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ border: '1px solid #00d492' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">😔</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium">29+ doctors</span>
+        {/* Mobile Horizontal Scroll View */}
+        <div className="block lg:hidden mb-8">
+          <div className="relative">
+            <div className="flex overflow-x-auto pb-8 space-x-4 hide-scrollbar snap-x snap-mandatory">
+              {consultations.map((consultation) => (
+                <div
+                  key={consultation.id}
+                  className="flex-shrink-0 w-80 snap-center bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg p-6"
+                >
+                  {/* Icon */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-400 to-blue-500 p-0.5">
+                      <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-2xl">
+                        {consultation.icon}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <h3 className="text-xl font-bold text-gray-900 text-center mb-3">
+                    {consultation.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 text-center text-sm leading-relaxed mb-4 line-clamp-2">
+                    {consultation.description}
+                  </p>
+
+                  {/* Doctors Count */}
+                  <div className="text-center mb-4">
+                    <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                      {consultation.doctors}
+                    </span>
+                  </div>
+
+                  {/* Gradient Button */}
+                  <button className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 active:scale-95 text-sm shadow-lg">
+                    CONSULT NOW
+                  </button>
+                </div>
+              ))}
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Depression or anxiety</h3>
-            <button className="w-full text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm hover:bg-green-700" style={{ backgroundColor: '#009966' }}>
-              CONSULT NOW
+
+            {/* Scroll Indicator for Mobile */}
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                </div>
+                <span className="text-xs text-gray-600 ml-2">Swipe for more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="inline-flex flex-col sm:flex-row gap-4 sm:gap-6 items-center bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl p-6 sm:p-8 border border-emerald-100 shadow-lg w-full max-w-4xl mx-auto">
+            <div className="text-center sm:text-left">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Can't find what you're looking for?
+              </h3>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Browse our complete directory of healthcare specialists
+              </p>
+            </div>
+            <button className="group/btn px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap flex items-center space-x-2 text-sm sm:text-base">
+              <span>View All Specialties</span>
+              <svg 
+                className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>
 
-        {/* View All Specialties Button */}
-        <div className="text-center">
-          <button className="border-2 text-green-600 font-medium py-2 px-6 rounded-lg transition-colors hover:bg-green-600 hover:text-white" style={{ borderColor: '#00d492', color: '#009966' }}>
-            View All Specialties
-          </button>
-        </div>
+        {/* Stats Section with Permanent 1.5px Gradient Borders */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-16">
+          {/* Happy Patients Counter */}
+          <div className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            {/* Permanent 1.5px Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full rounded-2xl bg-white"></div>
+            </div>
+            
+            <div className="relative z-10 text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                {counters.patients}+
+              </div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Happy Patients</div>
+            </div>
+          </div>
 
+          {/* Expert Doctors Counter */}
+          <div className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            {/* Permanent 1.5px Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full rounded-2xl bg-white"></div>
+            </div>
+            
+            <div className="relative z-10 text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                {counters.doctors}+
+              </div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Expert Doctors</div>
+            </div>
+          </div>
+
+          {/* Availability Counter */}
+          <div className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            {/* Permanent 1.5px Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full rounded-2xl bg-white"></div>
+            </div>
+            
+            <div className="relative z-10 text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                {counters.availability}/7
+              </div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Availability</div>
+            </div>
+          </div>
+
+          {/* Specialties Counter */}
+          <div className="relative bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            {/* Permanent 1.5px Gradient Border */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-[1.5px]">
+              <div className="w-full h-full rounded-2xl bg-white"></div>
+            </div>
+            
+            <div className="relative z-10 text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                {counters.specialties}+
+              </div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Specialties</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* CSS for mobile features */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+          scroll-snap-align: center;
+        }
+      `}</style>
     </section>
   );
 };
 
+
+
+
 /* mission vision section */
+
 const DoctorAppointmentCards = () => {
-  const [currentIndex, setCurrentIndex] = useState(1); // Start with middle card
+  const [currentIndex, setCurrentIndex] = useState(1); // start from middle card
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const cards = [
@@ -889,29 +1959,29 @@ const DoctorAppointmentCards = () => {
       id: 1,
       title: "Mission",
       description:
-        "To provide exceptional healthcare services with compassion, innovation, and excellence, ensuring every patient receives personalized care in a comfortable environment.",
+        "Provide exceptional healthcare with compassion, innovation, and personalized patient care excellence.",
       icon: "🎯",
-      bgColor: "#ffe2e2",
+      gradient: "from-blue-400 to-cyan-400",
     },
     {
       id: 2,
       title: "Vision",
       description:
-        "To be the leading healthcare provider known for outstanding patient care, medical excellence, and community wellness through cutting-edge technology and compassionate service.",
+        "Leading healthcare provider known for outstanding patient care and medical excellence through innovation.",
       icon: "👁️",
-      bgColor: "#f3e8ff",
+      gradient: "from-emerald-400 to-green-400",
     },
     {
       id: 3,
       title: "Core Values",
       description:
-        "Compassion, Integrity, Excellence, Innovation, and Patient-Centered Care. We prioritize your health and wellbeing above all else.",
+        "Compassion, Integrity, Excellence, Innovation. We prioritize your health and wellbeing above all.",
       icon: "❤️",
-      bgColor: "#fef9c2",
+      gradient: "from-purple-400 to-pink-400",
     },
   ];
 
-  // Auto-rotate every 4 seconds (no dependency on currentIndex)
+  // Auto-slide every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       handleNext();
@@ -926,87 +1996,97 @@ const DoctorAppointmentCards = () => {
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  const handlePrev = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
   const getCardPosition = (index) => {
     const positions = ["left", "center", "right"];
     const adjustedIndex = (index - currentIndex + cards.length) % cards.length;
     return positions[adjustedIndex];
   };
 
-  const getCardStyle = (position, bgColor) => {
+  const getCardStyle = (position) => {
     switch (position) {
       case "left":
         return {
-          transform: "translateX(-120%) scale(0.9)",
-          opacity: 0.9,
+          transform: "translateX(-130%) scale(0.85)",
+          opacity: 1,
           zIndex: 10,
-          backgroundColor: bgColor,
         };
       case "center":
         return {
           transform: "translateX(0) scale(1)",
           opacity: 1,
           zIndex: 30,
-          backgroundColor: bgColor,
         };
       case "right":
         return {
-          transform: "translateX(120%) scale(0.9)",
-          opacity: 0.9,
+          transform: "translateX(130%) scale(0.85)",
+          opacity: 1,
           zIndex: 10,
-          backgroundColor: bgColor,
         };
       default:
-        return { backgroundColor: bgColor };
+        return {};
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="max-w-6xl mx-auto w-full">
+    <section className="py-20 bg-gradient-to-br from-white via-emerald-50 to-blue-50">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="font-bold mb-4" style={{ fontSize: "36px" }}>
-            <span className="text-black">Our Commitment </span>
-            <span style={{ color: "#009966" }}>to You</span>
+          <div className="inline-flex items-center mb-4">
+            <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-3 animate-pulse" />
+            <span className="text-sm font-semibold px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-700">
+              💫 Our Commitment
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent">
+            Our Commitment to You
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
             Discover what drives our passion for healthcare excellence and
             patient-centered service
           </p>
         </div>
 
-        {/* Cards Container */}
-        <div className="relative h-96 md:h-80 flex items-center justify-center">
+        {/* Desktop Cards */}
+        <div className="hidden lg:flex items-center justify-center relative h-80 overflow-hidden mb-12">
           {cards.map((card, index) => {
             const position = getCardPosition(index);
-            const style = getCardStyle(position, card.bgColor);
+            const style = {
+              ...getCardStyle(position),
+              position: "absolute",
+              left: "50%",
+              transform: `${getCardStyle(position).transform} translateX(-50%)`,
+              transition: "all 0.6s ease",
+            };
 
             return (
               <div
                 key={card.id}
-                className="absolute w-80 md:w-96 h-72 rounded-2xl shadow-xl transition-all duration-500 ease-in-out cursor-pointer hover:shadow-2xl"
+                className="absolute w-80 h-64 rounded-2xl cursor-pointer"
                 style={style}
-                onClick={() => {
-                  if (position === "left") handlePrev();
-                  if (position === "right") handleNext();
-                }}
+                onClick={() => handleNext()}
               >
-                <div className="p-8 h-full flex flex-col justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl mb-4">{card.icon}</div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                      {card.title}
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed text-lg">
-                      {card.description}
-                    </p>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
+                  <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center">
+                    <div className="p-6 h-full flex flex-col justify-center text-center w-full">
+                      {/* Icon */}
+                      <div className="flex justify-center mb-4">
+                        <div
+                          className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${card.gradient} p-0.5`}
+                        >
+                          <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-2xl">
+                            {card.icon}
+                          </div>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold text-gray-800 mb-3">
+                        {card.title}
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed text-sm">
+                        {card.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1014,61 +2094,89 @@ const DoctorAppointmentCards = () => {
           })}
         </div>
 
-        {/* Additional Info */}
-        <div className="text-center mt-16 max-w-2xl mx-auto">
-          <p className="text-gray-600 text-lg">
-            Our commitment to these principles ensures that every patient
-            receives the highest quality care in a supportive and innovative
-            environment.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+        {/* Mobile Cards - Scrollable */}
+        <div className="block lg:hidden">
+          <div className="relative">
+            <div className="flex overflow-x-auto pb-8 space-x-4 hide-scrollbar snap-x snap-mandatory px-4">
+              {cards.map((card) => (
+                <div key={card.id} className="flex-shrink-0 w-80 snap-center">
+                  <div className="relative bg-white rounded-2xl h-64">
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
+                      <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center">
+                        <div className="p-6 h-full flex flex-col justify-center text-center w-full">
+                          {/* Icon */}
+                          <div className="flex justify-center mb-4">
+                            <div
+                              className={`w-14 h-14 rounded-xl bg-gradient-to-r ${card.gradient} p-0.5`}
+                            >
+                              <div className="w-full h-full rounded-xl bg-white flex items-center justify-center text-xl">
+                                {card.icon}
+                              </div>
+                            </div>
+                          </div>
 
-
-
-const CTA = () => {
-  return (
-    <section className="py-20">
-      <div className="container mx-auto px-4">
-        <Card className="bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-200">
-          <CardContent className="p-8 md:p-12 lg:p-16 relative overflow-hidden">
-            <div className="max-w-2xl relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Ready to take control of your healthcare?
-              </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                Join thousands of users who have simplified their healthcare
-                journey with our platform. Get started today and experience
-                healthcare the way it should be.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-emerald-600 text-white hover:bg-emerald-700"
-                >
-                  <Link href="/sign-up">Sign Up Now</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="border-emerald-300 hover:bg-gray-100"
-                >
-                  <Link href="#pricing">View Pricing</Link>
-                </Button>
-              </div>
+                          <h3 className="text-lg font-bold text-gray-800 mb-3">
+                            {card.title}
+                          </h3>
+                          <p className="text-gray-700 leading-relaxed text-xs line-clamp-4">
+                            {card.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Decorative healthcare elements */}
-            <div className="absolute right-0 top-0 w-[300px] h-[300px] bg-emerald-200/30 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            <div className="absolute left-0 bottom-0 w-[200px] h-[200px] bg-emerald-300/30 rounded-full blur-3xl -ml-10 -mb-10"></div>
-          </CardContent>
-        </Card>
+            {/* Scroll Indicator */}
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                </div>
+                <span className="text-xs text-gray-600 ml-2">Swipe for more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer text */}
+        <div className="text-center mt-16 max-w-2xl mx-auto">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-lg">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Our commitment to these principles ensures that every patient
+              receives the highest quality care in a supportive and innovative
+              environment.
+            </p>
+          </div>
+        </div>
       </div>
+
+      {/* Custom CSS */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-4 {
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .snap-x {
+          scroll-snap-type: x mandatory;
+        }
+        .snap-center {
+          scroll-snap-align: center;
+        }
+      `}</style>
     </section>
   );
 };
@@ -1101,9 +2209,12 @@ const HomePage = () => {
     <div className="bg-white w-[100%] ">
       {/* Hero Section */}
       <Hero />
+      
+       
 
       {/* Services Section */}
-      <Services />
+      
+      < Services/>
      
       {/* Featured Doctors Section */}
       <FeaturedDoctors />
@@ -1120,11 +2231,9 @@ const HomePage = () => {
       {/* services in easy to understand */}
       <ConsultationSection/>
       
-      {/* Testimonials with green medical accents */}
-      <Testimonials />
+    <MedicineStoreSection/>
 
-      {/* CTA Section with green medical styling */}
-      <CTA />
+      
       
       {/* mission vision section */}
        <DoctorAppointmentCards/>
