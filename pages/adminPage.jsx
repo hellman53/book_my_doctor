@@ -5,6 +5,7 @@ import { db } from "@/app/firebase/config";
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast"
 import {
   submitDoctorApplication,
   getUsersFromFirestore,
@@ -12,6 +13,8 @@ import {
   approveDoctorApplication,
   rejectDoctorApplication,
   getAnalyticsData,
+  getTechnicalSupportTickets,
+  updateTechnicalSupportTicket,
 } from "@/lib/firebase-users";
 import {
   ArrowRight,
@@ -26,7 +29,11 @@ import {
   Baby,
   Bone,
   UserCog,
-} from "lucide-react";
+  MessageCircle,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useUser();
@@ -34,11 +41,14 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [supportTickets, setSupportTickets] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState({
     totalUsers: 0,
@@ -48,6 +58,9 @@ export default function AdminDashboard() {
     approvedApplications: 0,
     rejectedApplications: 0,
     totalApplications: 0,
+    openTickets: 0,
+    resolvedTickets: 0,
+    totalTickets: 0,
   });
   const router = useRouter();
 
@@ -56,16 +69,37 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
 
-        // Fetch users
+        // Fetch users (sorted by createdAt descending)
         const firestoreUsers = await getUsersFromFirestore();
         if (firestoreUsers) {
-          setUsers(firestoreUsers);
+          const sortedUsers = firestoreUsers.sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB - dateA;
+          });
+          setUsers(sortedUsers);
         }
 
-        // Fetch doctor applications
+        // Fetch doctor applications (sorted by submittedAt descending)
         const doctorApplications = await getAllDoctorApplications();
         if (doctorApplications) {
-          setApplications(doctorApplications);
+          const sortedApplications = doctorApplications.sort((a, b) => {
+            const dateA = a.submittedAt?.toDate?.() || new Date(a.appliedDate || 0);
+            const dateB = b.submittedAt?.toDate?.() || new Date(b.appliedDate || 0);
+            return dateB - dateA;
+          });
+          setApplications(sortedApplications);
+        }
+
+        // Fetch technical support tickets (sorted by createdAt descending)
+        const tickets = await getTechnicalSupportTickets();
+        if (tickets) {
+          const sortedTickets = tickets.sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB - dateA;
+          });
+          setSupportTickets(sortedTickets);
         }
 
         // Fetch analytics data
@@ -112,6 +146,22 @@ export default function AdminDashboard() {
     );
   });
 
+  // Filter support tickets based on search term
+  const filteredTickets = supportTickets.filter((ticket) => {
+    const title = (ticket?.title || "").toLowerCase();
+    const issueType = (ticket?.issueType || "").toLowerCase();
+    const userName = (ticket?.userName || "").toLowerCase();
+    const email = (ticket?.userEmail || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    return (
+      title.includes(search) ||
+      issueType.includes(search) ||
+      userName.includes(search) ||
+      email.includes(search)
+    );
+  });
+
   const handleRoleChange = async (user, newRole) => {
     try {
       setUsers(
@@ -151,7 +201,12 @@ export default function AdminDashboard() {
         // Refresh users data
         const firestoreUsers = await getUsersFromFirestore();
         if (firestoreUsers) {
-          setUsers(firestoreUsers);
+          const sortedUsers = firestoreUsers.sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB - dateA;
+          });
+          setUsers(sortedUsers);
         }
 
         alert("Doctor application approved successfully!");
@@ -171,7 +226,7 @@ export default function AdminDashboard() {
     try {
       const result = await rejectDoctorApplication(
         application.id,
-        "admin-user-id",
+        user.id,
         "Rejected by admin"
       );
 
@@ -192,7 +247,12 @@ export default function AdminDashboard() {
         // Refresh users data
         const firestoreUsers = await getUsersFromFirestore();
         if (firestoreUsers) {
-          setUsers(firestoreUsers);
+          const sortedUsers = firestoreUsers.sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB - dateA;
+          });
+          setUsers(sortedUsers);
         }
 
         alert("Doctor application rejected successfully!");
@@ -207,7 +267,112 @@ export default function AdminDashboard() {
     setShowApproveModal(false);
     setSelectedApplication(null);
   };
-  // console.log("user id:", user.id)
+
+  const handleResolveTicket = async (ticket) => {
+    try {
+      const result = await updateTechnicalSupportTicket(ticket.id, {
+        status: 'resolved',
+        resolvedAt: new Date(),
+        resolvedBy: user.id,
+        resolvedByName: user.fullName
+      });
+
+      if (result.success) {
+        // Update local state
+        setSupportTickets(
+          supportTickets.map((t) =>
+            t.id === ticket.id ? { ...t, status: 'resolved', resolvedAt: new Date() } : t
+          )
+        );
+
+        // Refresh analytics data
+        const analytics = await getAnalyticsData();
+        if (analytics) {
+          setAnalyticsData(analytics);
+        }
+
+        toast.success('Support ticket marked as resolved!');
+      } else {
+        toast.error('Failed to resolve ticket: ' + result.error);
+      }
+    } catch (error) {
+      console.error("Error resolving ticket:", error);
+      toast.error('An error occurred while resolving the ticket.');
+    }
+
+    setShowTicketModal(false);
+    setSelectedTicket(null);
+  };
+
+  const handleReopenTicket = async (ticket) => {
+    try {
+      const result = await updateTechnicalSupportTicket(ticket.id, {
+        status: 'open',
+        resolvedAt: null,
+        resolvedBy: null,
+        resolvedByName: null
+      });
+
+      if (result.success) {
+        // Update local state
+        setSupportTickets(
+          supportTickets.map((t) =>
+            t.id === ticket.id ? { ...t, status: 'open', resolvedAt: null } : t
+          )
+        );
+
+        // Refresh analytics data
+        const analytics = await getAnalyticsData();
+        if (analytics) {
+          setAnalyticsData(analytics);
+        }
+
+        toast.success('Support ticket reopened!');
+      } else {
+        toast.error('Failed to reopen ticket: ' + result.error);
+      }
+    } catch (error) {
+      console.error("Error reopening ticket:", error);
+      toast.error('An error occurred while reopening the ticket.');
+    }
+
+    setShowTicketModal(false);
+    setSelectedTicket(null);
+  };
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      open: { color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="w-4 h-4" /> },
+      resolved: { color: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-4 h-4" /> },
+      pending: { color: 'bg-blue-100 text-blue-800', icon: <Clock className="w-4 h-4" /> }
+    };
+
+    const config = statusConfig[status] || statusConfig.open;
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+        {config.icon}
+        <span className="ml-1 capitalize">{status}</span>
+      </span>
+    );
+  };
+
+  const getPriorityBadge = (priority) => {
+    const priorityConfig = {
+      high: { color: 'bg-red-100 text-red-800', label: 'High' },
+      medium: { color: 'bg-orange-100 text-orange-800', label: 'Medium' },
+      low: { color: 'bg-blue-100 text-blue-800', label: 'Low' }
+    };
+
+    const config = priorityConfig[priority] || priorityConfig.low;
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+        {config.label}
+      </span>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-18">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -221,7 +386,7 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
             <p className="text-gray-600 mt-2">
-              Manage users and doctor applications
+              Manage users, applications, and support tickets
             </p>
           </div>
         </div>
@@ -246,7 +411,7 @@ export default function AdminDashboard() {
             </div>
             <input
               type="text"
-              placeholder="Search users or applications..."
+              placeholder="Search users, applications, or support tickets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
@@ -318,6 +483,24 @@ export default function AdminDashboard() {
                 </span>
               </button>
               <button
+                onClick={() => setActiveTab("support")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "support"
+                    ? "border-emerald-500 text-emerald-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <span className="flex items-center">
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Support Tickets
+                  {supportTickets.filter((ticket) => ticket.status === "open").length > 0 && (
+                    <span className="ml-2 bg-red-100 text-red-600 text-xs font-medium px-2 py-1 rounded-full">
+                      {supportTickets.filter((ticket) => ticket.status === "open").length}
+                    </span>
+                  )}
+                </span>
+              </button>
+              <button
                 onClick={() => setActiveTab("analytics")}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "analytics"
@@ -363,7 +546,7 @@ export default function AdminDashboard() {
             {activeTab === "users" && (
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Manage Users
+                  Manage Users ({filteredUsers.length})
                 </h2>
                 <div className="overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -382,6 +565,9 @@ export default function AdminDashboard() {
                           Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Joined
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -391,7 +577,6 @@ export default function AdminDashboard() {
                         <tr key={user.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                          
                               <div className="flex-shrink-0 h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center overflow-hidden">
                                 <img
                                   src={user.profileImage}
@@ -440,6 +625,12 @@ export default function AdminDashboard() {
                               {user.status}
                             </span>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.createdAt?.toDate?.() 
+                              ? user.createdAt.toDate().toLocaleDateString()
+                              : new Date(user.createdAt || 0).toLocaleDateString()
+                            }
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
                               onClick={() => {
@@ -463,7 +654,7 @@ export default function AdminDashboard() {
             {activeTab === "applications" && (
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Doctor Applications
+                  Doctor Applications ({filteredApplications.length})
                 </h2>
                 <div className="space-y-4">
                   {filteredApplications.map((application) => (
@@ -479,17 +670,25 @@ export default function AdminDashboard() {
                                 application.name ||
                                 "Unknown Doctor"}
                             </h3>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                application.status === "approved"
-                                  ? "bg-green-100 text-green-800"
-                                  : application.status === "rejected"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {application.status}
-                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  application.status === "approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : application.status === "rejected"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {application.status}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {application.submittedAt?.toDate
+                                  ? application.submittedAt.toDate().toLocaleDateString()
+                                  : new Date(application.appliedDate || 0).toLocaleDateString()
+                                }
+                              </span>
+                            </div>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
                             <div>
@@ -512,6 +711,7 @@ export default function AdminDashboard() {
                               <span className="font-medium">License:</span>{" "}
                               {application.licenseNumber || "Not provided"}
                             </div>
+                          </div>
                           <div className="mt-3">
                             <span className="font-medium text-sm">
                               Qualifications:
@@ -519,31 +719,6 @@ export default function AdminDashboard() {
                             <p className="text-sm text-gray-600">
                               {application.qualifications}
                             </p>
-                          </div>
-                          
-                          {application.status === "approved" && (
-                          <div className="mt-3">
-                            <span className="font-medium text-sm">
-                              Approved By:
-                            </span>
-                            <p className="text-sm text-gray-600">
-                              {application.qualifications}
-                            </p>
-                          </div>
-                          )}
-
-                          </div>
-                          <div className="mt-2 text-sm text-gray-500">
-                            Applied on:{" "}
-                            {application.submittedAt?.toDate
-                              ? application.submittedAt
-                                  .toDate()
-                                  .toLocaleDateString()
-                              : application.appliedDate
-                              ? new Date(
-                                  application.appliedDate
-                                ).toLocaleDateString()
-                              : "Unknown date"}
                           </div>
                         </div>
                       </div>
@@ -608,13 +783,117 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Support Tickets Tab */}
+            {activeTab === "support" && (
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Technical Support Tickets ({filteredTickets.length})
+                </h2>
+                <div className="space-y-4">
+                  {filteredTickets.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="border border-gray-200 rounded-lg p-6 hover:border-emerald-300 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {ticket.title}
+                            </h3>
+                            {getStatusBadge(ticket.status)}
+                            {getPriorityBadge(ticket.priority)}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                            <div>
+                              <span className="font-medium">User:</span>{" "}
+                              {ticket.userName || "Unknown User"}
+                            </div>
+                            <div>
+                              <span className="font-medium">Email:</span>{" "}
+                              {ticket.userEmail || "Not provided"}
+                            </div>
+                            <div>
+                              <span className="font-medium">Issue Type:</span>{" "}
+                              {ticket.issueType || "General"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <span className="font-medium text-sm">Description:</span>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {ticket.description}
+                        </p>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-500">
+                          Submitted: {ticket.createdAt?.toDate?.() 
+                            ? ticket.createdAt.toDate().toLocaleString()
+                            : new Date(ticket.createdAt || 0).toLocaleString()
+                          }
+                          {ticket.resolvedAt && (
+                            <span className="ml-4">
+                              Resolved: {ticket.resolvedAt?.toDate?.() 
+                                ? ticket.resolvedAt.toDate().toLocaleString()
+                                : new Date(ticket.resolvedAt || 0).toLocaleString()
+                              }
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setShowTicketModal(true);
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                          >
+                            View Details
+                          </button>
+                          {ticket.status === 'open' ? (
+                            <button
+                              onClick={() => handleResolveTicket(ticket)}
+                              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                            >
+                              Mark Resolved
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleReopenTicket(ticket)}
+                              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium text-sm"
+                            >
+                              Reopen
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredTickets.length === 0 && (
+                    <div className="text-center py-12">
+                      <MessageCircle className="w-16 h-16 mx-auto text-gray-400" />
+                      <h3 className="mt-4 text-lg font-medium text-gray-900">
+                        No support tickets found
+                      </h3>
+                      <p className="mt-2 text-gray-500">
+                        No support tickets match your search criteria.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Analytics Tab */}
             {activeTab === "analytics" && (
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">
                   Analytics Overview
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-100">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
@@ -789,6 +1068,40 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-6 border border-orange-100">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <MessageCircle className="w-6 h-6 text-orange-600" />
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-sm font-medium text-gray-500">
+                          Open Support Tickets
+                        </h3>
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {analyticsData.openTickets}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg p-6 border border-teal-100">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                          <CheckCircle className="w-6 h-6 text-teal-600" />
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-sm font-medium text-gray-500">
+                          Resolved Tickets
+                        </h3>
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {analyticsData.resolvedTickets}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Additional Statistics */}
@@ -831,6 +1144,44 @@ export default function AdminDashboard() {
                       </div>
                       <div className="text-sm text-gray-500">
                         Pending Review
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Support Ticket Statistics */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Support Ticket Statistics
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-orange-600">
+                        {analyticsData.totalTickets}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Total Tickets
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">
+                        {analyticsData.totalTickets > 0
+                          ? Math.round(
+                              (analyticsData.resolvedTickets /
+                                analyticsData.totalTickets) *
+                                100
+                            )
+                          : 0}
+                        %
+                      </div>
+                      <div className="text-sm text-gray-500">Resolution Rate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-red-600">
+                        {analyticsData.openTickets}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Open Tickets
                       </div>
                     </div>
                   </div>
@@ -1212,6 +1563,255 @@ export default function AdminDashboard() {
                       Approve Application
                     </button>
                   </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Support Ticket Details Modal */}
+        {showTicketModal && selectedTicket && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-4xl w-full mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Support Ticket Details
+                  </h3>
+                  <p className="text-gray-600 mt-1">
+                    Complete information about the support request
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-2"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Ticket Header */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        {selectedTicket.title}
+                      </h4>
+                      <div className="flex items-center space-x-3 mt-2">
+                        {getStatusBadge(selectedTicket.status)}
+                        {getPriorityBadge(selectedTicket.priority)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-500">Ticket ID</div>
+                      <div className="text-sm font-mono text-gray-900">{selectedTicket.id}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Information */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    User Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        User Name
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedTicket.userName || "Unknown User"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        Email
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedTicket.userEmail || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        User ID
+                      </label>
+                      <p className="text-gray-900 font-mono text-sm">
+                        {selectedTicket.userId || "Not provided"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        Contact Number
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedTicket.contactNumber || "Not provided"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Issue Details */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Issue Details
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        Issue Type
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedTicket.issueType || "General"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">
+                        Submitted
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedTicket.createdAt?.toDate?.() 
+                          ? selectedTicket.createdAt.toDate().toLocaleString()
+                          : new Date(selectedTicket.createdAt || 0).toLocaleString()
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                      Description
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                      {selectedTicket.description || "No description provided"}
+                    </p>
+                  </div>
+                  {selectedTicket.additionalDetails && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500 mb-2">
+                        Additional Details
+                      </label>
+                      <p className="text-gray-900 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                        {selectedTicket.additionalDetails}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Transaction Details (if applicable) */}
+                {(selectedTicket.transactionId || selectedTicket.doctorName) && (
+                  <div className="border rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                      Transaction & Booking Details
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {selectedTicket.transactionId && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">
+                            Transaction ID
+                          </label>
+                          <p className="text-gray-900 font-mono">
+                            {selectedTicket.transactionId}
+                          </p>
+                        </div>
+                      )}
+                      {selectedTicket.amount && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">
+                            Amount
+                          </label>
+                          <p className="text-gray-900">
+                            {selectedTicket.amount}
+                          </p>
+                        </div>
+                      )}
+                      {selectedTicket.doctorName && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">
+                            Doctor Name
+                          </label>
+                          <p className="text-gray-900">
+                            {selectedTicket.doctorName}
+                          </p>
+                        </div>
+                      )}
+                      {selectedTicket.appointmentDate && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">
+                            Appointment Date
+                          </label>
+                          <p className="text-gray-900">
+                            {selectedTicket.appointmentDate}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Resolution Information */}
+                {selectedTicket.status === 'resolved' && (
+                  <div className="border rounded-lg p-4 bg-green-50">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                      Resolution Information
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500">
+                          Resolved By
+                        </label>
+                        <p className="text-gray-900">
+                          {selectedTicket.resolvedByName || "Admin"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-500">
+                          Resolved At
+                        </label>
+                        <p className="text-gray-900">
+                          {selectedTicket.resolvedAt?.toDate?.() 
+                            ? selectedTicket.resolvedAt.toDate().toLocaleString()
+                            : new Date(selectedTicket.resolvedAt || 0).toLocaleString()
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6 pt-6 border-t">
+                <button
+                  onClick={() => setShowTicketModal(false)}
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                >
+                  Close
+                </button>
+                {selectedTicket.status === 'open' ? (
+                  <button
+                    onClick={() => handleResolveTicket(selectedTicket)}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Mark as Resolved
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleReopenTicket(selectedTicket)}
+                    className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                  >
+                    Reopen Ticket
+                  </button>
                 )}
               </div>
             </div>
