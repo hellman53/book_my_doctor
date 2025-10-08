@@ -174,18 +174,21 @@ const MedicineStore = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 mt-10">
       {/* Enhanced Hero Section */}
-      <section className="relative bg-gradient-to-r from-emerald-600 to-blue-600 text-white py-20 px-6 md:px-20 overflow-hidden">
+      <section className="relative bg-gradient-to-r from-emerald-50 to-blue-50 text-white py-20 px-6 md:px-20 overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+          <h1 className="text-4xl text-gray-600 md:text-6xl font-bold mb-6 leading-tight">
             Your Trusted
-            <span className="block bg-gradient-to-r from-yellow-300 to-emerald-300 bg-clip-text text-transparent">
-              Online Pharmacy 💊
+            <div className="w-full flex text-center justify-center">
+            <span className="block bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">
+              Online Pharmacy 
             </span>
+            <span className="">💊</span>
+            </div>
           </h1>
-          <p className="text-xl md:text-2xl opacity-90 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-500 md:text-2xl opacity-90 mb-8 max-w-3xl mx-auto leading-relaxed">
             Get genuine medicines, healthcare products, and expert advice delivered to your doorstep
           </p>
           
@@ -197,7 +200,7 @@ const MedicineStore = () => {
               placeholder="Search medicines, brands, or symptoms..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-emerald-300 shadow-xl"
+              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-emerald-300 shadow-xl"
             />
           </div>
 

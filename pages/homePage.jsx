@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
+import { useUser } from "@clerk/nextjs";
 
 // import { db } from "../app/firebase/config";
 // import { collection, addDoc } from "firebase/firestore";
@@ -7,18 +8,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Stethoscope,
   Star,
-  MapPin,
   Calendar,
   Video,
-  Brain,
-  Heart,
-  Eye,
-  Baby,
-  Bone,
+  Grid2X2,
+  Users,
+  Clock,
+  Shield,
+  PlayCircle 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,138 +31,305 @@ import DoctorForm from "@/pages/DoctorForm";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const Hero = () => {
+  const { user, isLoaded } = useUser();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const stats = [
+    { number: "5000+", label: "Happy Patients", icon: <Users className="w-4 h-4" /> },
+    { number: "200+", label: "Expert Doctors", icon: <Star className="w-4 h-4" /> },
+    { number: "24/7", label: "Available", icon: <Clock className="w-4 h-4" /> },
+    { number: "50+", label: "Specialties", icon: <Shield className="w-4 h-4" /> }
+  ];
+
+  const features = [
+    { icon: <Video className="w-5 h-5" />, text: "Video Consultations" },
+    { icon: <Calendar className="w-5 h-5" />, text: "Easy Booking" },
+    { icon: <Shield className="w-5 h-5" />, text: "Secure & Private" }
+  ];
+
   return (
-    <section className="hero relative overflow-hidden bg-white py-9">
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* LEFT TEXT CONTENT */}
-          <div className="text-center lg:text-left space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center justify-center lg:justify-start">
-              <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full mr-2 animate-pulse" />
-              <Badge
-                variant="outline"
-                className="bg-white/80 backdrop-blur-sm border border-emerald-200 px-4 py-2 text-emerald-700 text-sm font-medium rounded-full shadow-sm"
-              >
-                🏥 Healthcare made simple
-              </Badge>
-            </div>
+    <section className="relative min-h-screen bg-gradient-to-br from-white via-emerald-50 to-blue-50 overflow-hidden mt-8 xl:mt-8">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-            {/* Main Heading */}
-            <div className="space-y-4">
-              {/* Dynamic Heading - 60px */}
-              <div className="h-24 lg:h-28 flex items-center justify-center lg:justify-start">
-                <h1 className="text-4xl lg:text-[60px] font-bold leading-tight">
-                  <span className="text-gray-900 block">
-                    <Typewriter
-                      words={[
-                        "Connect with doctors",
-                        "Book appointments",
-                        "Manage your health",
-                      ]}
-                      loop={true}
-                      cursor
-                      cursorStyle="|"
-                      typeSpeed={70}
-                      deleteSpeed={50}
-                      delaySpeed={2000}
-                    />
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center pt-16 pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
+            
+            {/* Left Content - Text & CTA */}
+            <div className="text-center lg:text-left space-y-8 lg:space-y-10">
+              
+              {/* Welcome Message for Logged-in Users */}
+              {user && isLoaded && (
+                <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-emerald-200 shadow-sm mb-8">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-emerald-700">
+                    👋 Welcome back, {user.firstName || 'there'}!
                   </span>
-                </h1>
+                </div>
+              )}
+
+              {/* Main Badge */}
+              {/* <div className="inline-flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <Badge className="bg-white/90 backdrop-blur-sm border border-emerald-200 text-emerald-700 px-4 py-2 text-sm font-semibold shadow-sm hover:bg-white">
+                    🚀 Next-Gen Healthcare
+                  </Badge>
+                </div>
+                <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                  <span>Trusted by thousands</span>
+                </div>
+              </div> */}
+
+              {/* Main Heading */}
+              <div className="space-y-4 lg:space-y-6">
+                {/* Dynamic Typing Text */}
+                {/* <div className="h-20 lg:h-24 flex items-center justify-center lg:justify-start">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+                    <span className="block text-gray-900">
+                      <Typewriter
+                        words={[
+                          "Healthcare Revolutionized",
+                          "Doctors at Your Fingertips",
+                          "Wellness Made Simple",
+                          "Your Health, Our Priority"
+                        ]}
+                        loop={true}
+                        cursor
+                        cursorStyle="|"
+                        typeSpeed={80}
+                        deleteSpeed={50}
+                        delaySpeed={2500}
+                      />
+                    </span>
+                  </h1>
+                </div> */}
+
+                {/* Static Heading with Gradient */}
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                  <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-600 bg-clip-text text-transparent">
+                    {isMobile ? "BookMyDoc" : "Experience Healthcare Like Never Before"}
+                  </span>
+                </h2>
               </div>
 
-              {/* Static Heading with Gradient - 60px */}
-              <h2 className="text-4xl lg:text-[60px] font-bold leading-tight">
-                <span 
-                  className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-blue-500 bg-clip-text text-transparent"
+              {/* Description */}
+              <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                Connect with top doctors, book instant appointments, and manage your health journey 
+                seamlessly—all in one secure platform designed for modern healthcare needs.
+              </p>
+
+              {/* Feature Pills */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-200 shadow-sm"
+                  >
+                    <div className="text-emerald-600">
+                      {feature.icon}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {feature.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button
+                  asChild
+                  size="lg"
+                  className="relative bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-bold rounded-2xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-2xl hover:shadow-3xl active:scale-95 py-6 px-8 group/btn min-w-[200px]"
                 >
-                  Consult with Doctors<br />Anytime, Anywhere
-                </span>
-              </h2>
-            </div>
+                  <Link href="/doctors" className="flex items-center justify-center gap-3">
+                    <span className="text-lg">Find Doctors Now</span>
+                    <ArrowRight className="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
 
-            {/* Description */}
-            <p className="text-gray-600 text-lg sm:text-xl max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Book appointments, consult via video, and manage your healthcare
-              journey all in one secure platform.
-            </p>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-gray-300 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-2xl hover:bg-white hover:border-emerald-500 hover:text-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 py-6 px-8 group/btn min-w-[200px]"
+                >
+                  <Link href="/about" className="flex items-center justify-center gap-3">
+                    <PlayCircle className="h-5 w-5" />
+                    <span className="text-lg">How It Works</span>
+                  </Link>
+                </Button>
+              </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button
-                asChild
-                size="lg"
-                className="relative bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 py-6 px-8 group/btn"
-              >
-                <Link href="/onboarding" className="flex items-center gap-2">
-                  Get Started 
-                  <ArrowRight className="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                size="lg"
-                className="relative bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 py-6 px-8 group/btn"
-              >
-                <Link href="/doctors" className="flex items-center gap-2">
-                  Find Doctors
-                  <ArrowRight className="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* RIGHT IMAGE */}
-          <div className="relative">
-            {/* Mobile View */}
-            <div className="block lg:hidden relative h-[300px] sm:h-[350px] rounded-2xl overflow-hidden shadow-2xl">
-              <Image
-                src="/banner2.png"
-                alt="Doctor consultation"
-                fill
-                priority
-                className="object-cover object-center"
-              />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent"></div>
-            </div>
-
-            {/* Desktop View */}
-            <div className="hidden lg:block relative h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
-              <Image
-                src="/banner5.jpg"
-                alt="Doctor consultation"
-                fill
-                priority
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
-              />
-              
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
-              
-              {/* Animated Border */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-            </div>
-
-            {/* Stats Badge - Desktop Only */}
-            <div className="hidden lg:block absolute -bottom-4 -right-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/50">
-              <div className="text-center">
-                <div className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                  5000+
+              {/* Stats Grid - Desktop Only */}
+              {!isMobile && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-8">
+                  {stats.map((stat, index) => (
+                    <div
+                      key={index}
+                      className="text-center lg:text-left p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
+                    >
+                      <div className="flex items-center justify-center lg:justify-start space-x-2 mb-2">
+                        <div className="text-emerald-600">
+                          {stat.icon}
+                        </div>
+                        <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                          {stat.number}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-xs text-gray-600 font-medium">
-                  Happy Patients
+              )}
+            </div>
+
+            {/* Right Content - Image & Visual Elements */}
+            {!isMobile && (
+              <div className="relative">
+                {/* Main Image Container */}
+                <div className="relative">
+                  {/* Floating Card 1 */}
+                  <div className="absolute -top-8 -left-8 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/50 transform rotate-3 z-10">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <Calendar className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900">Instant Booking</div>
+                        <div className="text-sm text-gray-600">24/7 Available</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating Card 2 */}
+                  <div className="absolute -bottom-6 -right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/50 transform -rotate-2 z-10">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <Video className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900">Video Consult</div>
+                        <div className="text-sm text-gray-600">Anywhere, Anytime</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Image */}
+                  <div className="relative h-[600px] rounded-3xl overflow-hidden  group">
+                    <Image
+                      src="/hero3.jpg"
+                      alt="Modern healthcare platform showing doctor consultation"
+                      fill
+                      priority
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    />
+                    
+                    {/* Gradient Overlay */}
+                    {/* <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-blue-500/5"></div> */}
+                    
+                    {/* Animated Border */}
+                    {/* <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div> */}
+                  </div>
+                </div>
+
+                {/* Background Decorative Elements */}
+                <div className="absolute -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full blur-3xl opacity-10"></div>
+              </div>
+            )}
+
+            {/* Mobile Only Stats & Features */}
+            {isMobile && (
+              <div className="space-y-6">
+                {/* Stats Grid for Mobile */}
+                <div className="grid grid-cols-2 gap-4">
+                  {stats.map((stat, index) => (
+                    <div
+                      key={index}
+                      className="text-center p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-sm"
+                    >
+                      <div className="flex items-center justify-center space-x-2 mb-2">
+                        <div className="text-emerald-600">
+                          {stat.icon}
+                        </div>
+                        <div className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                          {stat.number}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile CTA Enhancement */}
+                <div className="bg-gradient-to-r from-emerald-500 to-blue-500 rounded-3xl p-6 text-white text-center shadow-2xl">
+                  <h3 className="text-xl font-bold mb-2">Start Your Health Journey Today</h3>
+                  <p className="text-emerald-100 text-sm mb-4">
+                    Join thousands of happy patients using BookMyDoc
+                  </p>
+                  <Button
+                    asChild
+                    className="bg-white text-emerald-600 hover:bg-gray-100 font-bold rounded-xl py-3 px-6 shadow-lg"
+                  >
+                    <Link href="/onboarding" className="flex items-center justify-center gap-2">
+                      Get Started Free
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
-
-        {/* Background Decorative Elements */}
-        <div className="absolute top-10 -left-20 w-32 h-32 bg-emerald-50 rounded-full opacity-40 blur-3xl -z-10"></div>
-        <div className="absolute bottom-10 -right-20 w-32 h-32 bg-blue-50 rounded-full opacity-40 blur-3xl -z-10"></div>
       </div>
+
+      {/* Scroll Indicator - Desktop Only */}
+      {!isMobile && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-pulse"></div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </section>
   );
 };
@@ -892,7 +1060,7 @@ const PricingSection = () => {
 
 const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const router = useRouter();
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -900,30 +1068,30 @@ const FloatingActionButton = () => {
   const buttons = [
     {
       id: 1,
-      label: "Doctor Appointment",
+      label: "My Appointments",
       icon: "👨‍⚕️",
-      onClick: () => console.log("Doctor Appointment clicked"),
+      onClick: () => router.push("/my-appointments"),
       bgColor: "bg-emerald-500"
     },
     {
       id: 2,
-      label: "AI Assistant",
-      icon: "🤖",
-      onClick: () => console.log("AI Assistant clicked"),
-      bgColor: "bg-blue-500"
-    },
-    {
-      id: 3,
-      label: "Contact Us",
+      label: "Find Doctors",
       icon: "📞",
-      onClick: () => console.log("Contact Us clicked"),
+      onClick: () => router.push("/doctors"),
       bgColor: "bg-purple-500"
     },
     {
+      id: 3,
+      label: "AI Assistant",
+      icon: "🤖",
+      onClick: () => router.push("/ai-assistent"),
+      bgColor: "bg-blue-500"
+    },
+    {
       id: 4,
-      label: "WhatsApp",
+      label: "Supports",
       icon: "💬",
-      onClick: () => console.log("WhatsApp clicked"),
+      onClick: () => router.push("/technical-support"),
       bgColor: "bg-green-500"
     }
   ];
@@ -947,7 +1115,7 @@ const FloatingActionButton = () => {
         onClick={handleClick}
         onMouseEnter={handleBubbleEffect}
         onTouchStart={handleBubbleEffect}
-        className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative"
+        className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative"
       >
         {/* Bubble effect */}
         {isBubbling && (
@@ -958,9 +1126,9 @@ const FloatingActionButton = () => {
         <span className="text-lg">🛒</span>
         
         {/* Optional: Cart badge */}
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
+        {/* <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
           3
-        </div>
+        </div> */}
       </button>
     );
   };
@@ -999,21 +1167,23 @@ const FloatingActionButton = () => {
       </div>
 
       {/* Cart Button - Shows only when main menu is closed */}
-      <div className={`mb-3 absolute bottom-full right-0 transition-all duration-500 transform ${
-        !isOpen 
-          ? 'opacity-100 translate-y-0 scale-100' 
-          : 'opacity-0 translate-y-10 scale-50 pointer-events-none'
-      }`}>
-        <CartButton />
-      </div>
+      <Link href="/medicine-store">
+        <div className={`mb-3 absolute bottom-full right-0 transition-all duration-500 transform ${
+          !isOpen 
+            ? 'opacity-100 translate-y-0 scale-100' 
+            : 'opacity-0 translate-y-10 scale-50 pointer-events-none'
+        }`}>
+          <CartButton />
+        </div>
+      </Link>
 
       {/* Main Floating Button */}
       <button
         onClick={toggleMenu}
-        className="w-14 h-14 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 relative"
+        className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 relative"
       >
         <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-45' : 'rotate-0'}`}>
-          +
+          <Grid2X2 />
         </span>
       </button>
     </div>
