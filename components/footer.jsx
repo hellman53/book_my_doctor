@@ -17,6 +17,9 @@ import {
   Users,
   Warehouse,
   Truck,
+  X,
+  Contact2,
+  HelpCircle
 } from "lucide-react";
 
 export default function Footer() {
@@ -54,7 +57,7 @@ export default function Footer() {
                 href="#"
                 className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
               >
-                <Twitter className="h-5 w-5" />
+                <X className="h-5 w-5 font-bold" />
               </Link>
               <Link
                 href="#"
@@ -87,7 +90,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/search-doctors"
+                  href="/doctors"
                   className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
                 >
                   <span>Find Doctors</span>
@@ -95,7 +98,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/medical-chat"
+                  href="/ai-assistant"
                   className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
                 >
                   <span>AI Assistant</span>
@@ -111,7 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="/privacy-policy"
                   className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
                 >
                   <span>Privacy Policy</span>
@@ -119,7 +122,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href="/terms-of-service"
                   className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
                 >
                   <span>Terms of Service</span>
@@ -137,11 +140,6 @@ export default function Footer() {
               <li className="text-emerald-100 flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-emerald-400" />
                 <span>General Medicine</span>
-              </li>
-
-              <li className="text-emerald-100 flex items-center space-x-2">
-                <Heart className="h-4 w-4 text-emerald-400" />
-                <span>Pediatrics</span>
               </li>
 
               <li className="text-emerald-100 flex items-center space-x-2">
@@ -168,6 +166,15 @@ export default function Footer() {
                 >
                   <Truck className="h-4 w-4 text-emerald-400" />
                   <span>Register as Distributor</span>
+                </Link>
+              </li>
+              <li className="text-emerald-100 flex items-center space-x-2">
+                <Link
+                  href="/technical-support"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
+                  <Contact2 className="h-4 w-4 text-emerald-400" />
+                  <span>Technical Support</span>
                 </Link>
               </li>
             </ul>
