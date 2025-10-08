@@ -1319,6 +1319,180 @@ const Feature = () => {
 };
 
 
+const ChatbotFeatures = () => {
+  const features = [
+    {
+      icon: "👨‍⚕️",
+      title: "Doctor Suggestions",
+      description: "Get instant medical advice and doctor recommendations based on your symptoms and health concerns"
+    },
+    {
+      icon: "🕒",
+      title: "24/7 Availability",
+      description: "Round-the-clock assistance whenever you need medical guidance, even during late hours"
+    },
+    {
+      icon: "💊",
+      title: "Medication Reminders",
+      description: "Never miss your medication with smart reminders and dosage tracking"
+    },
+    {
+      icon: "🏥",
+      title: "Hospital Locator",
+      description: "Find nearby hospitals, clinics, and specialists based on your location and needs"
+    },
+    {
+      icon: "📊",
+      title: "Health Analytics",
+      description: "Track your health metrics and get personalized insights and trends"
+    },
+    {
+      icon: "🔒",
+      title: "Secure & Private",
+      description: "Your health data is encrypted and completely confidential"
+    }
+  ];
+
+  return (
+    <section className="bg-white py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Heading */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl lg:text-[60px] font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent mb-6 leading-tight">
+            AI Health Assistant
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Your personal healthcare companion powered by advanced AI technology. 
+            Get instant medical guidance, support, and resources anytime, anywhere.
+          </p>
+        </div>
+
+        {/* Features - Horizontal Scroll on Mobile */}
+        <div className="relative">
+          {/* Mobile Horizontal Scroll */}
+          <div className="flex lg:hidden overflow-x-auto pb-6 -mx-4 px-4 space-x-4 scrollbar-hide">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="flex-shrink-0 w-80 rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 shadow-lg"
+              >
+                <div className="bg-white rounded-2xl p-6 h-full">
+                  {/* Icon */}
+                  <div className="w-14 h-14 bg-gradient-to-r from-green-400 to-blue-400 rounded-2xl flex items-center justify-center text-2xl mb-4">
+                    {feature.icon}
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-gray-800 mb-3">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-gray-600 leading-relaxed text-sm">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Grid */}
+          <div className="hidden lg:grid lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="bg-white rounded-2xl p-8 h-full hover:scale-[1.02] transition-transform duration-300">
+                  {/* Icon */}
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-400 rounded-2xl flex items-center justify-center text-2xl mb-6 hover:scale-110 transition-transform duration-300">
+                    {feature.icon}
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats with Gradient Borders */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 text-center">
+          {[
+            { number: "50K+", label: "Users Helped" },
+            { number: "24/7", label: "Availability" },
+            { number: "98%", label: "Accuracy Rate" },
+            { number: "5min", label: "Avg Response Time" }
+          ].map((stat, index) => (
+            <div 
+              key={index}
+              className="rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 shadow-lg"
+            >
+              <div className="bg-white rounded-2xl p-6">
+                <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                  {stat.number}
+                </div>
+                <div className="text-gray-600 mt-2 font-medium">{stat.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Section with Gradient Border */}
+        <div className="text-center mt-16">
+          <div className="rounded-3xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400">
+            <div className="bg-white rounded-3xl p-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+                Ready to Experience Better Healthcare?
+              </h2>
+              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Start chatting with our AI health assistant today and get personalized medical guidance in seconds.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  Start Chat Now
+                </button>
+                <button className="rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 hover:scale-105 transition-all duration-300">
+                  <div className="bg-white rounded-2xl px-8 py-4">
+                    <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent font-semibold text-lg">
+                      Learn More
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom CSS for scrollbar hiding */}
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+    </section>
+  );
+};
+
+
+
+
+
+
+
 /* moving testimonial section api */
 const mockTestimonials = [
   {
@@ -1684,7 +1858,6 @@ Angle270</p>
 
 
 /* services in easy to understand*/ 
-
 const ConsultationSection = () => {
   const consultations = [
     {
@@ -2037,10 +2210,8 @@ const ConsultationSection = () => {
 
 
 
+
 /* mission vision section */
-
-
-
 const DoctorAppointmentCards = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -2322,7 +2493,7 @@ const HomePage = () => {
       
     <MedicineStoreSection/>
 
-      
+      <ChatbotFeatures/>
       
       {/* mission vision section */}
        <DoctorAppointmentCards/>
