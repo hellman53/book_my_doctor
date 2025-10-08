@@ -1,8 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
+import { getAuth } from "@clerk/nextjs/server";
 
 const ai = new GoogleGenAI({});
 
-// Always short + safe prompt
 const SYSTEM_PROMPT = `
 You are a medical assistant chatbot.
 Rules:
@@ -13,6 +13,8 @@ Rules:
 
 export async function POST(req) {
   try {
+    const { userId } = getAuth(req);
+    
     const body = await req.json();
     const { messages } = body;
 
@@ -30,7 +32,6 @@ export async function POST(req) {
 
     const prompt = `${SYSTEM_PROMPT}\n\nConversation:\n${convoText}\n\nAssistant:`;
 
-    // Call the Gemini API properly: contents expects an array of messages with role & text parts
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
@@ -41,7 +42,6 @@ export async function POST(req) {
       ]
     });
 
-    // Parse reply text safely from response
     const reply = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "⚠️ No response.";
 
     return new Response(JSON.stringify({ text: reply }), { status: 200 });

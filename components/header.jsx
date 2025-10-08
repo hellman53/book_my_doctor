@@ -199,7 +199,7 @@ const Header = () => {
                   }`}
                 >
                   <Calendar className={`h-4 w-4 ${
-                    isActiveLink('/appointments') ? 'text-emerald-600' : ''
+                    isActiveLink('/my-appointments') ? 'text-emerald-600' : ''
                   }`} />
                   My Appointments
                 </Button>
