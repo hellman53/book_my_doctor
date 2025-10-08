@@ -14,7 +14,9 @@ import {
   Heart,
   Shield,
   Clock,
-  Users
+  Users,
+  Warehouse,
+  Truck,
 } from "lucide-react";
 
 export default function Footer() {
@@ -37,20 +39,33 @@ export default function Footer() {
               <div className="font-bold text-2xl">BookMyDoc</div>
             </div>
             <p className="text-emerald-100 leading-relaxed">
-              Your trusted healthcare partner providing quality medical services with modern technology. 
-              Connecting patients with verified doctors nationwide.
+              Your trusted healthcare partner providing quality medical services
+              with modern technology. Connecting patients with verified doctors
+              nationwide.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              <Link
+                href="#"
+                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+              >
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              <Link
+                href="#"
+                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+              >
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              <Link
+                href="#"
+                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+              >
                 <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              <Link
+                href="#"
+                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+              >
                 <Linkedin className="h-5 w-5" />
               </Link>
             </div>
@@ -58,35 +73,55 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-emerald-300">Quick Links</h3>
+            <h3 className="text-xl font-semibold text-emerald-300">
+              Quick Links
+            </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>Home</span>
                 </Link>
               </li>
               <li>
-                <Link href="/search-doctors" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/search-doctors"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>Find Doctors</span>
                 </Link>
               </li>
               <li>
-                <Link href="/medical-chat" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/medical-chat"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>AI Assistant</span>
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/about"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>About Us</span>
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/privacy"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>Privacy Policy</span>
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2">
+                <Link
+                  href="/terms"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
                   <span>Terms of Service</span>
                 </Link>
               </li>
@@ -95,24 +130,20 @@ export default function Footer() {
 
           {/* Services */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-emerald-300">Our Services</h3>
+            <h3 className="text-xl font-semibold text-emerald-300">
+              Our Services
+            </h3>
             <ul className="space-y-3">
               <li className="text-emerald-100 flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-emerald-400" />
                 <span>General Medicine</span>
               </li>
-              <li className="text-emerald-100 flex items-center space-x-2">
-                <Heart className="h-4 w-4 text-emerald-400" />
-                <span>Cardiology</span>
-              </li>
+
               <li className="text-emerald-100 flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-emerald-400" />
                 <span>Pediatrics</span>
               </li>
-              <li className="text-emerald-100 flex items-center space-x-2">
-                <Heart className="h-4 w-4 text-emerald-400" />
-                <span>Dermatology</span>
-              </li>
+
               <li className="text-emerald-100 flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-emerald-400" />
                 <span>Virtual Consultations</span>
@@ -121,18 +152,40 @@ export default function Footer() {
                 <Heart className="h-4 w-4 text-emerald-400" />
                 <span>Emergency Care</span>
               </li>
+              <li className="text-emerald-100 flex items-center space-x-2">
+                <Link
+                  href="/doctor-form"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
+                  <Stethoscope className="h-4 w-4 text-emerald-400" />
+                  <span className="">Register as Doctor</span>
+                </Link>
+              </li>
+              <li className="text-emerald-100 flex items-center space-x-2">
+                <Link
+                  href="/"
+                  className="text-emerald-100 hover:text-white transition-colors flex items-center space-x-2"
+                >
+                  <Truck className="h-4 w-4 text-emerald-400" />
+                  <span>Register as Distributor</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-emerald-300">Contact Us</h3>
+            <h3 className="text-xl font-semibold text-emerald-300">
+              Contact Us
+            </h3>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-emerald-400" />
                 <div>
                   <div className="text-emerald-100">123 Healthcare Street</div>
-                  <div className="text-emerald-200 text-sm">Gorakhpur, UP 273001</div>
+                  <div className="text-emerald-200 text-sm">
+                    Gorakhpur, UP 273001
+                  </div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -147,7 +200,9 @@ export default function Footer() {
                 <Clock className="h-5 w-5 text-emerald-400" />
                 <div>
                   <div className="text-emerald-100">24/7 Emergency</div>
-                  <div className="text-emerald-200 text-sm">Always available</div>
+                  <div className="text-emerald-200 text-sm">
+                    Always available
+                  </div>
                 </div>
               </div>
             </div>
@@ -195,7 +250,8 @@ export default function Footer() {
               &copy; {year ? year : ""} BookMyDoc. All rights reserved.
             </div>
             <div className="text-emerald-200 text-sm">
-              Designed & Developed with ❤️ by <span className="text-emerald-300 font-semibold">Angle270</span>
+              Designed & Developed with ❤️ by{" "}
+              <span className="text-emerald-300 font-semibold">Angle270</span>
             </div>
           </div>
         </div>

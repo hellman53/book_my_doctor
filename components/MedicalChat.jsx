@@ -696,7 +696,7 @@ export default function MedicalChat() {
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col">
           {/* Enhanced Header */}
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b border-emerald-500/30">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-6 py-3 sm:py-3 flex items-center justify-between border-b border-emerald-500/30">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
