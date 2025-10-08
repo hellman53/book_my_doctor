@@ -130,7 +130,7 @@ const Hero = () => {
             {/* Desktop View */}
             <div className="hidden lg:block relative h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
               <Image
-                src="/banner2.png"
+                src="/banner5.jpg"
                 alt="Doctor consultation"
                 fill
                 priority
@@ -928,6 +928,43 @@ const FloatingActionButton = () => {
     }
   ];
 
+  // Cart button with bubble effect
+  const CartButton = () => {
+    const [isBubbling, setIsBubbling] = useState(false);
+
+    const handleClick = () => {
+      console.log("Cart clicked");
+      // Add your cart functionality here
+    };
+
+    const handleBubbleEffect = () => {
+      setIsBubbling(true);
+      setTimeout(() => setIsBubbling(false), 600);
+    };
+
+    return (
+      <button
+        onClick={handleClick}
+        onMouseEnter={handleBubbleEffect}
+        onTouchStart={handleBubbleEffect}
+        className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 relative"
+      >
+        {/* Bubble effect */}
+        {isBubbling && (
+          <div className="absolute inset-0 rounded-full border-4 border-orange-300 animate-ping opacity-75"></div>
+        )}
+        
+        {/* Cart icon */}
+        <span className="text-lg">🛒</span>
+        
+        {/* Optional: Cart badge */}
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
+          3
+        </div>
+      </button>
+    );
+  };
+
   return (
     <div className="fixed bottom-6 right-8 z-50">
       {/* Floating Action Buttons - Stack vertically to the LEFT of main button */}
@@ -959,6 +996,15 @@ const FloatingActionButton = () => {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Cart Button - Shows only when main menu is closed */}
+      <div className={`mb-3 absolute bottom-full right-0 transition-all duration-500 transform ${
+        !isOpen 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-10 scale-50 pointer-events-none'
+      }`}>
+        <CartButton />
       </div>
 
       {/* Main Floating Button */}
@@ -2465,7 +2511,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <Hero />
       
-       <FloatingActionButton/> 
+      <FloatingActionButton/> 
 
       {/* Services Section */}
       
@@ -2486,7 +2532,7 @@ const HomePage = () => {
       {/* services in easy to understand */}
       <ConsultationSection/>
       
-    <MedicineStoreSection/>
+      <MedicineStoreSection/>
 
       <ChatbotFeatures/>
       
