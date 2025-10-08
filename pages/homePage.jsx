@@ -1318,7 +1318,7 @@ const Feature = () => {
   );
 };
 
-
+/* chatbot section*/ 
 const ChatbotFeatures = () => {
   const features = [
     {
@@ -1430,7 +1430,7 @@ const ChatbotFeatures = () => {
             { number: "50K+", label: "Users Helped" },
             { number: "24/7", label: "Availability" },
             { number: "98%", label: "Accuracy Rate" },
-            { number: "5min", label: "Avg Response Time" }
+            { number: "5min", label: "Response Time" }
           ].map((stat, index) => (
             <div 
               key={index}
@@ -1486,11 +1486,6 @@ const ChatbotFeatures = () => {
     </section>
   );
 };
-
-
-
-
-
 
 
 /* moving testimonial section api */
