@@ -654,11 +654,6 @@ const FeaturedDoctors = () => {
 };
 
 
-
-
-
-
-
 const PricingSection = () => {
   const creditBenefits = [
     "1 Credit = 1 Consultation with any specialist doctor",
@@ -683,6 +678,8 @@ const PricingSection = () => {
         "Basic Health Records",
         "7 Days Follow-up",
         "Email Support",
+        "Prescription Storage",
+        "Health Tips & Reminders",
       ],
     },
     {
@@ -699,6 +696,7 @@ const PricingSection = () => {
         "30 Days Follow-up",
         "Health Records for 4",
         "Dedicated Care Manager",
+        "Free Nutrition & Lifestyle Guidance",
       ],
     },
     {
@@ -892,14 +890,89 @@ const PricingSection = () => {
 };
 
 
+const FloatingActionButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
 
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
+  const buttons = [
+    {
+      id: 1,
+      label: "Doctor Appointment",
+      icon: "👨‍⚕️",
+      onClick: () => console.log("Doctor Appointment clicked"),
+      bgColor: "bg-emerald-500"
+    },
+    {
+      id: 2,
+      label: "AI Assistant",
+      icon: "🤖",
+      onClick: () => console.log("AI Assistant clicked"),
+      bgColor: "bg-blue-500"
+    },
+    {
+      id: 3,
+      label: "Contact Us",
+      icon: "📞",
+      onClick: () => console.log("Contact Us clicked"),
+      bgColor: "bg-purple-500"
+    },
+    {
+      id: 4,
+      label: "WhatsApp",
+      icon: "💬",
+      onClick: () => console.log("WhatsApp clicked"),
+      bgColor: "bg-green-500"
+    }
+  ];
 
+  return (
+    <div className="fixed bottom-6 right-8 z-50">
+      {/* Floating Action Buttons - Stack vertically to the LEFT of main button */}
+      <div className={`flex flex-col items-end mb-3 absolute bottom-full right-0 space-y-3 transition-all duration-300 ${
+        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}>
+        {buttons.map((button, index) => (
+          <div
+            key={button.id}
+            className={`flex items-center transition-all duration-500 transform ${
+              isOpen 
+                ? 'opacity-100 translate-x-0 scale-100' 
+                : 'opacity-0 translate-x-10 scale-50'
+            }`}
+            style={{
+              transitionDelay: isOpen ? `${index * 100}ms` : '0ms'
+            }}
+          >
+            {/* Label on the left side */}
+            <div className="mr-2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg">
+              {button.label}
+            </div>
+            {/* Button */}
+            <button
+              onClick={button.onClick}
+              className={`${button.bgColor} w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110`}
+            >
+              <span className="text-lg">{button.icon}</span>
+            </button>
+          </div>
+        ))}
+      </div>
 
-
-
-
-
+      {/* Main Floating Button */}
+      <button
+        onClick={toggleMenu}
+        className="w-14 h-14 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 relative"
+      >
+        <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-45' : 'rotate-0'}`}>
+          +
+        </span>
+      </button>
+    </div>
+  );
+};
 
 
 
@@ -1966,8 +2039,10 @@ const ConsultationSection = () => {
 
 /* mission vision section */
 
+
+
 const DoctorAppointmentCards = () => {
-  const [currentIndex, setCurrentIndex] = useState(1); // start from middle card
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const cards = [
@@ -1997,11 +2072,8 @@ const DoctorAppointmentCards = () => {
     },
   ];
 
-  // Auto-slide every 4 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      handleNext();
-    }, 4000);
+    const interval = setInterval(() => handleNext(), 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -2022,19 +2094,19 @@ const DoctorAppointmentCards = () => {
     switch (position) {
       case "left":
         return {
-          transform: "translateX(-130%) scale(0.85)",
+          transform: "translateX(-135%) scale(0.9)",
           opacity: 1,
           zIndex: 10,
         };
       case "center":
         return {
-          transform: "translateX(0) scale(1)",
+          transform: "translateX(0) scale(1.05)",
           opacity: 1,
           zIndex: 30,
         };
       case "right":
         return {
-          transform: "translateX(130%) scale(0.85)",
+          transform: "translateX(135%) scale(0.9)",
           opacity: 1,
           zIndex: 10,
         };
@@ -2064,7 +2136,7 @@ const DoctorAppointmentCards = () => {
         </div>
 
         {/* Desktop Cards */}
-        <div className="hidden lg:flex items-center justify-center relative h-80 overflow-hidden mb-12">
+        <div className="hidden lg:flex items-center justify-center relative h-[380px] overflow-hidden mb-12">
           {cards.map((card, index) => {
             const position = getCardPosition(index);
             const style = {
@@ -2078,28 +2150,27 @@ const DoctorAppointmentCards = () => {
             return (
               <div
                 key={card.id}
-                className="absolute w-80 h-64 rounded-2xl cursor-pointer"
+                className="absolute w-[360px] h-[280px] rounded-2xl cursor-pointer"
                 style={style}
                 onClick={() => handleNext()}
               >
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
                   <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center">
                     <div className="p-6 h-full flex flex-col justify-center text-center w-full">
-                      {/* Icon */}
                       <div className="flex justify-center mb-4">
                         <div
-                          className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${card.gradient} p-0.5`}
+                          className={`w-18 h-18 rounded-2xl bg-gradient-to-r ${card.gradient} p-0.5`}
                         >
-                          <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-2xl">
+                          <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-3xl">
                             {card.icon}
                           </div>
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-bold text-gray-800 mb-3">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-3">
                         {card.title}
                       </h3>
-                      <p className="text-gray-700 leading-relaxed text-sm">
+                      <p className="text-gray-700 leading-relaxed text-base">
                         {card.description}
                       </p>
                     </div>
@@ -2110,31 +2181,30 @@ const DoctorAppointmentCards = () => {
           })}
         </div>
 
-        {/* Mobile Cards - Scrollable */}
+        {/* Mobile Cards */}
         <div className="block lg:hidden">
           <div className="relative">
             <div className="flex overflow-x-auto pb-8 space-x-4 hide-scrollbar snap-x snap-mandatory px-4">
               {cards.map((card) => (
-                <div key={card.id} className="flex-shrink-0 w-80 snap-center">
-                  <div className="relative bg-white rounded-2xl h-64">
+                <div key={card.id} className="flex-shrink-0 w-[320px] snap-center">
+                  <div className="relative bg-white rounded-2xl h-[260px]">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 p-0.5">
                       <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center">
                         <div className="p-6 h-full flex flex-col justify-center text-center w-full">
-                          {/* Icon */}
                           <div className="flex justify-center mb-4">
                             <div
-                              className={`w-14 h-14 rounded-xl bg-gradient-to-r ${card.gradient} p-0.5`}
+                              className={`w-16 h-16 rounded-xl bg-gradient-to-r ${card.gradient} p-0.5`}
                             >
-                              <div className="w-full h-full rounded-xl bg-white flex items-center justify-center text-xl">
+                              <div className="w-full h-full rounded-xl bg-white flex items-center justify-center text-2xl">
                                 {card.icon}
                               </div>
                             </div>
                           </div>
 
-                          <h3 className="text-lg font-bold text-gray-800 mb-3">
+                          <h3 className="text-xl font-bold text-gray-800 mb-3">
                             {card.title}
                           </h3>
-                          <p className="text-gray-700 leading-relaxed text-xs line-clamp-4">
+                          <p className="text-gray-700 leading-relaxed text-sm line-clamp-4">
                             {card.description}
                           </p>
                         </div>
@@ -2197,6 +2267,9 @@ const DoctorAppointmentCards = () => {
   );
 };
 
+
+
+
 const HomePage = () => {
   // const [name, setName] = useState("");
   // const [email, setEmail] = useState("");
@@ -2226,7 +2299,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <Hero />
       
-       
+       <FloatingActionButton/> 
 
       {/* Services Section */}
       
