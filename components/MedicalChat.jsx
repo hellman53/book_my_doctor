@@ -31,7 +31,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 
-// Dummy doctor data
+// Dummy doctor data (unchanged)
 const dummyDoctors = [
   {
     name: "Anjali Sharma",
@@ -175,6 +175,49 @@ const quickReplies = [
   "Stomach pain and nausea",
 ];
 
+// Faster animation variants
+const sidebarVariants = {
+  open: { 
+    x: 0, 
+    opacity: 1,
+    transition: { 
+      duration: 0.15,
+      ease: "easeOut"
+    }
+  },
+  closed: { 
+    x: -300, 
+    opacity: 0,
+    transition: { 
+      duration: 0.15,
+      ease: "easeIn"
+    }
+  }
+};
+
+const messageVariants = {
+  initial: { 
+    opacity: 0, 
+    y: 10,
+    transition: { duration: 0.1 }
+  },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.15 }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.1 }
+  }
+};
+
+const floatingButtonVariants = {
+  initial: { opacity: 0, scale: 0.8 },
+  animate: { opacity: 1, scale: 1, transition: { duration: 0.1 } },
+  exit: { opacity: 0, scale: 0.8, transition: { duration: 0.1 } }
+};
+
 export default function MedicalChat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -190,7 +233,7 @@ export default function MedicalChat() {
   const endRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Start new chat function
+  // Start new chat function (unchanged)
   const startNewChat = async () => {
     console.log("Starting new chat...");
 
@@ -201,34 +244,28 @@ export default function MedicalChat() {
       time: new Date(),
     };
 
-    // Clear current messages and show welcome message
     setMessages([welcomeMessage]);
     setCurrentChatId(null);
 
     if (user) {
       try {
         console.log("Creating new chat session for user:", user.id);
-        // Create new chat session
         const sessionId = await createNewChatSession(user.id);
         console.log("New session created with ID:", sessionId);
 
         if (sessionId) {
           setCurrentChatId(sessionId);
-          // Save the welcome message to the new session
           await saveUserMessage(user.id, sessionId, welcomeMessage);
 
-          // Reload sessions to update the sidebar
           const sessions = await getChatSessions(user.id);
           console.log("Updated sessions:", sessions);
           setChatSessions(sessions);
         } else {
           console.error("Failed to create new session");
-          // Fallback: just show welcome message without saving
           setMessages([welcomeMessage]);
         }
       } catch (error) {
         console.error("Error starting new chat:", error);
-        // Fallback: just show welcome message without saving
         setMessages([welcomeMessage]);
       }
     } else {
@@ -237,7 +274,7 @@ export default function MedicalChat() {
     }
   };
 
-  // Load chat function
+  // Load chat function (unchanged)
   const loadChat = async (chatId) => {
     if (user && chatId) {
       try {
@@ -263,7 +300,6 @@ export default function MedicalChat() {
         setMessages(formattedMessages);
         setCurrentChatId(chatId);
 
-        // Hide sidebar on mobile after selecting a chat
         if (window.innerWidth < 1024) {
           setShowSidebar(false);
         }
@@ -273,7 +309,7 @@ export default function MedicalChat() {
     }
   };
 
-  // Format date for display
+  // Format date for display (unchanged)
   const formatDate = (timestamp) => {
     if (!timestamp) return "Recently";
 
@@ -293,11 +329,10 @@ export default function MedicalChat() {
     });
   };
 
-  // Get chat preview from messages
+  // Get chat preview from messages (unchanged)
   const getChatPreview = (messages) => {
     if (!messages || messages.length === 0) return "New conversation";
 
-    // Find the first user message for preview
     const userMessage = messages.find((msg) => msg.role === "user");
     if (userMessage) {
       return userMessage.content.length > 35
@@ -305,7 +340,6 @@ export default function MedicalChat() {
         : userMessage.content;
     }
 
-    // If no user message, use assistant message
     const assistantMessage = messages.find((msg) => msg.role === "assistant");
     if (assistantMessage) {
       return (
@@ -318,29 +352,26 @@ export default function MedicalChat() {
     return "New conversation";
   };
 
-  // Get message count for display - FIXED VERSION
+  // Get message count for display - FIXED VERSION (unchanged)
   const getMessageCount = (session) => {
-    // Use the messageCount field from Firestore if available
     if (session.messageCount !== undefined) {
       return session.messageCount;
     }
-    // Fallback to messages array length
     return session.messages?.length || 0;
   };
 
-  // Clear chat history (placeholder function)
+  // Clear chat history (placeholder function) (unchanged)
   const clearChatHistory = async () => {
     if (
       confirm(
         "Are you sure you want to clear all chat history? This action cannot be undone."
       )
     ) {
-      // Implement clear history functionality here
       console.log("Clear history functionality to be implemented");
     }
   };
 
-  // Load chat history and set up real-time listener
+  // Load chat history and set up real-time listener (unchanged)
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -348,13 +379,11 @@ export default function MedicalChat() {
       if (user) {
         await initializeUserChat(user.id);
 
-        // Load chat sessions
         const sessions = await getChatSessions(user.id);
         console.log("Initial sessions loaded:", sessions);
         setChatSessions(sessions);
 
         if (sessions.length > 0) {
-          // Load the most recent chat
           const recentChat = sessions[0];
           setCurrentChatId(recentChat.id);
           const history = await getUserChatHistory(user.id, recentChat.id);
@@ -368,15 +397,12 @@ export default function MedicalChat() {
             }));
             setMessages(formattedMessages);
           } else {
-            // If recent chat has no messages, start new chat
             await startNewChat();
           }
         } else {
-          // Start new chat automatically if no sessions exist
           await startNewChat();
         }
       } else {
-        // User is not signed in - just show welcome message
         const welcomeMessage = {
           role: "assistant",
           content:
@@ -390,7 +416,7 @@ export default function MedicalChat() {
     initializeChat();
   }, [user, isLoaded]);
 
-  // Set up real-time listener when currentChatId changes
+  // Set up real-time listener when currentChatId changes (unchanged)
   useEffect(() => {
     if (user && currentChatId && currentChatId !== "new-session") {
       const unsubscribe = subscribeToChat(
@@ -411,7 +437,7 @@ export default function MedicalChat() {
     }
   }, [user, currentChatId]);
 
-  // Hide new chat button when scrolling in messages
+  // Hide new chat button when scrolling in messages (unchanged)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -422,7 +448,6 @@ export default function MedicalChat() {
         container.clientHeight + 100;
       setShowScrollBtn(!atBottom);
 
-      // Hide new chat button when not at top
       if (container.scrollTop > 100) {
         setShowNewChatButton(false);
       } else {
@@ -434,6 +459,7 @@ export default function MedicalChat() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // sendMessage function (unchanged)
   async function sendMessage(e) {
     if (e) e.preventDefault();
     if (!input.trim()) return;
@@ -444,7 +470,6 @@ export default function MedicalChat() {
       time: new Date(),
     };
 
-    // Save user message immediately if signed in
     if (user) {
       if (!currentChatId) {
         const sessionId = await createNewChatSession(user.id);
@@ -478,15 +503,12 @@ export default function MedicalChat() {
         doctor,
       };
 
-      // Save assistant message if signed in
       if (user && currentChatId) {
         await saveUserMessage(user.id, currentChatId, assistantMsg);
 
-        // Reload sessions to update last message and message count
         const sessions = await getChatSessions(user.id);
         setChatSessions(sessions);
       } else {
-        // If not signed in, just update local state
         setMessages((prev) => [...prev, assistantMsg]);
       }
     } catch (err) {
@@ -526,21 +548,22 @@ export default function MedicalChat() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.15 }}
         className={`${
           isFullScreen ? "h-full" : "h-full max-w-7xl mx-auto"
         } flex bg-white/90 backdrop-blur-lg shadow-2xl relative`}
       >
-        {/* Enhanced Sidebar */}
-        <AnimatePresence>
+        {/* Enhanced Sidebar with faster animations */}
+        <AnimatePresence mode="wait">
           {showSidebar && user && (
             <motion.div
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ type: "spring", damping: 25 }}
+              variants={sidebarVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
               className={`${
                 sidebarCollapsed ? "w-20" : "w-80"
-              } border-r border-gray-200 bg-white flex flex-col transition-all duration-300`}
+              } border-r border-gray-200 bg-white flex flex-col transition-all duration-150`}
             >
               {/* Enhanced Sidebar Header */}
               <div className="p-4 border-b border-gray-200">
@@ -569,7 +592,7 @@ export default function MedicalChat() {
                       title={sidebarCollapsed ? "Expand" : "Collapse"}
                     >
                       <ChevronDown
-                        className={`h-4 w-4 text-gray-600 transition-transform ${
+                        className={`h-4 w-4 text-gray-600 transition-transform duration-150 ${
                           sidebarCollapsed ? "-rotate-90" : ""
                         }`}
                       />
@@ -601,8 +624,9 @@ export default function MedicalChat() {
                         key={session.id}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.1 }}
                         onClick={() => loadChat(session.id)}
-                        className={`w-full text-left p-3 rounded-lg transition-all duration-200 group ${
+                        className={`w-full text-left p-3 rounded-lg transition-all duration-150 group ${
                           currentChatId === session.id
                             ? "bg-emerald-50 border border-emerald-200"
                             : "hover:bg-gray-50 border border-transparent"
@@ -671,13 +695,6 @@ export default function MedicalChat() {
                         </p>
                       </div>
                     </div>
-                    {/* <button
-                      onClick={clearChatHistory}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-400 hover:text-red-600"
-                      title="Clear History"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button> */}
                   </div>
                 ) : (
                   <div className="flex justify-center">
@@ -733,9 +750,10 @@ export default function MedicalChat() {
               <AnimatePresence>
                 {showNewChatButton && (
                   <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
+                    variants={floatingButtonVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
                     onClick={startNewChat}
                     className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm font-medium"
                   >
@@ -744,18 +762,6 @@ export default function MedicalChat() {
                   </motion.button>
                 )}
               </AnimatePresence>
-
-              {/* <button
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                className="p-1 sm:p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title={isFullScreen ? "Minimize" : "Maximize"}
-              >
-                {isFullScreen ? (
-                  <Minimize className="h-4 w-4 sm:h-5 sm:w-5" />
-                ) : (
-                  <Maximize className="h-4 w-4 sm:h-5 sm:w-5" />
-                )}
-              </button> */}
             </div>
           </div>
 
@@ -768,9 +774,10 @@ export default function MedicalChat() {
             <AnimatePresence>
               {showNewChatButton && (
                 <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
+                  variants={floatingButtonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
                   onClick={startNewChat}
                   className="sm:hidden fixed top-20 right-4 z-30 bg-emerald-500 text-white p-3 rounded-full shadow-lg hover:bg-emerald-600 transition-colors"
                   title="New Chat"
@@ -780,7 +787,7 @@ export default function MedicalChat() {
               )}
             </AnimatePresence>
 
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {messages.map((m, i) => {
                 const time = m.time
                   ? new Date(m.time).toLocaleTimeString([], {
@@ -793,9 +800,10 @@ export default function MedicalChat() {
                   return (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      variants={messageVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                       className="flex space-x-2 sm:space-x-3"
                     >
                       <div className="flex-shrink-0">
@@ -823,8 +831,8 @@ export default function MedicalChat() {
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-gradient-to-br from-white to-emerald-50 border border-emerald-200 rounded-2xl p-3 sm:p-5 shadow-lg max-w-2xl hover:shadow-xl transition-all duration-300"
+                            transition={{ duration: 0.15 }}
+                            className="bg-gradient-to-br from-white to-emerald-50 border border-emerald-200 rounded-2xl p-3 sm:p-5 shadow-lg max-w-2xl hover:shadow-xl transition-all duration-200"
                           >
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 sm:mb-4 gap-3">
                               <div className="flex items-center space-x-3">
@@ -916,9 +924,10 @@ export default function MedicalChat() {
                 return (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    variants={messageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
                     className="flex justify-end space-x-2 sm:space-x-3"
                   >
                     <div className="flex-1 max-w-2xl">
@@ -949,6 +958,7 @@ export default function MedicalChat() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                transition={{ duration: 0.1 }}
                 className="flex space-x-2 sm:space-x-3"
               >
                 <div className="flex-shrink-0">
@@ -980,6 +990,7 @@ export default function MedicalChat() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
               className="px-4 sm:px-6 pb-3"
             >
               <div className="flex flex-wrap gap-2 justify-center">
@@ -988,8 +999,9 @@ export default function MedicalChat() {
                     key={index}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.1 }}
                     onClick={() => setInput(reply)}
-                    className="px-3 py-2 bg-white border border-emerald-200 text-emerald-700 rounded-full text-xs sm:text-sm font-medium hover:bg-emerald-50 transition-all duration-200 shadow-sm"
+                    className="px-3 py-2 bg-white border border-emerald-200 text-emerald-700 rounded-full text-xs sm:text-sm font-medium hover:bg-emerald-50 transition-all duration-150 shadow-sm"
                   >
                     {reply}
                   </motion.button>
@@ -1005,8 +1017,9 @@ export default function MedicalChat() {
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 0.1 }}
                 onClick={scrollToBottom}
-                className="absolute bottom-20 right-4 sm:bottom-24 sm:right-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110 z-10"
+                className="absolute bottom-20 right-4 sm:bottom-24 sm:right-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-150 transform hover:scale-110 z-10"
                 title="Scroll to latest"
               >
                 <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -1021,7 +1034,7 @@ export default function MedicalChat() {
           >
             <div className="flex items-end space-x-2 sm:space-x-3 max-w-4xl mx-auto">
               {/* Input Container */}
-              <div className="flex-1 flex items-end bg-gray-100 rounded-3xl px-4 py-2 sm:px-4 sm:py-3 transition-all duration-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500">
+              <div className="flex-1 flex items-end bg-gray-100 rounded-3xl px-4 py-2 sm:px-4 sm:py-3 transition-all duration-150 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -1053,8 +1066,9 @@ export default function MedicalChat() {
                 disabled={!input.trim()}
                 whileHover={{ scale: input.trim() ? 1.05 : 1 }}
                 whileTap={{ scale: input.trim() ? 0.95 : 1 }}
+                transition={{ duration: 0.1 }}
                 className={`
-                  flex-shrink-0 p-3 rounded-full transition-all duration-200
+                  flex-shrink-0 p-3 rounded-full transition-all duration-150
                   ${
                     input.trim()
                       ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg cursor-pointer"
