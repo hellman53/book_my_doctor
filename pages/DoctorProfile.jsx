@@ -458,7 +458,7 @@ export default function DoctorProfile() {
                 </div>
 
                 {/* Rating */}
-                {doctor.rating && doctor.rating > 0 && (
+                {doctor.rating > 0 && (
                   <div className="flex items-center justify-center lg:justify-start gap-2 mb-3 sm:mb-4">
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
