@@ -2,6 +2,6 @@
 
 import TermsOfServices from "@/pages/TermsOfServices";
 
-export default function DoctorFormPage() {
+export default function TermsServices() {
   return <TermsOfServices />;
 }

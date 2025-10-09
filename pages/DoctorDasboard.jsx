@@ -51,6 +51,7 @@ import {
   LogOut,
 } from "lucide-react";
 import VideoCall from "@/components/VideoCall";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function DoctorDashboard() {
   const { user: currentUser, isLoaded } = useUser();
@@ -528,6 +529,7 @@ export default function DoctorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
+      <FloatingActionButton />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

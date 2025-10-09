@@ -2,6 +2,6 @@
 
 import MedStore from "@/pages/MedStore";
 
-export default function DoctorFormPage() {
+export default function MedStorePage() {
   return <MedStore />;
 }

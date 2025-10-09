@@ -2,6 +2,6 @@
 
 import DoctorDasboard from "@/pages/DoctorDasboard";
 
-export default function DoctorFormPage() {
+export default function DoctorDasboardPage() {
   return <DoctorDasboard />;
 }

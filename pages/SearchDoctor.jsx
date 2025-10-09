@@ -3,6 +3,7 @@ import { Search, MapPin, Heart, X, Clock, User, ChevronDown, Filter, Star, Calen
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function DoctorSearch() {
   const [doctors, setDoctors] = useState([]);
@@ -253,6 +254,7 @@ export default function DoctorSearch() {
 
   return (
     <div className="mt-4 min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <FloatingActionButton />
       <div className="pt-20 sm:pt-24 pb-8">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           

@@ -22,13 +22,9 @@ import {
   PlayCircle 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Pricing from "@/components/pricingEX";
-import { creditBenefits, features, testimonials } from "@/lib/data";
+import {features} from "@/lib/data";
 import "./homePage.css"
-import DoctorForm from "@/pages/DoctorForm";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 
 const Hero = () => {
   const { user, isLoaded } = useUser();
@@ -579,7 +575,6 @@ const Services = () => {
   );
 };
 
-
 const featuredDoctors = [
   {
     name: "Dr. Priya Sharma",
@@ -821,7 +816,6 @@ const FeaturedDoctors = () => {
   );
 };
 
-
 const PricingSection = () => {
   const creditBenefits = [
     "1 Credit = 1 Consultation with any specialist doctor",
@@ -1057,7 +1051,6 @@ const PricingSection = () => {
   );
 };
 
-
 const FloatingActionButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -1084,7 +1077,7 @@ const FloatingActionButton = () => {
       id: 3,
       label: "AI Assistant",
       icon: "🤖",
-      onClick: () => router.push("/ai-assistent"),
+      onClick: () => router.push("/ai-assistant"),
       bgColor: "bg-blue-500"
     },
     {
@@ -1189,8 +1182,6 @@ const FloatingActionButton = () => {
     </div>
   );
 };
-
-
 
 const MedicineStoreSection = () => {
   return (
@@ -1703,7 +1694,6 @@ const ChatbotFeatures = () => {
   );
 };
 
-
 /* moving testimonial section api */
 const mockTestimonials = [
   {
@@ -2067,7 +2057,6 @@ Angle270</p>
 );
 };
 
-
 /* services in easy to understand*/ 
 const ConsultationSection = () => {
   const consultations = [
@@ -2418,10 +2407,6 @@ const ConsultationSection = () => {
   );
 };
 
-
-
-
-
 /* mission vision section */
 const DoctorAppointmentCards = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -2648,8 +2633,6 @@ const DoctorAppointmentCards = () => {
     </section>
   );
 };
-
-
 
 
 const HomePage = () => {

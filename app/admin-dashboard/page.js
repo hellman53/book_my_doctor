@@ -1,7 +1,7 @@
 "use client";
 
-import DoctorForm from "@/pages/adminPage";
+import AdminPage from "@/pages/adminPage";
 
-export default function DoctorFormPage() {
-  return <DoctorForm />;
+export default function Admin() {
+  return <AdminPage />;
 }

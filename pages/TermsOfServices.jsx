@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton"
 import { Scale, FileText, AlertTriangle, Users, CreditCard, Shield } from 'lucide-react';
 
 const TermsOfService = () => {
@@ -65,8 +66,10 @@ const TermsOfService = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-blue-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50 to-blue-50 py-12 mt-16">
+      <FloatingActionButton />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
         
         {/* Header Section */}
         <div className="text-center mb-12">

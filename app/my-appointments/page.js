@@ -2,6 +2,6 @@
 
 import MyAppointment from "@/pages/MyAppointment";
 
-export default function DoctorFormPage() {
+export default function MyAppointmentPage() {
   return <MyAppointment />;
 }
