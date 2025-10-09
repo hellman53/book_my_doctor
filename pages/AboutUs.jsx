@@ -36,6 +36,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function AboutUs() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -211,6 +212,7 @@ export default function AboutUs() {
 
   return (
     <div className="mt-10 w-full bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden">
+      <FloatingActionButton />
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-20 left-4 sm:left-10 w-3 h-3 sm:w-4 sm:h-4 bg-emerald-300 rounded-full opacity-20 animate-float"></div>

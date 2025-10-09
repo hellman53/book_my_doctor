@@ -34,6 +34,7 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function AdminDashboard() {
   const { user } = useUser();
@@ -375,6 +376,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-18">
+      <FloatingActionButton />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center mb-8">

@@ -41,6 +41,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import VideoCall from "@/components/VideoCall";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function MyAppointments() {
   const { user: currentUser, isLoaded } = useUser();
@@ -237,6 +238,7 @@ export default function MyAppointments() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-20">
+      <FloatingActionButton />
       {/* Header */}
       <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 text-white overflow-hidden">
         <div className="absolute inset-0 bg-emerald-700 bg-opacity-10"></div>

@@ -189,11 +189,11 @@ const Header = () => {
           <SignedIn>
             {/* Role-based navigation */}
             {userData?.role === "patient" && (
-              <Link href="/appointments">
+              <Link href="/my-appointments">
                 <Button 
                   variant="outline" 
                   className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${
-                    isActiveLink('/appointments') 
+                    isActiveLink('/my-appointments') 
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-400' 
                       : 'text-emerald-700 hover:bg-emerald-50'
                   }`}
@@ -207,7 +207,7 @@ const Header = () => {
             )}
 
             {userData?.role === "doctor-pending" && (
-              <Link href="/appointments">
+              <Link href="/my-appointments">
                 <Button 
                   variant="outline" 
                   className={`hidden lg:inline-flex items-center gap-2 border-emerald-300 ${

@@ -2,6 +2,6 @@
 
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
-export default function DoctorFormPage() {
+export default function PrivacyPolicyPage() {
   return <PrivacyPolicy />;
 }

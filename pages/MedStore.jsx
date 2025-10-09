@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ShoppingCart, Star, Heart, Search, Filter, Truck, Shield, Clock, Zap, ArrowRight } from "lucide-react";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 const MedicineStore = () => {
   const [wishlist, setWishlist] = useState([]);
@@ -175,6 +176,7 @@ const MedicineStore = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 mt-10">
+      <FloatingActionButton />
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-r from-emerald-50 to-blue-50 text-white py-20 px-6 md:px-20 overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>

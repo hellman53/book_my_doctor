@@ -43,6 +43,7 @@ import {
   Building2,
   Sparkles,
 } from "lucide-react";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 export default function DoctorProfile() {
   const params = useParams();
@@ -384,6 +385,7 @@ export default function DoctorProfile() {
   if (!doctor) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Doctor Not Found
@@ -405,7 +407,8 @@ export default function DoctorProfile() {
   const appointmentStatus = getAppointmentTypeStatus();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 mt-4">
+      <FloatingActionButton />
       {/* Navigation */}
       <div className="pt-20 pb-4">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
@@ -455,7 +458,7 @@ export default function DoctorProfile() {
                 </div>
 
                 {/* Rating */}
-                {doctor.rating && doctor.rating > 0 && (
+                {doctor.rating > 0 && (
                   <div className="flex items-center justify-center lg:justify-start gap-2 mb-3 sm:mb-4">
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (

@@ -7,6 +7,7 @@ import Select from "react-select";
 import { useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 // Medical specializations
 const SPECIALIZATIONS = [
@@ -289,6 +290,7 @@ export default function DoctorForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 mt-8 pt-20 py-8 px-4 sm:px-6 lg:px-8">
+      
      
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
@@ -750,6 +752,7 @@ export default function DoctorForm() {
           </div>
         </form>
       </div>
+      <FloatingActionButton />
     </div>
   );
 }
