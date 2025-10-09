@@ -288,7 +288,7 @@ const Hero = () => {
                     asChild
                     className="bg-white text-emerald-600 hover:bg-gray-100 font-bold rounded-xl py-3 px-6 shadow-lg"
                   >
-                    <Link href="/onboarding" className="flex items-center justify-center gap-2">
+                    <Link href="/" className="flex items-center justify-center gap-2">
                       Get Started Free
                       <ArrowRight className="h-4 w-4" />
                     </Link>
