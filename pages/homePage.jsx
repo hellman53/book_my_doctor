@@ -1,10 +1,7 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser } from "@clerk/nextjs";
-
-// import { db } from "../app/firebase/config";
-// import { collection, addDoc } from "firebase/firestore";
-
 import Image from "next/image";
 import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
