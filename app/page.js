@@ -1,14 +1,5 @@
-"use client"
-export const dynamic = "force-dynamic";
+import ClientHomePage from "@/components/ClientHomePage";
 
-import HomePage from "@/pages/homePage";
-
-const Home = () => {
- return (
-  <div className="">
-    <HomePage />
-  </div>
- );
+export default function Home() {
+  return <ClientHomePage />;
 }
-
-export default Home;
