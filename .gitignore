@@ -40,7 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /lib/private.key
-/app/firebase/config.js
+# /app/firebase/config.js
 
 # clerk configuration (can include secrets)
 /.clerk/
