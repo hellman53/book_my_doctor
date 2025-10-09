@@ -1,6 +1,6 @@
 "use client";
 
-import MedStore from "@/pages/MedStore";
+import MedStore from "@/components/pages/MedStore";
 
 export default function MedStorePage() {
   return <MedStore />;

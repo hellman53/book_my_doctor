@@ -1,6 +1,6 @@
 "use client";
 
-import HomePage from "@/pages/homePage";
+import HomePage from "@/components/pages/homePage";
 
 const ClientHomePage = () => {
   return <HomePage />;

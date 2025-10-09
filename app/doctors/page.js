@@ -1,6 +1,6 @@
 "use client";
 
-import DoctorSearch from '@/pages/SearchDoctor';
+import DoctorSearch from '@/components/pages/SearchDoctor';
 
 export default function DoctorsPage() {
   return <DoctorSearch />;

@@ -1,6 +1,6 @@
 "use client";
 
-import AboutUs from "@/pages/AboutUs";
+import AboutUs from "@/components/pages/AboutUs";
 
 export default function AboutUsPage() {
   return <AboutUs />;

@@ -1,5 +1,5 @@
 
-import DoctorForm from "@/pages/DoctorForm";
+import DoctorForm from "@/components/pages/DoctorForm";
 
 export default function DoctorFormPage() {
   return <DoctorForm />;
