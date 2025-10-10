@@ -15,6 +15,7 @@ import {
   serverTimestamp,
   writeBatch,
   deleteDoc,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import VideoCallWrapper from "@/components/VideoCallWrapper";
@@ -49,6 +50,10 @@ import {
   Search,
   Filter,
   LogOut,
+  ChevronRight,
+  ChevronLeft,
+  Download,
+  MessageCircle,
 } from "lucide-react";
 import VideoCall from "@/components/VideoCall";
 import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
@@ -99,20 +104,6 @@ export default function DoctorDashboard() {
     startTime: "",
     endTime: "",
   });
-  // Add this useEffect to check ZegoCloud configuration
-  useEffect(() => {
-    // Check if ZegoCloud is configured
-    const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
-    const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET;
-
-    if (!appID || !serverSecret) {
-      console.warn(
-        "ZegoCloud credentials not configured. Video calls will not work."
-      );
-    } else if (isNaN(parseInt(appID))) {
-      console.warn("Invalid ZegoCloud App ID format.");
-    }
-  }, []);
 
   useEffect(() => {
     if (currentUser && isLoaded) {
@@ -149,13 +140,24 @@ export default function DoctorDashboard() {
   const fetchAppointments = async (doctorId) => {
     try {
       const appointmentsRef = collection(db, "appointments");
-      const q = query(appointmentsRef, where("doctorId", "==", doctorId));
+      const q = query(
+        appointmentsRef, 
+        where("doctorId", "==", doctorId),
+        // orderBy("createdAt", "desc") // Sort by creation date, newest first
+      );
 
       const querySnapshot = await getDocs(q);
       const appointmentsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Additional sorting by appointment date and time (newest first)
+      appointmentsData.sort((a, b) => {
+        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+        return dateB - dateA;
+      });
 
       setAppointments(appointmentsData);
     } catch (error) {
@@ -424,16 +426,7 @@ export default function DoctorDashboard() {
       toast.success("Joining video call...");
     } catch (error) {
       console.error("Error joining video call:", error);
-
-      if (error.message.includes("credentials")) {
-        toast.error(
-          "Video call service not configured. Please contact support."
-        );
-      } else if (error.message.includes("room configuration")) {
-        toast.error("Invalid room configuration. Please try again.");
-      } else {
-        toast.error("Error starting video call. Please try again.");
-      }
+      toast.error("Error starting video call. Please try again.");
     }
   };
 
@@ -448,11 +441,6 @@ export default function DoctorDashboard() {
 
       if (!appID || !serverSecret) {
         throw new Error("ZegoCloud credentials not configured");
-      }
-
-      // Validate credentials
-      if (isNaN(parseInt(appID))) {
-        throw new Error("Invalid App ID format");
       }
 
       return {
@@ -494,15 +482,18 @@ export default function DoctorDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (!doctor) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-20 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Doctor Not Found
@@ -528,32 +519,47 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-20">
       <FloatingActionButton />
+      
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                Welcome, Dr. {doctor.fullName}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Manage your appointments and schedule
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-xl lg:text-2xl font-bold text-emerald-600">
-                  ₹{revenue}
-                </p>
+      <div className="relative bg-gradient-to-r from-emerald-600 to-blue-600 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-emerald-700 bg-opacity-10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center lg:text-left">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-4">
+              Welcome, Dr. {doctor.fullName}
+            </h1>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto lg:mx-0">
+              Manage your practice, appointments, and patient care in one place
+            </p>
+            <div className="mt-6 flex items-center justify-center lg:justify-start gap-4">
+              <div className="bg-white text-emerald-700 bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span className="font-semibold">
+                  {appointments.filter(a => a.status === "confirmed").length} Upcoming Appointments
+                </span>
               </div>
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                <User className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-600" />
+              <div className="bg-white bg-opacity-20 text-emerald-700 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span className="font-semibold">
+                  ₹{revenue} Total Revenue
+                </span>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Wave decoration */}
+        <div className="w-full absolute bottom-0 left-0 right-0 overflow-hidden leading-[0]">
+          <svg
+            viewBox="0 0 1440 120"
+            preserveAspectRatio="none"
+            className="w-full h-12 text-slate-50"
+          >
+            <path
+              fill="currentColor"
+              d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,58.7C960,64,1056,64,1152,58.7C1248,53,1344,43,1392,37.3L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+            />
+          </svg>
         </div>
       </div>
 
@@ -574,13 +580,13 @@ export default function DoctorDashboard() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    className={`flex items-center gap-2 py-6 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                       activeTab === tab.id
                         ? "border-emerald-500 text-emerald-600"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-5 w-5" />
                     {tab.name}
                   </button>
                 );
@@ -594,34 +600,32 @@ export default function DoctorDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+          <div className="space-y-8">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">
                       Total Appointments
                     </p>
-                    <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                      {
-                        appointments.filter((a) => a.status === "confirmed")
-                          .length
-                      }
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+                      {appointments.filter((a) => a.status === "confirmed").length}
                     </p>
                   </div>
-                  <div className="p-2 lg:p-3 bg-blue-100 rounded-lg">
-                    <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
+                  <div className="p-3 bg-blue-100 rounded-xl">
+                    <Calendar className="h-6 w-6 text-blue-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">
                       Virtual Appointments
                     </p>
-                    <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-900">
                       {
                         appointments.filter(
                           (a) =>
@@ -631,19 +635,19 @@ export default function DoctorDashboard() {
                       }
                     </p>
                   </div>
-                  <div className="p-2 lg:p-3 bg-green-100 rounded-lg">
-                    <Video className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
+                  <div className="p-3 bg-green-100 rounded-xl">
+                    <Video className="h-6 w-6 text-green-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">
                       In-Person Appointments
                     </p>
-                    <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    <p className="text-2xl lg:text-3xl font-bold text-gray-900">
                       {
                         appointments.filter(
                           (a) =>
@@ -653,36 +657,37 @@ export default function DoctorDashboard() {
                       }
                     </p>
                   </div>
-                  <div className="p-2 lg:p-3 bg-purple-100 rounded-lg">
-                    <MapPin className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
+                  <div className="p-3 bg-purple-100 rounded-xl">
+                    <MapPin className="h-6 w-6 text-purple-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">
-                      Cancelled Revenue
+                      Total Revenue
                     </p>
-                    <p className="text-xl lg:text-2xl font-bold text-red-600">
-                      -₹{cancelledRevenue}
+                    <p className="text-2xl lg:text-3xl font-bold text-emerald-600">
+                      ₹{revenue}
                     </p>
                   </div>
-                  <div className="p-2 lg:p-3 bg-red-100 rounded-lg">
-                    <AlertCircle className="h-5 w-5 lg:h-6 lg:w-6 text-red-600" />
+                  <div className="p-3 bg-emerald-100 rounded-xl">
+                    <DollarSign className="h-6 w-6 text-emerald-600" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-emerald-600" />
                   Today's Appointments
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {appointments
                     .filter(
                       (a) =>
@@ -694,18 +699,18 @@ export default function DoctorDashboard() {
                     .map((appointment) => (
                       <div
                         key={appointment.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
                       >
                         <div>
-                          <p className="font-medium text-sm">
+                          <p className="font-semibold text-gray-900">
                             {appointment.patientName}
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-sm text-gray-600">
                             {appointment.appointmentTime}
                           </p>
                         </div>
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
+                          className={`px-3 py-1 text-xs rounded-full font-medium ${
                             appointment.appointmentType === "virtual"
                               ? "bg-green-100 text-green-800"
                               : "bg-blue-100 text-blue-800"
@@ -720,33 +725,30 @@ export default function DoctorDashboard() {
                       a.appointmentDate ===
                       new Date().toISOString().split("T")[0]
                   ).length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
+                    <p className="text-gray-500 text-center py-8">
                       No appointments today
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-emerald-600" />
+                  Revenue Overview
+                </h3>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                     <span className="text-gray-600">Total Revenue</span>
-                    <span className="font-bold text-emerald-600">
-                      ₹{revenue}
-                    </span>
+                    <span className="font-bold text-emerald-600">₹{revenue}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                     <span className="text-gray-600">Cancelled Revenue</span>
-                    <span className="font-bold text-red-600">
-                      -₹{cancelledRevenue}
-                    </span>
+                    <span className="font-bold text-red-600">-₹{cancelledRevenue}</span>
                   </div>
-                  <div className="flex justify-between items-center border-t pt-3">
-                    <span className="text-gray-600 font-semibold">
-                      Net Revenue
-                    </span>
-                    <span className="font-bold text-blue-600 text-lg">
+                  <div className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border border-emerald-200">
+                    <span className="text-gray-900 font-semibold">Net Revenue</span>
+                    <span className="text-xl font-bold text-blue-600">
                       ₹{revenue - cancelledRevenue}
                     </span>
                   </div>
@@ -827,65 +829,105 @@ function AppointmentsManager({
       appointment.appointmentType === activeAppointmentType
   );
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "confirmed":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "pending":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "cancelled":
+        return "text-red-600 bg-red-50 border-red-200";
+      case "completed":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "confirmed":
+        return <CheckCircle className="h-4 w-4" />;
+      case "pending":
+        return <Clock className="h-4 w-4" />;
+      case "cancelled":
+        return <X className="h-4 w-4" />;
+      case "completed":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <AlertCircle className="h-4 w-4" />;
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
+          <div className="flex flex-col lg:flex-row gap-4 lg:items-center flex-1">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search patients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             >
               <option value="all">All Status</option>
               <option value="confirmed">Confirmed</option>
               <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
 
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-              <Filter className="h-4 w-4" />
+            <button className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-3 rounded-xl hover:bg-emerald-200 transition-colors">
+              <Filter className="h-5 w-5" />
               <span className="hidden sm:inline">Filter</span>
             </button>
           </div>
         </div>
 
         {/* Appointment Type Tabs */}
-        <div className="mt-4 overflow-x-auto">
-          <div className="flex space-x-1 min-w-max">
+        <div className="mt-6 overflow-x-auto">
+          <div className="flex space-x-2 min-w-max">
             {[
-              { id: "all", name: "All Appointments", icon: Calendar },
-              { id: "virtual", name: "Virtual", icon: Video },
-              { id: "personal", name: "In-Person", icon: MapPin },
-              { id: "general", name: "General", icon: Users },
+              { id: "all", name: "All Appointments", icon: Calendar, count: appointments.length },
+              { id: "virtual", name: "Virtual", icon: Video, count: appointments.filter(a => a.appointmentType === "virtual").length },
+              { id: "personal", name: "In-Person", icon: MapPin, count: appointments.filter(a => a.appointmentType === "personal").length },
+              { id: "general", name: "General", icon: Users, count: appointments.filter(a => a.appointmentType === "general").length },
             ].map((type) => {
               const Icon = type.icon;
               return (
                 <button
                   key={type.id}
                   onClick={() => setActiveAppointmentType(type.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
                     activeAppointmentType === type.id
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-emerald-500 text-white shadow-lg transform scale-105"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:transform hover:scale-105"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {type.name}
+                  <Icon className="h-5 w-5" />
+                  <span>{type.name}</span>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      activeAppointmentType === type.id
+                        ? "bg-white text-emerald-600"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {type.count}
+                  </span>
                 </button>
               );
             })}
@@ -894,8 +936,11 @@ function AppointmentsManager({
       </div>
 
       {/* Bulk Cancellation */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
-        <h3 className="text-lg font-semibold mb-4">Bulk Cancellation</h3>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-red-600" />
+          Bulk Cancellation
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -910,7 +955,7 @@ function AppointmentsManager({
                   date: e.target.value,
                 }))
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
           <div>
@@ -926,7 +971,7 @@ function AppointmentsManager({
                   startTime: e.target.value,
                 }))
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
           <div>
@@ -942,13 +987,13 @@ function AppointmentsManager({
                   endTime: e.target.value,
                 }))
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
           <div className="flex items-end">
             <button
               onClick={onBulkCancel}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              className="w-full bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 transition-colors font-semibold"
             >
               Cancel Appointments
             </button>
@@ -957,9 +1002,9 @@ function AppointmentsManager({
       </div>
 
       {/* Appointments List */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-4 lg:p-6 border-b">
-          <h3 className="text-lg font-semibold">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-semibold">
             {activeAppointmentType === "all"
               ? "All"
               : activeAppointmentType.charAt(0).toUpperCase() +
@@ -970,7 +1015,7 @@ function AppointmentsManager({
             </span>
           </h3>
         </div>
-        <div className="divide-y">
+        <div className="divide-y divide-gray-200">
           {filteredByType.map((appointment) => (
             <AppointmentCard
               key={appointment.id}
@@ -978,12 +1023,21 @@ function AppointmentsManager({
               onCancel={onCancel}
               onJoinVideoCall={onJoinVideoCall}
               onViewDetails={onViewDetails}
+              getStatusColor={getStatusColor}
+              getStatusIcon={getStatusIcon}
             />
           ))}
           {filteredByType.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No appointments found</p>
+            <div className="p-12 text-center text-gray-500">
+              <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No appointments found
+              </h3>
+              <p className="text-gray-600">
+                {searchTerm || statusFilter !== "all" || activeAppointmentType !== "all"
+                  ? "Try adjusting your search or filters to find more appointments."
+                  : "You don't have any appointments scheduled yet."}
+              </p>
             </div>
           )}
         </div>
@@ -1006,13 +1060,13 @@ function ScheduleManager({
   doctor,
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Virtual Appointments Settings */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3">
             <Video className="h-6 w-6 text-green-600" />
-            <h3 className="text-lg font-semibold">Virtual Appointments</h3>
+            <h3 className="text-xl font-semibold">Virtual Appointments</h3>
           </div>
           <button
             onClick={() => toggleAppointmentType("virtual")}
@@ -1030,7 +1084,7 @@ function ScheduleManager({
         </div>
 
         {scheduleSettings.virtual.enabled && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Slot Duration (minutes)
@@ -1040,7 +1094,7 @@ function ScheduleManager({
                 onChange={(e) =>
                   updateSlotDuration("virtual", parseInt(e.target.value))
                 }
-                className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full max-w-xs border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               >
                 <option value={15}>15 minutes</option>
                 <option value={30}>30 minutes</option>
@@ -1060,11 +1114,11 @@ function ScheduleManager({
       </div>
 
       {/* In-Person Appointments Settings */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3">
             <MapPin className="h-6 w-6 text-blue-600" />
-            <h3 className="text-lg font-semibold">In-Person Appointments</h3>
+            <h3 className="text-xl font-semibold">In-Person Appointments</h3>
           </div>
           <button
             onClick={() => toggleAppointmentType("inPerson")}
@@ -1082,7 +1136,7 @@ function ScheduleManager({
         </div>
 
         {scheduleSettings.inPerson.enabled && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Slot Duration (minutes)
@@ -1092,7 +1146,7 @@ function ScheduleManager({
                 onChange={(e) =>
                   updateSlotDuration("inPerson", parseInt(e.target.value))
                 }
-                className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full max-w-xs border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               >
                 <option value={15}>15 minutes</option>
                 <option value={30}>30 minutes</option>
@@ -1112,14 +1166,14 @@ function ScheduleManager({
       </div>
 
       {/* General Appointments */}
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex items-center gap-3 mb-6">
           <Calendar className="h-6 w-6 text-purple-600" />
-          <h3 className="text-lg font-semibold">General Appointments</h3>
+          <h3 className="text-xl font-semibold">General Appointments</h3>
         </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date
@@ -1133,7 +1187,7 @@ function ScheduleManager({
                     date: e.target.value,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               />
             </div>
             <div>
@@ -1149,13 +1203,13 @@ function ScheduleManager({
                     fee: parseInt(e.target.value) || 0,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 placeholder={doctor.consultationFee}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Start Time
@@ -1169,7 +1223,7 @@ function ScheduleManager({
                     startTime: e.target.value,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               />
             </div>
             <div>
@@ -1185,12 +1239,12 @@ function ScheduleManager({
                     endTime: e.target.value,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Patient Name (Optional)
@@ -1204,7 +1258,7 @@ function ScheduleManager({
                     patientName: e.target.value,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 placeholder="General Appointment"
               />
             </div>
@@ -1221,7 +1275,7 @@ function ScheduleManager({
                     patientEmail: e.target.value,
                   }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               />
             </div>
           </div>
@@ -1238,14 +1292,14 @@ function ScheduleManager({
                   notes: e.target.value,
                 }))
               }
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              rows={4}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
 
           <button
             onClick={onAddGeneralAppointment}
-            className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+            className="bg-emerald-600 text-white px-8 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-semibold"
           >
             Add General Appointment
           </button>
@@ -1255,9 +1309,9 @@ function ScheduleManager({
       <div className="flex justify-end">
         <button
           onClick={onSaveSettings}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold"
         >
-          <Save className="h-4 w-4" />
+          <Save className="h-5 w-5" />
           Save All Changes
         </button>
       </div>
@@ -1268,71 +1322,70 @@ function ScheduleManager({
 // Revenue Manager Component
 function RevenueManager({ revenue, cancelledRevenue, appointments }) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-        <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-xl lg:text-3xl font-bold text-emerald-600">
+              <p className="text-2xl lg:text-3xl font-bold text-emerald-600">
                 ₹{revenue}
               </p>
             </div>
-            <div className="p-2 lg:p-3 bg-emerald-100 rounded-lg">
-              <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-emerald-600" />
+            <div className="p-3 bg-emerald-100 rounded-xl">
+              <DollarSign className="h-6 w-6 text-emerald-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">
                 Cancelled Revenue
               </p>
-              <p className="text-xl lg:text-3xl font-bold text-red-600">
+              <p className="text-2xl lg:text-3xl font-bold text-red-600">
                 -₹{cancelledRevenue}
               </p>
             </div>
-            <div className="p-2 lg:p-3 bg-red-100 rounded-lg">
-              <AlertCircle className="h-5 w-5 lg:h-6 lg:w-6 text-red-600" />
+            <div className="p-3 bg-red-100 rounded-xl">
+              <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Net Revenue</p>
-              <p className="text-xl lg:text-3xl font-bold text-blue-600">
+              <p className="text-2xl lg:text-3xl font-bold text-blue-600">
                 ₹{revenue - cancelledRevenue}
               </p>
             </div>
-            <div className="p-2 lg:p-3 bg-blue-100 rounded-lg">
-              <Wallet className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <Wallet className="h-6 w-6 text-blue-600" />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
-        <h3 className="text-lg font-semibold mb-4">Revenue Breakdown</h3>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <h3 className="text-xl font-semibold mb-6">Revenue Breakdown</h3>
         <div className="space-y-4">
           {appointments
             .filter((a) => a.status === "confirmed")
             .map((appointment) => (
               <div
                 key={appointment.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
+                className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               >
                 <div>
-                  <p className="font-medium">{appointment.patientName}</p>
+                  <p className="font-semibold text-gray-900">{appointment.patientName}</p>
                   <p className="text-sm text-gray-600">
-                    {appointment.appointmentDate} at{" "}
-                    {appointment.appointmentTime}
+                    {appointment.appointmentDate} at {appointment.appointmentTime}
                   </p>
                   <span
-                    className={`inline-block px-2 py-1 text-xs rounded-full ${
+                    className={`inline-block px-3 py-1 text-xs rounded-full font-medium mt-1 ${
                       appointment.appointmentType === "virtual"
                         ? "bg-green-100 text-green-800"
                         : appointment.appointmentType === "personal"
@@ -1344,10 +1397,10 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-lg">
+                  <p className="font-bold text-lg text-emerald-600">
                     ₹{appointment.consultationFee}
                   </p>
-                  <p className="text-sm text-green-600">Completed</p>
+                  <p className="text-sm text-green-600 font-medium">Completed</p>
                 </div>
               </div>
             ))}
@@ -1360,8 +1413,8 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
 // Settings Manager Component
 function SettingsManager({ doctor }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 lg:p-6">
-      <h3 className="text-lg font-semibold mb-6">Profile Settings</h3>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+      <h3 className="text-xl font-semibold mb-6">Profile Settings</h3>
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -1371,7 +1424,7 @@ function SettingsManager({ doctor }) {
             <input
               type="number"
               defaultValue={doctor.consultationFee}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
           <div>
@@ -1381,11 +1434,11 @@ function SettingsManager({ doctor }) {
             <input
               type="text"
               defaultValue={doctor.specialization}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
             />
           </div>
         </div>
-        <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors">
+        <button className="bg-emerald-600 text-white px-8 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-semibold">
           Update Profile
         </button>
       </div>
@@ -1408,9 +1461,9 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
 
   return (
     <div>
-      <h4 className="text-md font-medium mb-4">Weekly Availability</h4>
+      <h4 className="text-lg font-semibold mb-4">Weekly Availability</h4>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Day
@@ -1420,7 +1473,7 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
             onChange={(e) =>
               setNewSlot((prev) => ({ ...prev, day: e.target.value }))
             }
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
           >
             {[
               "Monday",
@@ -1448,7 +1501,7 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
             onChange={(e) =>
               setNewSlot((prev) => ({ ...prev, startTime: e.target.value }))
             }
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
           />
         </div>
 
@@ -1462,36 +1515,36 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
             onChange={(e) =>
               setNewSlot((prev) => ({ ...prev, endTime: e.target.value }))
             }
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
           />
         </div>
 
         <div className="flex items-end">
           <button
             onClick={handleAdd}
-            className="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+            className="w-full bg-gray-600 text-white px-4 py-3 rounded-xl hover:bg-gray-700 transition-colors font-semibold"
           >
             Add Slot
           </button>
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {availability.map((slot, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
           >
             <div className="flex items-center gap-4">
               <span className="font-medium min-w-20">{slot.day}</span>
               <Clock className="h-4 w-4 text-gray-400" />
-              <span>
+              <span className="font-medium">
                 {slot.startTime} - {slot.endTime}
               </span>
             </div>
             <button
               onClick={() => onRemove(type, index)}
-              className="text-red-600 hover:text-red-700"
+              className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -1499,7 +1552,7 @@ function AvailabilityManager({ type, availability, onAdd, onRemove }) {
         ))}
 
         {availability.length === 0 && (
-          <p className="text-gray-500 text-center py-4">
+          <p className="text-gray-500 text-center py-8">
             No availability slots added
           </p>
         )}
@@ -1514,32 +1567,30 @@ function AppointmentCard({
   onCancel,
   onJoinVideoCall,
   onViewDetails,
+  getStatusColor,
+  getStatusIcon,
 }) {
-  const getAppointmentTypeColor = (type) => {
-    switch (type) {
-      case "virtual":
-        return "bg-green-100 text-green-800";
-      case "personal":
-        return "bg-blue-100 text-blue-800";
-      case "general":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
   };
+
+  const isUpcoming =
+    appointment.status === "confirmed" &&
+    new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`) >
+      new Date();
 
   const canJoinVideoCall =
     appointment.status === "confirmed" &&
@@ -1547,25 +1598,30 @@ function AppointmentCard({
     (appointment.zegoCloudData || appointment.vonageSessionId);
 
   return (
-    <div className="p-4 lg:p-6">
+    <div className="p-6 hover:bg-gray-50 transition-colors">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <p className="font-semibold text-lg">{appointment.patientName}</p>
+          <div className="flex items-center gap-3 mb-3">
+            <p className="font-semibold text-lg text-gray-900">{appointment.patientName}</p>
             <div className="flex gap-2">
               <span
-                className={`inline-block px-2 py-1 text-xs rounded-full ${getAppointmentTypeColor(
-                  appointment.appointmentType
-                )}`}
-              >
-                {appointment.appointmentType}
-              </span>
-              <span
-                className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(
+                className={`inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full border ${getStatusColor(
                   appointment.status
                 )}`}
               >
-                {appointment.status}
+                {getStatusIcon(appointment.status)}
+                <span className="font-medium capitalize">{appointment.status}</span>
+              </span>
+              <span
+                className={`inline-block px-3 py-1 text-xs rounded-full font-medium ${
+                  appointment.appointmentType === "virtual"
+                    ? "bg-green-100 text-green-800"
+                    : appointment.appointmentType === "personal"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-purple-100 text-purple-800"
+                }`}
+              >
+                {appointment.appointmentType}
               </span>
             </div>
           </div>
@@ -1574,7 +1630,7 @@ function AppointmentCard({
             {appointment.patientEmail}
           </p>
           <p className="text-sm text-gray-600">
-            {appointment.appointmentDate} at {appointment.appointmentTime}
+            {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentTime)}
           </p>
 
           {appointment.patientNotes && (
@@ -1584,14 +1640,14 @@ function AppointmentCard({
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <p className="font-bold text-lg">₹{appointment.consultationFee}</p>
+        <div className="flex flex-col items-end gap-3">
+          <p className="font-bold text-lg text-emerald-600">₹{appointment.consultationFee}</p>
 
           <div className="flex gap-2">
             {canJoinVideoCall && (
               <button
                 onClick={() => onJoinVideoCall(appointment)}
-                className="flex items-center gap-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors"
                 title="Join video consultation"
               >
                 <Video className="h-4 w-4" />
@@ -1601,18 +1657,16 @@ function AppointmentCard({
 
             <button
               onClick={() => onViewDetails(appointment)}
-              className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              <Eye className="h-3 w-3" />
+              <Eye className="h-4 w-4" />
               View
             </button>
 
-            {appointment.status === "confirmed" && (
+            {isUpcoming && (
               <button
-                onClick={() =>
-                  onCancel(appointment.id, appointment.consultationFee)
-                }
-                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                onClick={() => onCancel(appointment.id, appointment.consultationFee)}
+                className="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors"
               >
                 Cancel
               </button>

@@ -65,6 +65,7 @@ export default function DoctorProfile() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState(null);
+  const [availabilityTab, setAvailabilityTab] = useState("virtual"); // New state for availability tabs
 
   const doctorId = params.id;
 
@@ -371,6 +372,20 @@ export default function DoctorProfile() {
     toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
   };
 
+  // Get availability for display based on selected tab
+  const getAvailabilityForDisplay = () => {
+    if (!doctor) return [];
+
+    if (availabilityTab === "virtual" && doctor.scheduleSettings?.virtual) {
+      return doctor.scheduleSettings.virtual.availability || [];
+    } else if (availabilityTab === "inPerson" && doctor.scheduleSettings?.inPerson) {
+      return doctor.scheduleSettings.inPerson.availability || [];
+    }
+    
+    // Fallback to old availability structure
+    return doctor.availability || [];
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -385,7 +400,6 @@ export default function DoctorProfile() {
   if (!doctor) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Doctor Not Found
@@ -405,6 +419,7 @@ export default function DoctorProfile() {
   }
 
   const appointmentStatus = getAppointmentTypeStatus();
+  const displayAvailability = getAvailabilityForDisplay();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 mt-4">
@@ -826,9 +841,69 @@ export default function DoctorProfile() {
                   </h2>
                 </div>
 
+                {/* Availability Type Tabs */}
+                <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setAvailabilityTab("virtual")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors flex-1 ${
+                      availabilityTab === "virtual"
+                        ? "bg-white text-emerald-700 shadow-sm"
+                        : "text-gray-600 hover:text-emerald-600"
+                    }`}
+                  >
+                    <Video className="h-4 w-4" />
+                    Virtual Appointments
+                  </button>
+                  <button
+                    onClick={() => setAvailabilityTab("inPerson")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors flex-1 ${
+                      availabilityTab === "inPerson"
+                        ? "bg-white text-emerald-700 shadow-sm"
+                        : "text-gray-600 hover:text-emerald-600"
+                    }`}
+                  >
+                    <Building2 className="h-4 w-4" />
+                    In-Person Appointments
+                  </button>
+                </div>
+
+                {/* Availability Status */}
+                <div className="mb-6">
+                  <div className={`p-4 rounded-lg border ${
+                    (availabilityTab === "virtual" && appointmentStatus.virtual) ||
+                    (availabilityTab === "inPerson" && appointmentStatus.inPerson)
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        (availabilityTab === "virtual" && appointmentStatus.virtual) ||
+                        (availabilityTab === "inPerson" && appointmentStatus.inPerson)
+                          ? "bg-green-500 animate-pulse"
+                          : "bg-red-500"
+                      }`}></div>
+                      <span className={`font-medium ${
+                        (availabilityTab === "virtual" && appointmentStatus.virtual) ||
+                        (availabilityTab === "inPerson" && appointmentStatus.inPerson)
+                          ? "text-green-700"
+                          : "text-red-700"
+                      }`}>
+                        {availabilityTab === "virtual" && appointmentStatus.virtual
+                          ? "Virtual appointments are available"
+                          : availabilityTab === "inPerson" && appointmentStatus.inPerson
+                          ? "In-person appointments are available"
+                          : availabilityTab === "virtual"
+                          ? "Virtual appointments are currently unavailable"
+                          : "In-person appointments are currently unavailable"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Availability Schedule */}
                 <div className="grid gap-2 sm:gap-3">
-                  {doctor.availability && doctor.availability.length > 0 ? (
-                    doctor.availability.map((slot, index) => (
+                  {displayAvailability.length > 0 ? (
+                    displayAvailability.map((slot, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg sm:rounded-xl hover:from-emerald-50 hover:to-emerald-100 transition-all duration-300"
@@ -852,7 +927,7 @@ export default function DoctorProfile() {
                     <div className="text-center py-6 sm:py-8">
                       <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
                       <p className="text-gray-500 text-sm sm:text-base">
-                        No availability schedule provided.
+                        No {availabilityTab} availability schedule provided.
                       </p>
                     </div>
                   )}
@@ -1538,7 +1613,6 @@ export default function DoctorProfile() {
         </div>
       )}
       {/* Payment Modal */}
-            {/* Payment Modal - Wrapped with Elements */}
       <Elements stripe={stripePromise}>
         <PaymentModal
           show={showPaymentModal}
