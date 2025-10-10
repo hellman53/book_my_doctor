@@ -1459,6 +1459,7 @@ const MedicineStoreSection = () => {
 };
 
 const Feature = () => {
+  const route = useRouter();
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4 sm:px-6">
@@ -1647,6 +1648,7 @@ const Feature = () => {
 
 /* chatbot section*/
 const ChatbotFeatures = () => {
+  const route = useRouter();
   const features = [
     {
       icon: "👨‍⚕️",
@@ -1760,10 +1762,10 @@ const ChatbotFeatures = () => {
         {/* Stats with Gradient Borders */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 text-center">
           {[
-            { number: "50K+", label: "Users Helped" },
+            { number: "2K+", label: "Users Helped" },
             { number: "24/7", label: "Availability" },
-            { number: "98%", label: "Accuracy Rate" },
-            { number: "5min", label: "Response Time" },
+            { number: "85%", label: "Accuracy Rate" },
+            { number: "15sec", label: "Response Time" },
           ].map((stat, index) => (
             <div
               key={index}
@@ -1793,10 +1795,10 @@ const ChatbotFeatures = () => {
                 personalized medical guidance in seconds.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <button onClick={() => route.push(`/ai-assistant`)} className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
                   Start Chat Now
                 </button>
-                <button className="rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 hover:scale-105 transition-all duration-300">
+                <button onClick={() => route.push(`/terms-of-service`)} className="rounded-2xl p-[1.5px] bg-gradient-to-r from-green-500 to-blue-400 hover:scale-105 transition-all duration-300">
                   <div className="bg-white rounded-2xl px-8 py-4">
                     <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent font-semibold text-lg">
                       Learn More
@@ -2249,6 +2251,7 @@ const Footer = () => {
 
 /* services in easy to understand*/
 const ConsultationSection = () => {
+  const route = useRouter();
   const consultations = [
     {
       id: 1,
@@ -2256,6 +2259,7 @@ const ConsultationSection = () => {
       icon: "🤰",
       doctors: "45+ doctors",
       description: "Expert guidance for women's health concerns",
+      route:"gynecologist",
     },
     {
       id: 2,
@@ -2263,6 +2267,7 @@ const ConsultationSection = () => {
       icon: "🧴",
       doctors: "38+ doctors",
       description: "Dermatology specialists for skin care",
+      route:"dermatologist",
     },
     {
       id: 3,
@@ -2270,6 +2275,7 @@ const ConsultationSection = () => {
       icon: "💊",
       doctors: "52+ doctors",
       description: "Confidential consultations available",
+      route:"obstetrician",
     },
     {
       id: 4,
@@ -2277,6 +2283,7 @@ const ConsultationSection = () => {
       icon: "🤒",
       doctors: "67+ doctors",
       description: "General physicians for common illnesses",
+      route:"general physician",
     },
     {
       id: 5,
@@ -2284,6 +2291,7 @@ const ConsultationSection = () => {
       icon: "👶",
       doctors: "41+ doctors",
       description: "Pediatric specialists for children's health",
+      route:"pediatrician",
     },
     {
       id: 6,
@@ -2291,6 +2299,7 @@ const ConsultationSection = () => {
       icon: "😔",
       doctors: "29+ doctors",
       description: "Mental health professionals available",
+      route:" psychiatrist",
     },
   ];
 
@@ -2303,8 +2312,8 @@ const ConsultationSection = () => {
   });
 
   const targetCounters = {
-    patients: 5000,
-    doctors: 200,
+    patients: 2000,
+    doctors: 300,
     availability: 24,
     specialties: 50,
   };
@@ -2413,7 +2422,7 @@ const ConsultationSection = () => {
                 </div>
 
                 {/* Gradient Button */}
-                <button className="group/btn w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center space-x-2">
+                <button onClick={() => route.push(`/doctors?q=${consultation.route}`)} className="group/btn w-full py-4 px-6 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center space-x-2">
                   <span>CONSULT NOW</span>
                   <svg
                     className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform"
@@ -2472,7 +2481,7 @@ const ConsultationSection = () => {
                   </div>
 
                   {/* Gradient Button */}
-                  <button className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 active:scale-95 text-sm shadow-lg">
+                  <button onClick={() => route.push(`/doctors?q=${consultation.route}`)} className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 active:scale-95 text-sm shadow-lg">
                     CONSULT NOW
                   </button>
                 </div>
@@ -2506,7 +2515,7 @@ const ConsultationSection = () => {
                 Browse our complete directory of healthcare specialists
               </p>
             </div>
-            <button className="group/btn px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap flex items-center space-x-2 text-sm sm:text-base">
+            <button onClick={() => route.push(`/doctors`)} className="group/btn px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap flex items-center space-x-2 text-sm sm:text-base">
               <span>View All Specialties</span>
               <svg
                 className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform"
