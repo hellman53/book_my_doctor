@@ -1,7 +1,11 @@
-"use client";
-
+import { Suspense } from 'react';
 import DoctorSearch from '@/components/pages/SearchDoctor';
 
 export default function DoctorsPage() {
-  return <DoctorSearch />;
+   <div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <DoctorSearch />
+      </Suspense>
+    </div>
+
 }
