@@ -783,173 +783,181 @@ export default function DoctorSearch() {
                         onClick={() => handleCardClick(doctor.id)}
                         className="group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 sm:p-6 cursor-pointer border border-gray-100 hover:border-emerald-200 transform hover:-translate-y-1"
                       >
-                        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-                          {/* Doctor Avatar */}
-                          <div className="flex-shrink-0">
-                            <div className="relative">
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                                {doctor.profileImage ? (
-                                  <img
-                                    src={doctor.profileImage}
-                                    alt={doctor.fullName}
-                                    className="w-full h-full rounded-xl sm:rounded-2xl object-cover"
-                                  />
-                                ) : (
-                                  <User className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-emerald-600" />
-                                )}
-                              </div>
-                              {/* Online Status Indicator */}
-                              <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                              </div>
-                            </div>
-                          </div>
+                          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 relative">
+  {/* Doctor Avatar */}
+  <div className="flex items-start gap-3">
+    <div className="relative">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+        {doctor.profileImage ? (
+          <img
+            src={doctor.profileImage}
+            alt={doctor.fullName}
+            className="w-full h-full rounded-xl sm:rounded-2xl object-cover"
+          />
+        ) : (
+          <User className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-emerald-600" />
+        )}
+      </div>
 
-                          {/* Doctor Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 sm:mb-4 gap-2">
-                              <div className="flex-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
-                                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
-                                    Dr. {doctor.fullName}
-                                  </h3>
-                                  <div className="flex items-center gap-1">
-                                    <Award className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
-                                    <Badge className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                                  </div>
-                                </div>
-                                <p className="text-emerald-600 font-semibold text-sm sm:text-base lg:text-lg mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2">
-                                  <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  {doctor.specialization}
-                                </p>
+      {/* Online Status Indicator */}
+      <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+      </div>
+    </div>
 
-                                {/* Rating and Reviews */}
-                                {doctor.rating > 0 && (
-                                  <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
-                                    <div className="flex items-center gap-0.5 sm:gap-1">
-                                      {[...Array(5)].map((_, i) => (
-                                        <Star
-                                          key={i}
-                                          className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                                            i < Math.floor(doctor.rating)
-                                              ? "text-yellow-400 fill-yellow-400"
-                                              : "text-gray-300"
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="font-semibold text-gray-900 text-sm sm:text-base">
-                                      {doctor.rating}
-                                    </span>
-                                    {doctor.reviewCount && (
-                                      <span className="text-gray-500 text-xs sm:text-sm">
-                                        ({doctor.reviewCount} reviews)
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
+    {/* Name + Specialization beside image (mobile view) */}
+    <div className="flex flex-col justify-center sm:hidden">
+      <h3 className="text-base font-bold text-gray-900">
+        Dr. {doctor.fullName}
+      </h3>
+      <p className="text-emerald-600 font-semibold text-sm flex items-center gap-1">
+        <Stethoscope className="h-3 w-3" />
+        {doctor.specialization}
+      </p>
+    </div>
+  </div>
 
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                  {/* Left Column - Address & Details */}
-                                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-1 text-xs sm:text-sm flex-1">
-                                    <div className="flex items-center sm:gap-2 text-gray-600">
-                                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
-                                      <span className="font-medium truncate">
-                                        {doctor.clinicName}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
-                                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
-                                      <span className="truncate">
-                                        {doctor.city}
-                                      </span>
-                                    </div>
-                                    {doctor.experience && (
-                                      <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
-                                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
-                                        <span>
-                                          {doctor.experience} years experience
-                                        </span>
-                                      </div>
-                                    )}
-                                    <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
-                                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
-                                      <span className="text-green-600 font-medium">
-                                        Available Today
-                                      </span>
-                                    </div>
-                                  </div>
+  {/* Favorite Button - Top Right */}
+  <button
+    onClick={(e) => toggleFavorite(doctor.id, e)}
+    className="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-50 transition-colors"
+  >
+    <Heart
+      className={`h-5 w-5 ${
+        favorites.has(doctor.id)
+          ? "fill-red-500 text-red-500"
+          : "text-gray-400 hover:text-red-500"
+      }`}
+    />
+  </button>
 
-                                  {/* Right Column - Fee, Services & Actions */}
-                                  <div className="sm:w-56 lg:w-80 flex-shrink-0 ">
-                                    {/* Line 1: Consultation Fee */}
-                                    {doctor.consultationFee && (
-                                      <div className="mb-4">
-                                        <div className="text-xl font-bold text-gray-500">
-                                          Consultation Fee -{" "}
-                                          <span className="text-lg sm:text-xl font-bold text-emerald-600">
-                                            ₹{doctor.consultationFee}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
+  {/* Doctor Info */}
+  <div className="flex-1 min-w-0">
+    {/* Desktop: Name + specialization beside info */}
+    <div className="hidden sm:flex flex-col sm:flex-row sm:items-start justify-between mb-3 sm:mb-4 gap-2">
+      <div className="flex-1">
+        <div className="flex sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
+          <h3 className="text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+            Dr. {doctor.fullName}
+          </h3>
+          <div className="flex items-center gap-1">
+            <Award className="h-4 w-4 text-yellow-500" />
+            <Badge className="h-4 w-4 text-blue-500" />
+          </div>
+        </div>
+        <p className="text-emerald-600 font-semibold text-base lg:text-lg mb-2 flex items-center gap-2">
+          <Stethoscope className="h-4 w-4" />
+          {doctor.specialization}
+        </p>
+      </div>
+    </div>
 
-                                    {/* Line 2: Service Tags */}
-                                    <div className="flex gap-1 flex-wrap mb-4">
-                                      <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                                        <Video className="h-3 w-3 mr-1" />
-                                        Video Call
-                                      </span>
-                                      <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200">
-                                        <User className="h-3 w-3 mr-1" />
-                                        In-Person
-                                      </span>
-                                      <span className="inline-flex items-center px-2 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
-                                        <Clock className="h-3 w-3 mr-1" />
-                                        Same Day
-                                      </span>
-                                    </div>
+    {/* Rest of the info (always below on mobile) */}
+    
+    <div className="flex flex-col sm:flex-row gap-4">
+      {/* Left Column - Address & Details */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-1 text-xs sm:text-sm flex-1">
+        <div className="flex items-center sm:gap-2 text-gray-600">
+          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+          <span className="font-medium truncate">{doctor.clinicName}</span>
+        </div>
+        <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
+          <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+          <span className="truncate">
+            {doctor.locality}, {doctor.city}
+          </span>
+        </div>
+        {doctor.experience && (
+          <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+            <span>{doctor.experience} years experience</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
+          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+          <span className="text-green-600 font-medium">Available Today</span>
+        </div>
+        {doctor.rating > 0 && (
+      <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                i < Math.floor(doctor.rating)
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+        <span className="font-semibold text-gray-900 text-sm sm:text-base">
+          {doctor.rating}
+        </span>
+        {doctor.reviewCount && (
+          <span className="text-gray-500 text-xs sm:text-sm">
+            ({doctor.reviewCount} reviews)
+          </span>
+        )}
+      </div>
+    )}
 
-                                    {/* Line 3: Action Buttons */}
-                                    <div className="flex gap-2">
-                                      <button
-                                        onClick={(e) =>
-                                          handleBookAppointment(doctor.id, e)
-                                        }
-                                        className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                                      >
-                                        Book Appointment
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // Add view profile functionality
-                                        }}
-                                        className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium text-xs"
-                                      >
-                                        Profile
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+      </div>
 
-                              {/* Favorite Button - Top Right Corner */}
-                              <button
-                                onClick={(e) => toggleFavorite(doctor.id, e)}
-                                className="self-start sm:self-auto p-1 sm:p-2 rounded-full hover:bg-gray-50 transition-colors"
-                              >
-                                <Heart
-                                  className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                                    favorites.has(doctor.id)
-                                      ? "fill-red-500 text-red-500"
-                                      : "text-gray-400 hover:text-red-500"
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+      {/* Right Column - Fee, Services & Actions */}
+      <div className="sm:w-56 lg:w-80 flex-shrink-0 sm:pb-1">
+        {/* Consultation Fee */}
+        {doctor.consultationFee && (
+          <div className="mb-4">
+            <div className="text-xl font-bold text-gray-500">
+              Consultation Fee -{" "}
+              <span className="text-lg sm:text-xl font-bold text-emerald-600">
+                ₹{doctor.consultationFee}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Service Tags */}
+        <div className="flex gap-1 flex-wrap mb-4 ">
+          <span className="inline-flex items-center  py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+            <Video className="h-3 w-3 mr-1" />
+            Video Call
+          </span>
+          <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200">
+            <User className="h-3 w-3 mr-1" />
+            In-Person
+          </span>
+          <span className="inline-flex items-center px-2 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Same Day
+          </span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => handleBookAppointment(doctor.id, e)}
+            className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            Book Appointment
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // Add view profile functionality
+            }}
+            className="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium text-xs"
+          >
+            Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
                       </div>
                     ))}
                   </div>
