@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, MapPin, Heart, X, Clock, User, ChevronDown, Filter, Star, Calendar, Badge,Video, Stethoscope, Award, ChevronLeft, ChevronRight } from "lucide-react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import { useRouter } from "next/navigation";
 import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
@@ -60,36 +60,63 @@ export default function DoctorSearch() {
 
   // Fetch doctors from Firebase
   useEffect(() => {
-    const fetchDoctors = async () => {
-      setLoading(true);
-      try {
-        const doctorsRef = collection(db, "doctors");
-        const q = query(doctorsRef, where("isActive", "==", true));
-        const querySnapshot = await getDocs(q);
+    
+
+// In your fetchDoctors function, update it like this:
+const fetchDoctors = async () => {
+  setLoading(true);
+  try {
+    const doctorsRef = collection(db, "doctors");
+    const q = query(doctorsRef, where("isActive", "==", true));
+    const querySnapshot = await getDocs(q);
+
+    const doctorsData = await Promise.all(
+      querySnapshot.docs.map(async (doctorDoc) => {
+        const doctorData = { id: doctorDoc.id, ...doctorDoc.data() };
         
-        const doctorsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        setDoctors(doctorsData);
-
-        // Extract unique cities and specializations
-        const uniqueCities = [...new Set(doctorsData.map(doc => doc.city).filter(Boolean))];
-        const uniqueSpecializations = [...new Set(doctorsData.map(doc => doc.specialization).filter(Boolean))];
+        // Also fetch user data for profile image
+        try {
+          const userDocRef = doc(db, "users", doctorDoc.id);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            return { 
+              ...doctorData, 
+              profileImage: userDoc.data().profileImage,
+              // You might want to include other user data as well
+              userData: userDoc.data()
+            };
+          }
+        } catch (error) {
+          console.error("Error fetching user data for doctor:", doctorDoc.id, error);
+        }
         
-        setCities(["", ...uniqueCities]);
-        setSpecializations(uniqueSpecializations);
+        return doctorData;
+      })
+    );
 
-      } catch (error) {
-        console.error("Error fetching doctors:", error);
-        setDoctors([]);
-        setCities([""]);
-        setSpecializations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setDoctors(doctorsData);
+
+    // Extract unique cities and specializations
+    const uniqueCities = [
+      ...new Set(doctorsData.map((doc) => doc.city).filter(Boolean)),
+    ];
+    const uniqueSpecializations = [
+      ...new Set(
+        doctorsData.map((doc) => doc.specialization).filter(Boolean)
+      ),
+    ];
+
+    setCities(["", ...uniqueCities]);
+    setSpecializations(uniqueSpecializations);
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    setDoctors([]);
+    setCities([""]);
+    setSpecializations([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchDoctors();
   }, []);
