@@ -1,11 +1,15 @@
-import React, { useState } from "react";
-import { ShoppingCart, Star, Heart, Search, Filter, Truck, Shield, Clock, Zap, ArrowRight } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { ShoppingCart, Star, Heart, Search, Filter, Truck, Shield, Clock, Zap, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
 
 const MedicineStore = () => {
   const [wishlist, setWishlist] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  
+  // Carousel states
+  const [currentMedicineSlide, setCurrentMedicineSlide] = useState(0);
+  const [currentHealthTipSlide, setCurrentHealthTipSlide] = useState(0);
 
   const categories = [
     { id: "all", name: "All Medicines", icon: "💊" },
@@ -159,6 +163,24 @@ const MedicineStore = () => {
       image: "https://media.istockphoto.com/id/1457433817/photo/group-of-healthy-food-for-flexitarian-diet.jpg?s=612x612&w=0&k=20&c=v48RE0ZNWpMZOlSp13KdF1yFDmidorO2pZTu2Idmd3M=",
       readTime: "5 min read",
       category: "Nutrition"
+    },
+    {
+      title: "Exercise Tips for Busy Professionals",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+      readTime: "4 min read",
+      category: "Fitness"
+    },
+    {
+      title: "Mental Health and Wellness Guide",
+      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
+      readTime: "6 min read",
+      category: "Mental Health"
+    },
+    {
+      title: "Healthy Eating Habits for 2024",
+      image: "https://media.istockphoto.com/id/1457433817/photo/group-of-healthy-food-for-flexitarian-diet.jpg?s=612x612&w=0&k=20&c=v48RE0ZNWpMZOlSp13KdF1yFDmidorO2pZTu2Idmd3M=",
+      readTime: "5 min read",
+      category: "Nutrition"
     }
   ];
 
@@ -172,6 +194,165 @@ const MedicineStore = () => {
 
   const filteredMedicines = medicines.filter(medicine => 
     selectedCategory === "all" || medicine.category === selectedCategory
+  );
+
+  // Carousel navigation functions for medicines
+  const nextMedicineSlide = () => {
+    if (currentMedicineSlide < filteredMedicines.length - 1) {
+      setCurrentMedicineSlide(currentMedicineSlide + 1);
+    }
+  };
+
+  const prevMedicineSlide = () => {
+    if (currentMedicineSlide > 0) {
+      setCurrentMedicineSlide(currentMedicineSlide - 1);
+    }
+  };
+
+  const goToMedicineSlide = (index) => {
+    setCurrentMedicineSlide(index);
+  };
+
+  // Carousel navigation functions for health tips
+  const nextHealthTipSlide = () => {
+    if (currentHealthTipSlide < healthTips.length - 1) {
+      setCurrentHealthTipSlide(currentHealthTipSlide + 1);
+    }
+  };
+
+  const prevHealthTipSlide = () => {
+    if (currentHealthTipSlide > 0) {
+      setCurrentHealthTipSlide(currentHealthTipSlide - 1);
+    }
+  };
+
+  const goToHealthTipSlide = (index) => {
+    setCurrentHealthTipSlide(index);
+  };
+
+  // Medicine card component for reusability
+  const MedicineCard = ({ med }) => (
+    <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 group overflow-hidden border border-gray-100 flex flex-col h-full">
+      {/* Image Section */}
+      <div className="relative overflow-hidden">
+        <img
+          src={med.image}
+          alt={med.name}
+          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+
+        {/* Discount Badge */}
+        {med.discount > 0 && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+            {med.discount}% OFF
+          </div>
+        )}
+
+        {/* Prescription Badge */}
+        {med.prescription && (
+          <div className="absolute top-3 right-3 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+            Rx Required
+          </div>
+        )}
+
+        {/* Wishlist Button */}
+        <button
+          onClick={() => toggleWishlist(med.id)}
+          className={`absolute top-12 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
+            wishlist.includes(med.id)
+              ? "bg-red-500 text-white"
+              : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
+          }`}
+        >
+          <Heart
+            size={18}
+            className={wishlist.includes(med.id) ? "fill-current" : ""}
+          />
+        </button>
+      </div>
+
+      {/* Content Section */}
+      <div className="p-5 pb-20 flex flex-col flex-1">
+        <div className="mb-2">
+          <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
+            {med.name}
+          </h3>
+          <p className="text-sm text-gray-500">{med.brand}</p>
+        </div>
+
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          {med.description}
+        </p>
+
+        {/* Rating */}
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-full">
+            <Star
+              size={14}
+              fill="currentColor"
+              className="text-yellow-500"
+            />
+            <span className="text-sm font-semibold text-emerald-700">
+              {med.rating}
+            </span>
+          </div>
+          <span className="text-xs text-gray-500">
+            ({med.reviews} reviews)
+          </span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl font-bold text-emerald-600">
+            ₹{med.price}
+          </span>
+          {med.originalPrice > med.price && (
+            <span className="text-gray-400 line-through text-sm">
+              ₹{med.originalPrice}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Add to Cart Button */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 bg-white">
+        <button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+          <ShoppingCart size={18} />
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+
+  // Health Tip card component
+  const HealthTipCard = ({ tip, index }) => (
+    <div
+      key={index}
+      className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 h-full"
+    >
+      <div className="relative overflow-hidden">
+        <img
+          src={tip.image}
+          alt={tip.title}
+          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+        <div className="absolute top-4 left-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+          {tip.category}
+        </div>
+      </div>
+      <div className="p-6">
+        <h3 className="font-bold text-xl text-gray-900 mb-3 line-clamp-2">
+          {tip.title}
+        </h3>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-500">{tip.readTime}</span>
+          <button className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm flex items-center gap-1">
+            Read More
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -272,7 +453,7 @@ const MedicineStore = () => {
         </div>
       </section>
 
-      {/* Product Grid */}
+      {/* Product Grid - Responsive with Carousel on Mobile */}
       <section className="py-16 px-6 md:px-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
@@ -288,84 +469,64 @@ const MedicineStore = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {/* Desktop Grid View */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {filteredMedicines.map((med) => (
-              <div
-                key={med.id}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 group overflow-hidden border border-gray-100"
-              >
-                {/* Image Section */}
-                <div className="relative overflow-hidden">
-                  <img
-                    src={med.image}
-                    alt={med.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  
-                  {/* Discount Badge */}
-                  {med.discount > 0 && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      {med.discount}% OFF
-                    </div>
-                  )}
-                  
-                  {/* Prescription Badge */}
-                  {med.prescription && (
-                    <div className="absolute top-3 right-3 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                      Rx Required
-                    </div>
-                  )}
-                  
-                  {/* Wishlist Button */}
-                  <button
-                    onClick={() => toggleWishlist(med.id)}
-                    className={`absolute top-12 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
-                      wishlist.includes(med.id)
-                        ? "bg-red-500 text-white"
-                        : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
-                    }`}
-                  >
-                    <Heart 
-                      size={18} 
-                      className={wishlist.includes(med.id) ? "fill-current" : ""}
-                    />
-                  </button>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-5">
-                  <div className="mb-2">
-                    <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{med.name}</h3>
-                    <p className="text-sm text-gray-500">{med.brand}</p>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{med.description}</p>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-full">
-                      <Star size={14} fill="currentColor" className="text-yellow-500" />
-                      <span className="text-sm font-semibold text-emerald-700">{med.rating}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">({med.reviews} reviews)</span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl font-bold text-emerald-600">₹{med.price}</span>
-                    {med.originalPrice > med.price && (
-                      <span className="text-gray-400 line-through text-sm">₹{med.originalPrice}</span>
-                    )}
-                  </div>
-
-                  {/* Add to Cart Button */}
-                  <button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                    <ShoppingCart size={18} />
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
+              <MedicineCard key={med.id} med={med} />
             ))}
+          </div>
+
+          {/* Mobile Carousel View for Medicines */}
+          <div className="md:hidden relative">
+            {/* Carousel Container */}
+            <div className="overflow-hidden">
+              <div 
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(-${currentMedicineSlide * 100}%)` }}
+              >
+                {filteredMedicines.map((med) => (
+                  <div key={med.id} className="w-full flex-shrink-0 px-2">
+                    <MedicineCard med={med} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevMedicineSlide}
+              disabled={currentMedicineSlide === 0}
+              className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all ${
+                currentMedicineSlide === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'
+              }`}
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-700" />
+            </button>
+
+            <button
+              onClick={nextMedicineSlide}
+              disabled={currentMedicineSlide === filteredMedicines.length - 1}
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all ${
+                currentMedicineSlide === filteredMedicines.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'
+              }`}
+            >
+              <ChevronRight className="h-5 w-5 text-gray-700" />
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {filteredMedicines.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToMedicineSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    index === currentMedicineSlide
+                      ? 'bg-emerald-500'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -395,7 +556,7 @@ const MedicineStore = () => {
         </div>
       </section>
 
-      {/* Health Tips Section */}
+      {/* Health Tips Section with Carousel */}
       <section className="py-16 px-6 md:px-20 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -403,36 +564,64 @@ const MedicineStore = () => {
             <p className="text-gray-600 text-lg">Expert advice to keep you healthy and informed</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {healthTips.map((tip, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={tip.image}
-                    alt={tip.title}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    {tip.category}
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-xl text-gray-900 mb-3 line-clamp-2">
-                    {tip.title}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{tip.readTime}</span>
-                    <button className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm flex items-center gap-1">
-                      Read More
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+          {/* Desktop Grid View for Health Tips */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-8">
+            {healthTips.slice(0, 3).map((tip, index) => (
+              <HealthTipCard key={index} tip={tip} index={index} />
             ))}
+          </div>
+
+          {/* Mobile Carousel View for Health Tips */}
+          <div className="md:hidden relative">
+            {/* Carousel Container */}
+            <div className="overflow-hidden">
+              <div 
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(-${currentHealthTipSlide * 100}%)` }}
+              >
+                {healthTips.map((tip, index) => (
+                  <div key={index} className="w-full flex-shrink-0 px-2">
+                    <HealthTipCard tip={tip} index={index} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevHealthTipSlide}
+              disabled={currentHealthTipSlide === 0}
+              className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all ${
+                currentHealthTipSlide === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'
+              }`}
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-700" />
+            </button>
+
+            <button
+              onClick={nextHealthTipSlide}
+              disabled={currentHealthTipSlide === healthTips.length - 1}
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm border border-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all ${
+                currentHealthTipSlide === healthTips.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'
+              }`}
+            >
+              <ChevronRight className="h-5 w-5 text-gray-700" />
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {healthTips.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToHealthTipSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    index === currentHealthTipSlide
+                      ? 'bg-emerald-500'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
