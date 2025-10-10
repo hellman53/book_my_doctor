@@ -126,7 +126,7 @@ export default function VideoCall({ roomID, userID, userName, onLeave }) {
           {/* Back/Exit Button */}
           <button
               onClick={handleLeaveRoom}
-              className="px-4 py-2 bg-gradient-to-br from-red-50 via-red-500 to-red-50 text-white font-semibold rounded-lg shadow-xl transition-colors duration-200 flex items-center space-x-2"
+              className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-xl transition-colors duration-200 flex items-center space-x-2"
               aria-label="Exit video call and return to the previous page"
           >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
