@@ -85,7 +85,7 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search-doctors?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/doctors?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
     }
   };
