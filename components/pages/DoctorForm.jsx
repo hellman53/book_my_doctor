@@ -236,7 +236,7 @@ export default function DoctorForm() {
         specialization: formData.specialization,
       };
       
-      console.log('Submitting doctor application:', submissionData);
+      // console.log('Submitting doctor application:', submissionData);
       
       const result = await submitDoctorApplication(submissionData, user?.id);
       

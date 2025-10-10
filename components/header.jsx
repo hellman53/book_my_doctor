@@ -75,7 +75,7 @@ const Header = () => {
         };
 
         setUserData(newUser);
-        console.log("new user data (before set):", newUser);
+        // console.log("new user data (before set):", newUser);
       }
     };
 
