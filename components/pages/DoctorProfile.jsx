@@ -65,7 +65,8 @@ export default function DoctorProfile() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState(null);
-  const [availabilityTab, setAvailabilityTab] = useState("virtual"); // New state for availability tabs
+  const [availabilityTab, setAvailabilityTab] = useState("virtual");
+  const [zegoCloudData, setZegoCloudData] = useState(null); // New state for ZegoCloud data
 
   const doctorId = params.id;
 
@@ -109,6 +110,26 @@ export default function DoctorProfile() {
       fetchDoctor();
     }
   }, [doctorId, router]);
+
+  // Generate ZegoCloud session data for virtual appointments
+  const generateZegoCloudSession = (appointmentId) => {
+    if (appointmentType !== "virtual") return null;
+
+    const roomID = `appointment_${appointmentId}`;
+    
+    // In a real application, you would generate these server-side for security
+    // For demo purposes, we're generating client-side
+    const appID = "1088666283"; // This should come from environment variables
+    const serverSecret = "a8fd6941cab34415532a1e15671f6628"; // This should come from server-side
+    
+    return {
+      appID,
+      roomID,
+      serverSecret,
+      userID: currentUser?.id || `user_${Date.now()}`,
+      userName: currentUser?.fullName || currentUser?.firstName || "Patient",
+    };
+  };
 
   // Check if today is available for appointments
   const checkTodaysAvailability = (doctorData) => {
@@ -322,17 +343,39 @@ export default function DoctorProfile() {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentSuccess = (appointmentId) => {
-    setAppointmentId(appointmentId);
-    setPaymentSuccess(true);
-    setShowPaymentModal(false);
-    setShowBookingModal(false);
-    setBookingStep(1);
-    setSelectedDate("");
-    setSelectedTime("");
-    setPatientNotes("");
+  const handlePaymentSuccess = async (appointmentId) => {
+    try {
+      // Generate ZegoCloud session data for virtual appointments
+      if (appointmentType === "virtual") {
+        const zegoCloudSession = generateZegoCloudSession(appointmentId);
+        
+        if (zegoCloudSession) {
+          // Update the appointment document with ZegoCloud data
+          const appointmentRef = doc(db, "appointments", appointmentId);
+          await updateDoc(appointmentRef, {
+            zegoCloudData: zegoCloudSession,
+            updatedAt: serverTimestamp(),
+          });
+          
+          setZegoCloudData(zegoCloudSession);
+          console.log("ZegoCloud session data added to appointment:", zegoCloudSession);
+        }
+      }
 
-    toast.success("Appointment booked successfully!");
+      setAppointmentId(appointmentId);
+      setPaymentSuccess(true);
+      setShowPaymentModal(false);
+      setShowBookingModal(false);
+      setBookingStep(1);
+      setSelectedDate("");
+      setSelectedTime("");
+      setPatientNotes("");
+
+      toast.success("Appointment booked successfully!");
+    } catch (error) {
+      console.error("Error updating appointment with ZegoCloud data:", error);
+      toast.error("Appointment booked but there was an error setting up video call");
+    }
   };
 
   const handleProceedToPayment = () => {
@@ -1612,6 +1655,7 @@ export default function DoctorProfile() {
           </div>
         </div>
       )}
+
       {/* Payment Modal */}
       <Elements stripe={stripePromise}>
         <PaymentModal
