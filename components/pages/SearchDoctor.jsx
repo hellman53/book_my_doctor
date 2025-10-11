@@ -866,7 +866,7 @@ export default function DoctorSearch() {
         <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
           <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
           <span className="truncate">
-            {doctor.locality}, {doctor.city}
+            {doctor.city}
           </span>
         </div>
         {doctor.experience && (

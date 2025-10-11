@@ -35,7 +35,7 @@ const dummyDoctors = [
     name: "Anjali Sharma",
     specialization: "Cardiologist",
     experience: "12 years",
-    hospital: "Green City Hospital, Delhi",
+    hospital: "Green City Hospital, Gorakhpur",
     rating: 5,
     reviews: 128,
     contact: "+91 98765 43210",
