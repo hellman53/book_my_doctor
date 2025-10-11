@@ -54,6 +54,8 @@ import {
   ChevronLeft,
   Download,
   MessageCircle,
+  Key,
+  ShieldCheck,
 } from "lucide-react";
 import VideoCall from "@/components/VideoCall";
 import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
@@ -69,6 +71,9 @@ export default function DoctorDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [activeVideoCall, setActiveVideoCall] = useState(null);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [otpInput, setOtpInput] = useState("");
 
   // Schedule settings
   const [scheduleSettings, setScheduleSettings] = useState({
@@ -142,8 +147,7 @@ export default function DoctorDashboard() {
       const appointmentsRef = collection(db, "appointments");
       const q = query(
         appointmentsRef, 
-        where("doctorId", "==", doctorId),
-        // orderBy("createdAt", "desc") // Sort by creation date, newest first
+        where("doctorId", "==", doctorId)
       );
 
       const querySnapshot = await getDocs(q);
@@ -381,6 +385,55 @@ export default function DoctorDashboard() {
     } catch (error) {
       console.error("Error cancelling appointments:", error);
       toast.error("Error cancelling appointments");
+    }
+  };
+
+  const openOTPModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setOtpInput("");
+    setShowOTPModal(true);
+  };
+
+  const verifyOTP = async () => {
+    if (!selectedAppointment || !otpInput) {
+      toast.error("Please enter OTP");
+      return;
+    }
+
+    try {
+      // Get the latest appointment data
+      const appointmentDoc = await getDoc(doc(db, "appointments", selectedAppointment.id));
+      if (!appointmentDoc.exists()) {
+        toast.error("Appointment not found");
+        return;
+      }
+
+      const appointmentData = appointmentDoc.data();
+      
+      // Check if OTP matches
+      if (appointmentData.otp !== otpInput) {
+        toast.error("Invalid OTP. Please check and try again.");
+        return;
+      }
+
+      // Update appointment status to completed
+      await updateDoc(doc(db, "appointments", selectedAppointment.id), {
+        status: "completed",
+        completedAt: serverTimestamp(),
+        otpVerifiedAt: serverTimestamp(),
+      });
+
+      toast.success("OTP verified successfully! Appointment marked as completed.");
+      setShowOTPModal(false);
+      setOtpInput("");
+      setSelectedAppointment(null);
+      
+      // Refresh appointments and revenue
+      fetchAppointments(currentUser.id);
+      calculateRevenue(currentUser.id);
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("Error verifying OTP");
     }
   };
 
@@ -769,6 +822,7 @@ export default function DoctorDashboard() {
             onCancel={cancelAppointment}
             onJoinVideoCall={joinVideoCall}
             onViewDetails={viewAppointmentDetails}
+            onVerifyOTP={openOTPModal}
             cancellationRange={cancellationRange}
             setCancellationRange={setCancellationRange}
             onBulkCancel={cancelAppointmentsInRange}
@@ -803,6 +857,21 @@ export default function DoctorDashboard() {
         {/* Settings Tab */}
         {activeTab === "settings" && <SettingsManager doctor={doctor} />}
       </div>
+
+      {/* OTP Verification Modal */}
+      {showOTPModal && selectedAppointment && (
+        <OTPVerificationModal
+          appointment={selectedAppointment}
+          otpInput={otpInput}
+          setOtpInput={setOtpInput}
+          onVerify={verifyOTP}
+          onClose={() => {
+            setShowOTPModal(false);
+            setSelectedAppointment(null);
+            setOtpInput("");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -817,6 +886,7 @@ function AppointmentsManager({
   onCancel,
   onJoinVideoCall,
   onViewDetails,
+  onVerifyOTP,
   cancellationRange,
   setCancellationRange,
   onBulkCancel,
@@ -1023,6 +1093,7 @@ function AppointmentsManager({
               onCancel={onCancel}
               onJoinVideoCall={onJoinVideoCall}
               onViewDetails={onViewDetails}
+              onVerifyOTP={onVerifyOTP}
               getStatusColor={getStatusColor}
               getStatusIcon={getStatusIcon}
             />
@@ -1373,7 +1444,7 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
         <h3 className="text-xl font-semibold mb-6">Revenue Breakdown</h3>
         <div className="space-y-4">
           {appointments
-            .filter((a) => a.status === "confirmed")
+            .filter((a) => a.status === "confirmed" || a.status === "completed")
             .map((appointment) => (
               <div
                 key={appointment.id}
@@ -1400,7 +1471,11 @@ function RevenueManager({ revenue, cancelledRevenue, appointments }) {
                   <p className="font-bold text-lg text-emerald-600">
                     ₹{appointment.consultationFee}
                   </p>
-                  <p className="text-sm text-green-600 font-medium">Completed</p>
+                  <p className={`text-sm font-medium ${
+                    appointment.status === "completed" ? "text-green-600" : "text-blue-600"
+                  }`}>
+                    {appointment.status === "completed" ? "Completed" : "Confirmed"}
+                  </p>
                 </div>
               </div>
             ))}
@@ -1567,6 +1642,7 @@ function AppointmentCard({
   onCancel,
   onJoinVideoCall,
   onViewDetails,
+  onVerifyOTP,
   getStatusColor,
   getStatusIcon,
 }) {
@@ -1596,6 +1672,9 @@ function AppointmentCard({
     appointment.status === "confirmed" &&
     appointment.appointmentType === "virtual" &&
     (appointment.zegoCloudData || appointment.vonageSessionId);
+
+  const canVerifyOTP =
+    appointment.status === "confirmed" 
 
   return (
     <div className="p-6 hover:bg-gray-50 transition-colors">
@@ -1655,6 +1734,17 @@ function AppointmentCard({
               </button>
             )}
 
+            {canVerifyOTP && (
+              <button
+                onClick={() => onVerifyOTP(appointment)}
+                className="flex items-center gap-1 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+                title="Verify OTP to complete appointment"
+              >
+                <Key className="h-4 w-4" />
+                Verify OTP
+              </button>
+            )}
+
             <button
               onClick={() => onViewDetails(appointment)}
               className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
@@ -1671,6 +1761,142 @@ function AppointmentCard({
                 Cancel
               </button>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// OTP Verification Modal Component
+function OTPVerificationModal({ appointment, otpInput, setOtpInput, onVerify, onClose }) {
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl max-w-lg w-full mx-auto shadow-2xl">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-xl">
+                <Key className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Verify OTP
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Complete appointment by verifying OTP
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Appointment Info */}
+          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200">
+            <h4 className="font-semibold text-gray-900 mb-2">Appointment Details</h4>
+            <p className="text-sm text-gray-600">
+              <strong>Patient:</strong> {appointment.patientName}
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Time:</strong> {formatTime(appointment.appointmentTime)}
+            </p>
+            <p className="text-sm text-gray-600">
+              <strong>Type:</strong> {appointment.appointmentType}
+            </p>
+          </div>
+
+          {/* OTP Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter OTP Provided by Patient
+            </label>
+            <div className="relative">
+              <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                value={otpInput}
+                onChange={(e) => setOtpInput(e.target.value.toUpperCase())}
+                placeholder="Enter OTP"
+                className="w-full py-2 px-3  border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-center text-lg font-mono tracking-widest uppercase"
+                maxLength={6}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Ask the patient for their OTP to complete the appointment
+            </p>
+          </div>
+
+          {/* Instructions */}
+          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-blue-900 text-sm mb-1">
+                  Verification Instructions
+                </h4>
+                <ul className="text-blue-800 text-sm space-y-1">
+                  <li>• Ask the patient for their appointment OTP</li>
+                  <li>• Enter the OTP exactly as provided</li>
+                  <li>• OTP is case-insensitive</li>
+                  <li>• Once verified, appointment will be marked as completed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="p-6 border-t border-gray-200">
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 px-6 rounded-2xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onVerify}
+              disabled={!otpInput}
+              className={`flex-1 py-3 px-6 rounded-2xl font-semibold transition-colors ${
+                !otpInput
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-purple-600 text-white hover:bg-purple-700"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ShieldCheck className="h-5 w-5" />
+                Verify & Complete
+              </div>
+            </button>
           </div>
         </div>
       </div>

@@ -11,6 +11,8 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
+  addDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import { db } from "@/app/firebase/config";
 import { toast } from "react-hot-toast";
@@ -39,6 +41,9 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Edit,
+  MessageSquare,
+  CreditCard,
 } from "lucide-react";
 import VideoCall from "@/components/VideoCall";
 import FloatingActionButton from "@/components/HomeComponent/FloatingActionButton";
@@ -53,6 +58,11 @@ export default function MyAppointments() {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [activeVideoCall, setActiveVideoCall] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewData, setReviewData] = useState({
+    rating: 0,
+    comment: "",
+  });
 
   useEffect(() => {
     if (currentUser && isLoaded) {
@@ -69,10 +79,31 @@ export default function MyAppointments() {
       );
 
       const querySnapshot = await getDocs(q);
-      const appointmentsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const appointmentsData = await Promise.all(
+        querySnapshot.docs.map(async (doc) => {
+          const appointmentData = {
+            id: doc.id,
+            ...doc.data(),
+          };
+
+          // Check if review exists for this appointment
+          const reviewsRef = collection(db, "reviews");
+          const reviewQuery = query(
+            reviewsRef,
+            where("appointmentId", "==", doc.id)
+          );
+          const reviewSnapshot = await getDocs(reviewQuery);
+          
+          const hasReview = !reviewSnapshot.empty;
+          const review = hasReview ? reviewSnapshot.docs[0].data() : null;
+
+          return {
+            ...appointmentData,
+            hasReview,
+            review,
+          };
+        })
+      );
 
       // Sort appointments by date and time (newest first)
       appointmentsData.sort((a, b) => {
@@ -129,6 +160,109 @@ export default function MyAppointments() {
     setShowDetailsModal(true);
   };
 
+  const openReviewModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setReviewData({
+      rating: appointment.review?.rating || 0,
+      comment: appointment.review?.comment || "",
+    });
+    setShowReviewModal(true);
+  };
+
+  const submitReview = async () => {
+    if (!selectedAppointment || reviewData.rating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    try {
+      const reviewDataToSave = {
+        appointmentId: selectedAppointment.id,
+        doctorId: selectedAppointment.doctorId,
+        patientId: currentUser.id,
+        patientName: `${currentUser.firstName} ${currentUser.lastName}`,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+        createdAt: serverTimestamp(),
+        doctorName: selectedAppointment.doctorName,
+        doctorSpecialization: selectedAppointment.doctorSpecialization,
+        appointmentDate: selectedAppointment.appointmentDate,
+        appointmentTime: selectedAppointment.appointmentTime,
+      };
+
+      // Check if review already exists
+      const reviewsRef = collection(db, "reviews");
+      const reviewQuery = query(
+        reviewsRef,
+        where("appointmentId", "==", selectedAppointment.id)
+      );
+      const reviewSnapshot = await getDocs(reviewQuery);
+
+      let reviewId;
+      if (!reviewSnapshot.empty) {
+        // Update existing review
+        reviewId = reviewSnapshot.docs[0].id;
+        await updateDoc(doc(db, "reviews", reviewId), reviewDataToSave);
+      } else {
+        // Create new review
+        const docRef = await addDoc(reviewsRef, reviewDataToSave);
+        reviewId = docRef.id;
+      }
+
+      // Update doctor's rating and reviews
+      await updateDoctorRating(selectedAppointment.doctorId);
+
+      // Update appointment to mark as reviewed
+      await updateDoc(doc(db, "appointments", selectedAppointment.id), {
+        hasReview: true,
+        reviewedAt: serverTimestamp(),
+      });
+
+      toast.success("Review submitted successfully!");
+      setShowReviewModal(false);
+      fetchAppointments(); // Refresh appointments to show the review
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Error submitting review");
+    }
+  };
+
+  const updateDoctorRating = async (doctorId) => {
+    try {
+      // Get all reviews for this doctor
+      const reviewsRef = collection(db, "reviews");
+      const reviewQuery = query(reviewsRef, where("doctorId", "==", doctorId));
+      const reviewSnapshot = await getDocs(reviewQuery);
+
+      let totalRating = 0;
+      const reviews = [];
+
+      reviewSnapshot.forEach((doc) => {
+        const review = doc.data();
+        totalRating += review.rating;
+        reviews.push({
+          id: doc.id,
+          ...review,
+        });
+      });
+
+      const averageRating = reviewSnapshot.size > 0 ? totalRating / reviewSnapshot.size : 0;
+
+      // Update doctor document
+      const doctorRef = doc(db, "doctors", doctorId);
+      await updateDoc(doctorRef, {
+        rating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+        totalReviews: reviewSnapshot.size,
+        reviews: reviews.slice(0, 50), // Keep last 50 reviews
+        updatedAt: serverTimestamp(),
+      });
+
+      console.log(`Doctor ${doctorId} rating updated to ${averageRating}`);
+    } catch (error) {
+      console.error("Error updating doctor rating:", error);
+    }
+  };
+
   // Check if join button should be shown for an appointment
   const shouldShowJoinButton = (appointment) => {
     if (
@@ -149,6 +283,68 @@ export default function MyAppointments() {
 
     // Show button 15 minutes before appointment until 1 hour after appointment start
     return timeUntilAppointment <= 15 && timeSinceAppointment <= 60;
+  };
+
+  // Check if cancel button should be shown for an appointment
+  const shouldShowCancelButton = (appointment) => {
+    if (appointment.status !== "confirmed") {
+      return false;
+    }
+
+    const appointmentDateTime = new Date(
+      `${appointment.appointmentDate}T${appointment.appointmentTime}`
+    );
+    const now = new Date();
+
+    // Calculate time until appointment in hours
+    const timeUntilAppointment = (appointmentDateTime - now) / (1000 * 60 * 60);
+
+    // Show cancel button until 2 hours before appointment
+    return timeUntilAppointment > 2;
+  };
+
+  // Check if review button should be shown for an appointment (only in modal, not in card)
+  const shouldShowReviewButton = (appointment) => {
+    // Don't show review button if appointment is cancelled
+    if (appointment.status === "cancelled") {
+      return false;
+    }
+
+    // If appointment has review already, show edit button
+    if (appointment.hasReview) {
+      return true;
+    }
+
+    const appointmentDateTime = new Date(
+      `${appointment.appointmentDate}T${appointment.appointmentTime}`
+    );
+    const now = new Date();
+
+    // Show review button if appointment time has passed (current time is after appointment time)
+    // OR if appointment status is completed
+    const isAppointmentTimePassed = now > appointmentDateTime;
+    const isCompleted = appointment.status === "completed";
+
+    return isAppointmentTimePassed || isCompleted;
+  };
+
+  // Check if OTP should be shown (24 hours before to 24 hours after)
+  const shouldShowOTP = (appointment) => {
+    if (appointment.status !== "confirmed") {
+      return false;
+    }
+
+    const appointmentDateTime = new Date(
+      `${appointment.appointmentDate}T${appointment.appointmentTime}`
+    );
+    const now = new Date();
+
+    // Calculate time differences in hours
+    const timeUntilAppointment = (appointmentDateTime - now) / (1000 * 60 * 60);
+    const timeSinceAppointment = (now - appointmentDateTime) / (1000 * 60 * 60);
+
+    // Show OTP from 24 hours before until 24 hours after appointment
+    return timeUntilAppointment <= 24 && timeSinceAppointment <= 24;
   };
 
   // Filter appointments based on active tab, search, and status
@@ -260,6 +456,12 @@ export default function MyAppointments() {
                 <span className="font-semibold">
                   {appointments.filter((a) => a.status === "confirmed").length}{" "}
                   Upcoming
+                </span>
+              </div>
+              <div className="bg-white bg-opacity-20 text-emerald-700 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span className="font-semibold">
+                  {appointments.filter((a) => a.status === "completed").length}{" "}
+                  Completed
                 </span>
               </div>
             </div>
@@ -384,6 +586,8 @@ export default function MyAppointments() {
                 getStatusIcon={getStatusIcon}
                 getAppointmentTypeIcon={getAppointmentTypeIcon}
                 shouldShowJoinButton={shouldShowJoinButton}
+                shouldShowCancelButton={shouldShowCancelButton}
+                shouldShowOTP={shouldShowOTP}
               />
             ))}
           </div>
@@ -419,10 +623,25 @@ export default function MyAppointments() {
           onClose={() => setShowDetailsModal(false)}
           onJoinVideoCall={joinVideoCall}
           onCancel={cancelAppointment}
+          onReview={openReviewModal}
           getStatusColor={getStatusColor}
           getStatusIcon={getStatusIcon}
           getAppointmentTypeIcon={getAppointmentTypeIcon}
           shouldShowJoinButton={shouldShowJoinButton}
+          shouldShowCancelButton={shouldShowCancelButton}
+          shouldShowReviewButton={shouldShowReviewButton}
+          shouldShowOTP={shouldShowOTP}
+        />
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && selectedAppointment && (
+        <ReviewModal
+          appointment={selectedAppointment}
+          reviewData={reviewData}
+          setReviewData={setReviewData}
+          onSubmit={submitReview}
+          onClose={() => setShowReviewModal(false)}
         />
       )}
     </div>
@@ -439,6 +658,8 @@ function AppointmentCard({
   getStatusIcon,
   getAppointmentTypeIcon,
   shouldShowJoinButton,
+  shouldShowCancelButton,
+  shouldShowOTP,
 }) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -463,6 +684,8 @@ function AppointmentCard({
       new Date();
 
   const showJoinButton = shouldShowJoinButton(appointment);
+  const showCancelButton = shouldShowCancelButton(appointment);
+  const showOTP = shouldShowOTP(appointment);
 
   // Calculate time until appointment
   const getTimeUntilAppointment = () => {
@@ -482,7 +705,7 @@ function AppointmentCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
@@ -530,10 +753,32 @@ function AppointmentCard({
             </div>
           </div>
         )}
+
+        {/* OTP Display */}
+        {showOTP && appointment.otp && (
+          <div className="mt-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
+            <div className="flex items-center gap-2 text-purple-700 text-sm">
+              <CreditCard className="h-3 w-3" />
+              <span className="font-medium">OTP: {appointment.otp}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Review Status */}
+        {appointment.hasReview && (
+          <div className="mt-3 p-2 bg-green-50 rounded-lg border border-green-200">
+            <div className="flex items-center gap-2 text-green-700 text-sm">
+              <Star className="h-3 w-3 fill-green-500" />
+              <span className="font-medium">
+                You rated {appointment.review?.rating}/5 stars
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Body */}
-      <div className="p-6">
+      <div className="p-6 flex-grow">
         {/* Appointment Type Badge */}
         <div
           className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 ${
@@ -573,36 +818,38 @@ function AppointmentCard({
         )}
       </div>
 
-      {/* Actions */}
-      <div className="p-6 border-t border-gray-100">
-        <div className="flex flex-col sm:flex-row gap-2">
+      {/* Actions - Fixed at bottom */}
+      <div className="p-6 border-t border-gray-100 mt-auto">
+        <div className="flex flex-col gap-2">
           <button
             onClick={() => onViewDetails(appointment)}
-            className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl hover:bg-gray-200 transition-colors"
           >
             <Eye className="h-4 w-4" />
             View Details
           </button>
 
-          {showJoinButton && (
-            <button
-              onClick={() => onJoinVideoCall(appointment)}
-              className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-colors animate-pulse"
-            >
-              <Video className="h-4 w-4" />
-              Join Call
-            </button>
-          )}
+          <div className="flex gap-2">
+            {showJoinButton && (
+              <button
+                onClick={() => onJoinVideoCall(appointment)}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition-colors animate-pulse"
+              >
+                <Video className="h-4 w-4" />
+                Join Call
+              </button>
+            )}
 
-          {isUpcoming && !showJoinButton && (
-            <button
-              onClick={() => onCancel(appointment.id)}
-              className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition-colors"
-            >
-              <X className="h-4 w-4" />
-              Cancel
-            </button>
-          )}
+            {showCancelButton && (
+              <button
+                onClick={() => onCancel(appointment.id)}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 transition-colors"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -615,10 +862,14 @@ function AppointmentDetailsModal({
   onClose,
   onJoinVideoCall,
   onCancel,
+  onReview,
   getStatusColor,
   getStatusIcon,
   getAppointmentTypeIcon,
   shouldShowJoinButton,
+  shouldShowCancelButton,
+  shouldShowReviewButton,
+  shouldShowOTP,
 }) {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -643,6 +894,9 @@ function AppointmentDetailsModal({
       new Date();
 
   const showJoinButton = shouldShowJoinButton(appointment);
+  const showCancelButton = shouldShowCancelButton(appointment);
+  const showReviewButton = shouldShowReviewButton(appointment);
+  const showOTP = shouldShowOTP(appointment);
 
   // Calculate time until appointment
   const getTimeUntilAppointment = () => {
@@ -706,6 +960,62 @@ function AppointmentDetailsModal({
               </div>
             </div>
           </div>
+
+          {/* OTP Display */}
+          {showOTP && appointment.otp && (
+            <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200">
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-5 w-5 text-purple-600" />
+                <div>
+                  <h4 className="font-semibold text-purple-900">
+                    Appointment OTP
+                  </h4>
+                  <p className="text-purple-700 text-lg font-bold">
+                    {appointment.otp}
+                  </p>
+                  <p className="text-purple-600 text-sm mt-1">
+                    Show this OTP to the doctor when you visit the clinic
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Status */}
+          {appointment.hasReview && (
+            <div className="p-4 bg-green-50 rounded-2xl border border-green-200">
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-green-600 fill-green-500" />
+                <div>
+                  <h4 className="font-semibold text-green-900">
+                    Your Review
+                  </h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${
+                            star <= appointment.review?.rating
+                              ? "text-yellow-400 fill-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-green-700">
+                      {appointment.review?.rating}/5 stars
+                    </span>
+                  </div>
+                  {appointment.review?.comment && (
+                    <p className="text-sm text-green-800 mt-2">
+                      "{appointment.review.comment}"
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Time Status */}
           {isUpcoming && (
@@ -782,6 +1092,21 @@ function AppointmentDetailsModal({
             </div>
           </div>
 
+          {/* Payment Information */}
+          {appointment.paymentIntentId && (
+            <div className="p-4 bg-yellow-50 rounded-2xl border border-yellow-200">
+              <h4 className="font-semibold text-gray-900 mb-2">
+                Payment Information
+              </h4>
+              <div className="flex items-center gap-2 text-gray-600">
+                <CreditCard className="h-4 w-4" />
+                <span className="text-sm">
+                  Payment ID: {appointment.paymentIntentId}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Patient Notes */}
           {appointment.patientNotes && (
             <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200">
@@ -821,6 +1146,11 @@ function AppointmentDetailsModal({
                 <li>• Bring your ID and any relevant medical reports</li>
                 <li>• Wear a mask and follow clinic safety protocols</li>
                 <li>• Carry your insurance information if applicable</li>
+                {showOTP && (
+                  <li className="font-semibold text-blue-900">
+                    • Don't forget to show your OTP to the reception
+                  </li>
+                )}
               </ul>
             </div>
           )}
@@ -849,7 +1179,33 @@ function AppointmentDetailsModal({
               </button>
             )}
 
-            {isUpcoming && !showJoinButton && (
+            {showReviewButton && !appointment.hasReview && (
+              <button
+                onClick={() => {
+                  onReview(appointment);
+                  onClose();
+                }}
+                className="flex-1 flex items-center justify-center gap-2 bg-yellow-600 text-white py-3 px-6 rounded-2xl font-semibold hover:bg-yellow-700 transition-colors"
+              >
+                <Star className="h-5 w-5" />
+                Add Review
+              </button>
+            )}
+
+            {showReviewButton && appointment.hasReview && (
+              <button
+                onClick={() => {
+                  onReview(appointment);
+                  onClose();
+                }}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-6 rounded-2xl font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <Edit className="h-5 w-5" />
+                Edit Review
+              </button>
+            )}
+
+            {showCancelButton && (
               <button
                 onClick={() => {
                   onCancel(appointment.id);
@@ -861,6 +1217,115 @@ function AppointmentDetailsModal({
                 Cancel Appointment
               </button>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Review Modal Component
+function ReviewModal({ appointment, reviewData, setReviewData, onSubmit, onClose }) {
+  const handleStarClick = (rating) => {
+    setReviewData({ ...reviewData, rating });
+  };
+
+  const handleCommentChange = (e) => {
+    setReviewData({ ...reviewData, comment: e.target.value });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl max-w-md w-full mx-auto shadow-2xl">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Rate Your Experience
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <p className="text-gray-600 mt-2">
+            How was your appointment with Dr. {appointment.doctorName}?
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Star Rating */}
+          <div className="text-center">
+            <div className="flex justify-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => handleStarClick(star)}
+                  className="transform hover:scale-110 transition-transform"
+                >
+                  <Star
+                    className={`h-12 w-12 ${
+                      star <= reviewData.rating
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-lg font-semibold text-gray-700">
+              {reviewData.rating === 0
+                ? "Tap to rate"
+                : reviewData.rating === 1
+                ? "Poor"
+                : reviewData.rating === 2
+                ? "Fair"
+                : reviewData.rating === 3
+                ? "Good"
+                : reviewData.rating === 4
+                ? "Very Good"
+                : "Excellent"}
+            </p>
+          </div>
+
+          {/* Comment */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Your Review (Optional)
+            </label>
+            <textarea
+              value={reviewData.comment}
+              onChange={handleCommentChange}
+              placeholder="Share your experience with the doctor..."
+              rows="4"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all resize-none"
+            />
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="p-6 border-t border-gray-200">
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 px-6 rounded-2xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSubmit}
+              disabled={reviewData.rating === 0}
+              className={`flex-1 py-3 px-6 rounded-2xl font-semibold transition-colors ${
+                reviewData.rating === 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+              }`}
+            >
+              Submit Review
+            </button>
           </div>
         </div>
       </div>
