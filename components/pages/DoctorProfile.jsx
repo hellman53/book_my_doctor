@@ -66,9 +66,14 @@ export default function DoctorProfile() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState(null);
   const [availabilityTab, setAvailabilityTab] = useState("virtual");
-  const [zegoCloudData, setZegoCloudData] = useState(null); // New state for ZegoCloud data
+  const [zegoCloudData, setZegoCloudData] = useState(null);
 
   const doctorId = params.id;
+
+  // Generate 6-digit OTP
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
 
   // Fetch doctor data
   useEffect(() => {
@@ -117,10 +122,8 @@ export default function DoctorProfile() {
 
     const roomID = `appointment_${appointmentId}`;
     
-    // In a real application, you would generate these server-side for security
-    // For demo purposes, we're generating client-side
-    const appID = "1088666283"; // This should come from environment variables
-    const serverSecret = "a8fd6941cab34415532a1e15671f6628"; // This should come from server-side
+    const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
+    const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET;
     
     return {
       appID,
@@ -198,6 +201,13 @@ export default function DoctorProfile() {
     }
 
     return null;
+  };
+
+  // Check if a time slot is in the past
+  const isTimeSlotInPast = (date, time) => {
+    const now = new Date();
+    const selectedDateTime = new Date(`${date}T${time}`);
+    return selectedDateTime < now;
   };
 
   // Generate available time slots
@@ -290,9 +300,11 @@ export default function DoctorProfile() {
     const availableSlotsWithStatus = await Promise.all(
       slots.map(async (slot) => {
         const isBooked = await isSlotBooked(date, slot);
+        const isPast = isTimeSlotInPast(date, slot);
         return {
           time: slot,
-          available: !isBooked,
+          available: !isBooked && !isPast,
+          isPast: isPast,
         };
       })
     );
@@ -339,27 +351,50 @@ export default function DoctorProfile() {
       return;
     }
 
+    // Check if selected time is in the past
+    if (isTimeSlotInPast(selectedDate, selectedTime)) {
+      toast.error("Cannot book appointments in the past");
+      return;
+    }
+
     // Show payment modal instead of directly booking
     setShowPaymentModal(true);
   };
 
   const handlePaymentSuccess = async (appointmentId) => {
     try {
+      const otp = generateOTP();
+      
       // Generate ZegoCloud session data for virtual appointments
       if (appointmentType === "virtual") {
         const zegoCloudSession = generateZegoCloudSession(appointmentId);
         
         if (zegoCloudSession) {
-          // Update the appointment document with ZegoCloud data
+          // Update the appointment document with ZegoCloud data and OTP
           const appointmentRef = doc(db, "appointments", appointmentId);
           await updateDoc(appointmentRef, {
             zegoCloudData: zegoCloudSession,
+            otp: otp,
             updatedAt: serverTimestamp(),
           });
           
           setZegoCloudData(zegoCloudSession);
-          console.log("ZegoCloud session data added to appointment:", zegoCloudSession);
+          console.log("ZegoCloud session data and OTP added to appointment:", { zegoCloudSession, otp });
+        } else {
+          // Still add OTP even if not virtual appointment
+          const appointmentRef = doc(db, "appointments", appointmentId);
+          await updateDoc(appointmentRef, {
+            otp: otp,
+            updatedAt: serverTimestamp(),
+          });
         }
+      } else {
+        // For in-person appointments, just add OTP
+        const appointmentRef = doc(db, "appointments", appointmentId);
+        await updateDoc(appointmentRef, {
+          otp: otp,
+          updatedAt: serverTimestamp(),
+        });
       }
 
       setAppointmentId(appointmentId);
@@ -371,9 +406,9 @@ export default function DoctorProfile() {
       setSelectedTime("");
       setPatientNotes("");
 
-      toast.success("Appointment booked successfully!");
+      toast.success("Appointment booked successfully! Your OTP is: " + otp);
     } catch (error) {
-      console.error("Error updating appointment with ZegoCloud data:", error);
+      console.error("Error updating appointment with ZegoCloud data and OTP:", error);
       toast.error("Appointment booked but there was an error setting up video call");
     }
   };
@@ -407,6 +442,13 @@ export default function DoctorProfile() {
   // Get minimum date for date input (today)
   const getMinDate = () => {
     return new Date().toISOString().split("T")[0];
+  };
+
+  // Get maximum date for date input (15 days from today)
+  const getMaxDate = () => {
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 15);
+    return maxDate.toISOString().split("T")[0];
   };
 
   // Toggle favorite
@@ -1416,6 +1458,7 @@ export default function DoctorProfile() {
                       <input
                         type="date"
                         min={getMinDate()}
+                        max={getMaxDate()}
                         value={selectedDate}
                         onChange={(e) => handleDateSelect(e.target.value)}
                         className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
@@ -1426,6 +1469,9 @@ export default function DoctorProfile() {
                       {isTodayAvailable
                         ? "Same-day appointments available"
                         : "Check availability for today"}
+                    </div>
+                    <div className="mt-1 text-xs sm:text-sm text-gray-500">
+                      You can book appointments up to 15 days in advance
                     </div>
                   </div>
                 </div>
@@ -1506,7 +1552,7 @@ export default function DoctorProfile() {
                             </div>
                             {!slot.available && (
                               <div className="text-xs text-gray-500 mt-1">
-                                Booked
+                                {slot.isPast ? "Past Time" : "Booked"}
                               </div>
                             )}
                           </button>
