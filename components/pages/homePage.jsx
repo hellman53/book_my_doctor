@@ -643,6 +643,7 @@ const featuredDoctors = [
     consultationFee: "₹800",
     virtualAvailable: true,
     nextAvailable: "Today, 3:00 PM",
+    id:"user_33uGU7bjhZd8V9J8yEyvWARdiXT",
   },
   {
     name: "Dr. Rajesh Kumar",
@@ -655,6 +656,7 @@ const featuredDoctors = [
     consultationFee: "₹700",
     virtualAvailable: true,
     nextAvailable: "Tomorrow, 10:00 AM",
+    id:"user_33uFNKoqT5euyppKOlTohzO6tKR",
   },
   {
     name: "Dr. Priya Singh",
@@ -667,6 +669,7 @@ const featuredDoctors = [
     consultationFee: "₹700",
     virtualAvailable: true,
     nextAvailable: "Today, 5:30 PM",
+    id:"user_32W6exE2zlZPfNZOtHKupo5DOYj",
   },
   {
     name: "Dr. Sanjay Dubey",
@@ -695,6 +698,7 @@ const featuredDoctors = [
 ];
 
 const FeaturedDoctors = () => {
+  const route = useRouter();
   // Show only first 3 doctors initially
   const displayedDoctors = featuredDoctors.slice(0, 3);
 
@@ -809,10 +813,10 @@ const FeaturedDoctors = () => {
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3">
-                  <button className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 text-sm">
+                  <button onClick={() => route.push(`doctors/${doctor.id}`)} className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 text-sm">
                     Book Appointment
                   </button>
-                  <button className="px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 active:scale-95 text-sm">
+                  <button onClick={() => route.push(`doctors/${doctor.id}`)} className="px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 active:scale-95 text-sm">
                     Profile
                   </button>
                 </div>
@@ -850,7 +854,7 @@ const FeaturedDoctors = () => {
                 healthcare professionals
               </p>
             </div>
-            <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
+            <button onClick={() => route.push(`/doctors`)} className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
               View All Doctors
             </button>
           </div>
@@ -1613,7 +1617,7 @@ const Feature = () => {
                 Join thousands of patients who trust our platform
               </p>
             </div>
-            <button className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
+            <button onClick={()=>route.push("/doctors")} className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap">
               Get Started Today
             </button>
           </div>
@@ -1931,6 +1935,8 @@ const TestimonialCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const transitionRef = useRef(null);
+  const route = useRouter();
+
 
   // Load testimonials with cloned cards for infinite loop
   useEffect(() => {
@@ -2121,7 +2127,7 @@ const TestimonialCarousel = () => {
                 Experience the future of healthcare today
               </p>
             </div>
-            <button className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap text-sm sm:text-base">
+            <button onClick={()=>route.push("/doctors")} className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 whitespace-nowrap text-sm sm:text-base">
               Get Started Now
             </button>
           </div>
