@@ -7,7 +7,7 @@
 
 ## 🌐 Live Demo
 
-**Try Memora now:**  [book-my-doctor-two.vercel.app](https://book-my-doctor-two.vercel.app/)
+**Try BookMyDoc now:**  [book-my-doctor-two.vercel.app](https://book-my-doctor-two.vercel.app/)
 
 <div style="border-left: 2px solid gray; padding-left: 10px;">
 <span style="font-weight:bold;">🚧 Demo Limitations:</span>  The live demo showcases core appointment booking functionality. Medicine store and several advanced features are placeholder implementations only.
